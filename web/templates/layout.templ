@@ -1,0 +1,45 @@
+package templates
+
+templ Layout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } — Picomaju</title>
+			<link rel="stylesheet" href="/static/style.css"/>
+			<script type="module" src="/static/datastar.js"></script>
+			<!-- Apply saved theme + sidebar state before first paint -->
+			<script>
+				(function(){
+					var t = localStorage.getItem('theme') ||
+						(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+					document.documentElement.setAttribute('data-theme', t);
+				})();
+			</script>
+		</head>
+		<body>
+			<nav class="nav">
+				<a href="/" class="nav-brand">Picomaju</a>
+				<button
+					class="theme-toggle"
+					onclick="
+						var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+						document.documentElement.setAttribute('data-theme', t);
+						localStorage.setItem('theme', t);
+					"
+				></button>
+			</nav>
+			{ children... }
+			<!-- Restore sidebar collapsed state after render -->
+			<script>
+				(function(){
+					if (localStorage.getItem('sidebar-collapsed') === '1') {
+						var s = document.getElementById('sidebar');
+						if (s) s.classList.add('collapsed');
+					}
+				})();
+			</script>
+		</body>
+	</html>
+}

@@ -1,0 +1,177 @@
+package templates
+
+import (
+	"fmt"
+	"picomaju/internal/category"
+	"picomaju/internal/sop"
+)
+
+templ SOPListPage(sops []*sop.SOP, sb SidebarData) {
+	@Layout("SOPs") {
+		@WithSidebar(sb) {
+			<div class="page-header">
+				<h1>
+					if sb.ActiveCat != "" {
+						{ categoryLabel(sb.Categories, sb.ActiveCat) }
+					} else {
+						SOPs
+					}
+				</h1>
+				<a href="/sops/new" class="btn btn-primary">New SOP</a>
+			</div>
+			if len(sops) == 0 {
+				<p class="empty">No SOPs here yet. <a href="/sops/new">Create one.</a></p>
+			} else {
+				@sopTable(sops, sb.Categories)
+			}
+		}
+	}
+}
+
+templ sopTable(sops []*sop.SOP, cats []category.Category) {
+	<table>
+		<thead>
+			<tr>
+				<th>Title</th>
+				<th>Category</th>
+				<th>Trigger</th>
+				<th>Priority</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, s := range sops {
+				<tr>
+					<td>{ s.Title }</td>
+					<td>
+						<a href={ templ.SafeURL("/?cat=" + s.Category) } class="cat-tag">
+							{ categoryLabel(cats, s.Category) }
+						</a>
+					</td>
+					<td>{ s.Trigger }</td>
+					<td>{ fmt.Sprintf("%d", s.Priority) }</td>
+					<td class="actions">
+						<a href={ templ.SafeURL("/sops/" + s.ID + "/edit") } class="btn btn-secondary">Edit</a>
+						<form method="post" action={ templ.SafeURL("/sops/" + s.ID + "/delete") } style="display:inline">
+							<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this SOP?')">Delete</button>
+						</form>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+templ SOPFormPage(s *sop.SOP, sb SidebarData, isNew bool, formErr string) {
+	@Layout(sopFormTitle(isNew)) {
+		@WithSidebar(sb) {
+			<div class="page-header">
+				<h1>{ sopFormTitle(isNew) }</h1>
+				<a href="/" class="btn btn-secondary">Cancel</a>
+			</div>
+			if formErr != "" {
+				<div class="alert alert-error">{ formErr }</div>
+			}
+			<form method="post" action={ templ.SafeURL(sopFormAction(s.ID, isNew)) } class="card">
+				<div class="field">
+					<label for="id">ID</label>
+					if isNew {
+						<input type="text" id="id" name="id" value={ s.ID } placeholder="handle_refund" required/>
+					} else {
+						<input type="text" id="id" name="id" value={ s.ID } readonly class="readonly"/>
+					}
+				</div>
+				<div class="field">
+					<label for="title">Title</label>
+					<input type="text" id="title" name="title" value={ s.Title } required/>
+				</div>
+				<div class="field">
+					<label for="category">Category</label>
+					<select id="category" name="category" required>
+						<option value="">— select —</option>
+						for _, c := range sb.Categories {
+							<option value={ c.ID } selected?={ s.Category == c.ID }>{ c.Label }</option>
+						}
+					</select>
+				</div>
+				<div class="field">
+					<label for="version">Version</label>
+					<input type="number" id="version" name="version" value={ fmt.Sprintf("%d", s.Version) } min="1" required/>
+				</div>
+				<div class="field">
+					<label for="priority">Priority (0–100)</label>
+					<input type="number" id="priority" name="priority" value={ fmt.Sprintf("%d", s.Priority) } min="0" max="100" required/>
+				</div>
+				<div class="field">
+					<label for="trigger">Trigger</label>
+					<input type="text" id="trigger" name="trigger" value={ s.Trigger } placeholder="customer mentions refund" required/>
+				</div>
+				<div class="field">
+					<label for="body">Instruction</label>
+					<textarea id="body" name="body">{ s.Body }</textarea>
+				</div>
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">Save</button>
+					if !isNew {
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-on-click={ fmt.Sprintf("@post('/sops/%s/validate-stream')", s.ID) }
+						>Validate</button>
+					}
+				</div>
+			</form>
+			if !isNew {
+				<div id="validation-result"></div>
+			}
+		}
+	}
+}
+
+templ ValidationFragment(res sop.ValidationResult) {
+	<div id="validation-result">
+		if res.Valid {
+			<div class="alert alert-ok">Valid</div>
+		} else {
+			<div class="alert alert-error">
+				<ul>
+					for _, e := range res.Errors {
+						<li>{ e.Field }: { e.Message }</li>
+					}
+				</ul>
+			</div>
+		}
+		if len(res.Warnings) > 0 {
+			<div class="alert alert-warn">
+				<ul>
+					for _, w := range res.Warnings {
+						<li>{ w }</li>
+					}
+				</ul>
+			</div>
+		}
+	</div>
+}
+
+func sopFormTitle(isNew bool) string {
+	if isNew {
+		return "New SOP"
+	}
+	return "Edit SOP"
+}
+
+func sopFormAction(id string, isNew bool) string {
+	if isNew {
+		return "/sops"
+	}
+	return "/sops/" + id
+}
+
+func categoryLabel(cats []category.Category, id string) string {
+	for _, c := range cats {
+		if c.ID == id {
+			return c.Label
+		}
+	}
+	return id
+}

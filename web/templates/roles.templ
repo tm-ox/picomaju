@@ -1,0 +1,165 @@
+package templates
+
+import (
+	"fmt"
+	"picomaju/internal/role"
+	"picomaju/internal/sop"
+)
+
+templ RoleListPage(roles []role.Role, sb SidebarData) {
+	@Layout("Roles") {
+		@WithSidebar(sb) {
+			<div class="page-header">
+				<h1>Roles</h1>
+				<a href="/roles/new" class="btn btn-primary">Hire Agent</a>
+			</div>
+			if len(roles) == 0 {
+				<p class="empty">No roles defined yet. <a href="/roles/new">Hire your first agent.</a></p>
+			} else {
+				<table>
+					<thead>
+						<tr>
+							<th>Role</th>
+							<th>Categories</th>
+							<th>Individual SOPs</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, r := range roles {
+							<tr>
+								<td>{ r.Label }</td>
+								<td>{ fmt.Sprintf("%d", len(r.Categories)) }</td>
+								<td>{ fmt.Sprintf("%d", len(r.SOPs)) }</td>
+								<td class="actions">
+									<button
+										type="button"
+										class="btn btn-secondary"
+										data-on-click={ fmt.Sprintf("@post('/roles/%s/compile-stream')", r.ID) }
+									>Compile</button>
+									<a href={ templ.SafeURL("/roles/" + r.ID + "/edit") } class="btn btn-secondary">Edit</a>
+									<form method="post" action={ templ.SafeURL("/roles/" + r.ID + "/delete") } style="display:inline">
+										<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this role?')">Delete</button>
+									</form>
+								</td>
+							</tr>
+							<tr class="compile-row">
+								<td colspan="4">
+									<div id={ "compile-result-" + r.ID }></div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+		}
+	}
+}
+
+templ RoleFormPage(r *role.Role, sb SidebarData, sopsByCat map[string][]*sop.SOP, isNew bool, formErr string) {
+	@Layout(roleFormTitle(isNew)) {
+		@WithSidebar(sb) {
+			<div class="page-header">
+				<h1>{ roleFormTitle(isNew) }</h1>
+				<a href="/roles" class="btn btn-secondary">Cancel</a>
+			</div>
+			if formErr != "" {
+				<div class="alert alert-error">{ formErr }</div>
+			}
+			<form method="post" action={ templ.SafeURL(roleFormAction(r.ID, isNew)) }>
+				<div class="card">
+					<div class="field">
+						<label for="id">ID</label>
+						if isNew {
+							<input type="text" id="id" name="id" value={ r.ID } placeholder="support_agent" required/>
+						} else {
+							<input type="text" id="id" name="id" value={ r.ID } readonly class="readonly"/>
+						}
+					</div>
+					<div class="field">
+						<label for="label">Label</label>
+						<input type="text" id="label" name="label" value={ r.Label } placeholder="Support Agent" required/>
+					</div>
+				</div>
+				<h2>Job Description</h2>
+				<p class="hint">Select categories to include all their SOPs, or add individual SOPs below each category.</p>
+				for _, cat := range sb.Categories {
+					<div class="cat-block card">
+						<label class="cat-header">
+							<input
+								type="checkbox"
+								name="categories"
+								value={ cat.ID }
+								checked?={ includesStr(r.Categories, cat.ID) }
+							/>
+							<span class="cat-label">{ cat.Label }</span>
+							if len(sopsByCat[cat.ID]) > 0 {
+								<span class="cat-count">{ fmt.Sprintf("%d SOPs", len(sopsByCat[cat.ID])) }</span>
+							}
+						</label>
+						if len(sopsByCat[cat.ID]) > 0 {
+							<div class="sop-picker">
+								for _, s := range sopsByCat[cat.ID] {
+									<label class="sop-item">
+										<input
+											type="checkbox"
+											name="sops"
+											value={ s.ID }
+											checked?={ includesStr(r.SOPs, s.ID) }
+										/>
+										<span>{ s.Title }</span>
+										<span class="sop-meta">p{ fmt.Sprintf("%d", s.Priority) }</span>
+									</label>
+								}
+							</div>
+						}
+					</div>
+				}
+				<div class="form-actions" style="margin-top:1.5rem">
+					<button type="submit" class="btn btn-primary">Save Role</button>
+				</div>
+			</form>
+		}
+	}
+}
+
+templ CompileFragment(roleID string, res *sop.CompileResult) {
+	<div id={ "compile-result-" + roleID }>
+		<div class="alert alert-ok">
+			{ fmt.Sprintf("%d policies assembled", len(res.Policies)) }
+		</div>
+		if len(res.Warnings) > 0 {
+			<div class="alert alert-warn">
+				<ul>
+					for _, w := range res.Warnings {
+						<li>{ w }</li>
+					}
+				</ul>
+			</div>
+		}
+		<details>
+			<summary>View manifest</summary>
+			<pre class="manifest">{ compileResultJSON(res) }</pre>
+		</details>
+	</div>
+}
+
+templ CompileErrorFragment(roleID, msg string) {
+	<div id={ "compile-result-" + roleID }>
+		<div class="alert alert-error">{ msg }</div>
+	</div>
+}
+
+func roleFormTitle(isNew bool) string {
+	if isNew {
+		return "Hire Agent"
+	}
+	return "Edit Role"
+}
+
+func roleFormAction(id string, isNew bool) string {
+	if isNew {
+		return "/roles"
+	}
+	return "/roles/" + id
+}

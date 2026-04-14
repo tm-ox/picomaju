@@ -1,0 +1,39 @@
+package templates
+
+import "picomaju/internal/settings"
+
+templ SettingsPage(cfg *settings.Settings, activeDataDir string, sb SidebarData, saved bool, formErr string) {
+	@Layout("Settings") {
+		@WithSidebar(sb) {
+			<div class="page-header">
+				<h1>Settings</h1>
+			</div>
+			if saved {
+				<div class="alert alert-ok">Settings saved.</div>
+			}
+			if formErr != "" {
+				<div class="alert alert-error">{ formErr }</div>
+			}
+			<form method="post" action="/settings" class="card">
+				<div class="field">
+					<label for="business_name">Business Name</label>
+					<input type="text" id="business_name" name="business_name" value={ cfg.BusinessName } placeholder="Acme Co."/>
+				</div>
+				<div class="field">
+					<label for="business_details">Business Details</label>
+					<textarea id="business_details" name="business_details" placeholder="Describe your business, tone, key values…">{ cfg.BusinessDetails }</textarea>
+				</div>
+				<div class="field">
+					<label for="data_dir">Data Directory</label>
+					<input type="text" id="data_dir" name="data_dir" value={ cfg.DataDir } placeholder={ activeDataDir }/>
+					<p class="hint">
+						Currently active: <code>{ activeDataDir }</code>. Existing data will not be moved automatically if you change this.
+					</p>
+				</div>
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</form>
+		}
+	}
+}

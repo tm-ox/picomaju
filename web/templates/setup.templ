@@ -1,0 +1,29 @@
+package templates
+
+templ SetupPage(businessName, dataDir, formErr string) {
+	@Layout("Welcome") {
+		<div class="setup-wrap">
+			<div class="setup-card card">
+				<h1 class="setup-title">Welcome to Picomaju</h1>
+				<p class="setup-lead">Choose where your SOPs, roles, and categories will be stored.</p>
+				if formErr != "" {
+					<div class="alert alert-error">{ formErr }</div>
+				}
+				<form method="post" action="/setup">
+					<div class="field">
+						<label for="business_name">Business Name</label>
+						<input type="text" id="business_name" name="business_name" value={ businessName } placeholder="Acme Co." required/>
+					</div>
+					<div class="field">
+						<label for="data_dir">Data Directory</label>
+						<input type="text" id="data_dir" name="data_dir" value={ dataDir } required/>
+						<p class="hint">Picomaju will create this directory if it does not exist.</p>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">Get Started</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	}
+}

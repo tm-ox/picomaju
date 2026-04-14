@@ -1,0 +1,82 @@
+package templates
+
+import "fmt"
+
+// WithSidebar wraps page content with the collapsible left sidebar.
+templ WithSidebar(sb SidebarData) {
+	<div class="app-body">
+		@sidebar(sb)
+		<main class="main">
+			{ children... }
+		</main>
+	</div>
+}
+
+templ sidebar(sb SidebarData) {
+	<aside class="sidebar" id="sidebar">
+		<div class="sidebar-inner">
+			<button
+				class="sidebar-toggle"
+				title="Collapse sidebar"
+				onclick="
+					var s = document.getElementById('sidebar');
+					var collapsed = s.classList.toggle('collapsed');
+					localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+				"
+			>&#8249;</button>
+			<nav class="sidebar-nav">
+				if sb.BusinessName != "" {
+					<div class="sidebar-business">{ sb.BusinessName }</div>
+				}
+				<div class="sidebar-section">
+					<span class="sidebar-heading">SOPs</span>
+					<a
+						href="/"
+						class={ "sidebar-item", templ.KV("active", sb.ActiveCat == "") }
+					>
+						All
+						<span class="sidebar-count">{ fmt.Sprintf("%d", totalSOPs(sb.SOPCounts)) }</span>
+					</a>
+					for _, cat := range sb.Categories {
+						<a
+							href={ templ.SafeURL("/?cat=" + cat.ID) }
+							class={ "sidebar-item", templ.KV("active", sb.ActiveCat == cat.ID) }
+						>
+							{ cat.Label }
+							if sb.SOPCounts[cat.ID] > 0 {
+								<span class="sidebar-count">{ fmt.Sprintf("%d", sb.SOPCounts[cat.ID]) }</span>
+							}
+						</a>
+					}
+					<a href="/sops/new" class="sidebar-item sidebar-action">+ New SOP</a>
+				</div>
+				if len(sb.Roles) > 0 {
+					<div class="sidebar-section">
+						<span class="sidebar-heading">Roles</span>
+						for _, r := range sb.Roles {
+							<a
+								href={ templ.SafeURL("/roles/" + r.ID + "/edit") }
+								class="sidebar-item"
+							>{ r.Label }</a>
+						}
+					</div>
+				}
+				<div class="sidebar-section">
+					<a href="/roles" class="sidebar-item">Manage Roles</a>
+					<a href="/roles/new" class="sidebar-item sidebar-action">+ Hire Agent</a>
+				</div>
+				<div class="sidebar-section sidebar-section-bottom">
+					<a href="/settings" class="sidebar-item">Settings</a>
+				</div>
+			</nav>
+		</div>
+	</aside>
+}
+
+func totalSOPs(counts map[string]int) int {
+	n := 0
+	for _, c := range counts {
+		n += c
+	}
+	return n
+}

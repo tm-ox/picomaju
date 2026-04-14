@@ -1,0 +1,8 @@
+# Binary
+picomaju
+
+# Datastar — download manually from data-star.dev releases
+web/static/datastar.js
+
+# OS
+.DS_Store
