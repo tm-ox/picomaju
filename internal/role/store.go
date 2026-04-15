@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 )
 
-// Role is a named agent profile ("job description") compiled from a selection
-// of categories and/or individual SOPs.
+// Role is a task definition assigned to a Staff member.
+// It describes what the agent does and which Tools it uses to do it.
 type Role struct {
-	ID         string   `json:"id"`
-	Label      string   `json:"label"`
-	Categories []string `json:"categories"` // bulk inclusion: all SOPs in these categories
-	SOPs       []string `json:"sops"`       // individual SOP IDs (deduped against categories)
+	ID          string   `json:"id"`
+	Label       string   `json:"label"`
+	Description string   `json:"description,omitempty"`
+	Tools       []string `json:"tools,omitempty"` // tool IDs
 }
 
 type Store struct {
@@ -25,11 +25,7 @@ func NewStore(path string) *Store {
 }
 
 func (s *Store) List() ([]Role, error) {
-	data, err := s.load()
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return s.load()
 }
 
 func (s *Store) Get(id string) (*Role, error) {

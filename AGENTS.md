@@ -4,7 +4,7 @@
 
 Mobile-first agent orchestrator for small business owners. Runs on a dedicated Android device via **picoclaw** (Go, single static binary, <10MB RAM, native APK). Picomaju wraps picoclaw with a purpose-built web UI served on `:18800`.
 
-Four pillars: Control Plane, SOP Compiler, Sidecar Execution, Managed Lifecycle. **v1 covers SOP Compiler + UI only.** The other pillars have planning docs but no implementation yet.
+Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Lifecycle. **Current implementation covers Directive Compiler + UI.** The other pillars have planning docs but no implementation yet.
 
 ---
 
@@ -17,35 +17,35 @@ picomaju/
   internal/
     settings/
       store.go                   — Settings type (business_name, business_details, data_dir) + file-backed store
-    sop/
-      model.go                   — SOP, Policy, ValidationResult, CompileResult types
+    value/
+      model.go                   — Value, DirectiveEntry, ValidationResult, ValidationError types
       store.go                   — file-based CRUD (.md + YAML frontmatter)
       validator.go               — required field check, priority clamp [0–100]
-      compiler.go                — Compile(roleID, categoryIDs, individualSOPIDs, allSOPs)
-    category/
-      model.go                   — Category type + Defaults (starter set)
-      store.go                   — CRUD on categories.json; seeds defaults if missing
+      category.go                — Category type + DefaultCategories (built-in, no separate store)
+    tool/
+      store.go                   — Tool type (id, label, type, config) + CRUD on tools.json
     role/
-      store.go                   — Role type + full CRUD on roles.json
+      store.go                   — Role type (id, label, description, tools[]) + CRUD on roles.json
+    staff/
+      store.go                   — Staff type (id, label, roles[], value_categories[], values[]) + CRUD on staff.json
     api/
       router.go                  — all routes wired here; setup gate middleware
-      sop.go                     — JSON API handlers for SOPs
-      role.go                    — JSON API handlers for roles
-      category.go                — JSON API handlers for categories
       ui.go                      — HTML + SSE handlers; uiHandler with mutex-guarded store init
       sse.go                     — SSEMergeFragment() for datastar
       helpers.go                 — jsonOK / jsonErr
   web/
     templates/
-      layout.templ               — base HTML shell, top nav (brand + theme toggle)
-      sidebar.templ              — WithSidebar wrapper + sidebar component (collapsible)
-      sops.templ                 — SOP list page, SOP form, ValidationFragment
-      roles.templ                — Role list page, hiring form, CompileFragment
+      layout.templ               — base HTML shell; top nav (business + avatar | section links | theme + settings)
+      sidebar.templ              — contextual sidebar component (switches per active section)
+      values.templ               — Value list page, Value form, ValidationFragment
+      tools.templ                — Tool list page, Tool form
+      roles.templ                — Role list page, Role form (with tool picker)
+      staff.templ                — Staff list page, Staff form (role + value picker)
       settings.templ             — Settings page (business info + data dir)
       setup.templ                — First-run onboarding page
-      helpers.go                 — SidebarData type, compileResultJSON(), includesStr()
+      helpers.go                 — SidebarData type, includesStr()
     static/
-      style.css                  — CSS custom properties for theming; light + dark mode
+      style.css                  — CSS custom properties; light + dark mode; 16px REM base
       datastar.js                — MUST be downloaded manually from data-star.dev releases
 ```
 
@@ -55,68 +55,75 @@ picomaju/
 
 On first launch, if no data directory is configured, **all routes redirect to `/setup`**. The setup page asks for:
 
-- **Business Name** — shown in the sidebar header
-- **Data Directory** — where SOPs, roles, and categories are stored; pre-filled with `~/picomaju`
+- **Business Name** — shown in the top nav
+- **Data Directory** — where values, roles, tools, and staff are stored; pre-filled with `~/picomaju`
 
-On submit, the directory is created, category defaults are seeded, and the user is dropped into the main app. No restart required.
+On submit, the directory is created and the user is dropped into the main app. No restart required.
 
-The settings file location is platform-aware (`os.UserConfigDir()/picomaju/settings.json`) and created automatically. On Linux this is `~/.config/picomaju/settings.json`.
+The settings file location is platform-aware (`os.UserConfigDir()/picomaju/settings.json`). On Linux: `~/.config/picomaju/settings.json`.
 
 ---
 
 ## Data model
 
-### SOP (`<data_dir>/sops/<id>.md`)
-Markdown file with YAML frontmatter. Each SOP is an atomic unit — it has no knowledge of which roles use it.
+### Value (`<data_dir>/values/<id>.md`)
+Markdown file with YAML frontmatter. Org-level directives — tone, goals, policies.
 
 ```yaml
 ---
-id: handle_refund
-title: Handle Refund Request
+id: tone_of_voice
+title: Tone of Voice
 version: 1
 priority: 80
-trigger: customer mentions refund
-category: tasks
+category: core_values
 ---
 
-When a customer requests a refund...
+Always respond in a warm, professional tone...
 ```
 
-Required fields: `id`, `title`, `version`, `priority` (0–100), `trigger`, `category`.
-No `roles` field — role assignment is managed by the Role Definition.
+Required fields: `id`, `title`, `version`, `priority` (0–100), `category`.
+No `trigger` field — Values are directives, not event-driven rules.
 
-### Category (`<data_dir>/categories.json`)
-Named grouping for SOPs. Starter set is seeded on first run. System categories cannot be deleted.
+### Tool (`<data_dir>/tools.json`)
+Capabilities or integrations available to a Role.
 
 ```json
-{ "categories": [
-  { "id": "business_objectives", "label": "Core Values",    "system": true },
-  { "id": "communication",       "label": "Communication",  "system": true },
-  { "id": "tasks",               "label": "Skills",         "system": true },
-  { "id": "escalation",          "label": "Escalation",     "system": true },
-  { "id": "uncategorized",       "label": "Custom",         "system": true }
+{ "tools": [
+  { "id": "email_sendgrid", "label": "SendGrid Email", "type": "email" }
 ]}
 ```
 
-`uncategorized` exists as a general-purpose bucket; new SOPs must have an explicit category.
-
-### Role Definition (`<data_dir>/roles.json`)
-The "job description" for an agent. Drives compilation via category bulk-inclusion and individual SOP overrides.
+### Role (`<data_dir>/roles.json`)
+Task definition. Describes what the agent does and which Tools it uses.
 
 ```json
 { "roles": [
   {
-    "id": "support_agent",
-    "label": "Support Agent",
-    "categories": ["communication", "tasks"],
-    "sops": ["refund_vip_override"]
+    "id": "manage_social_media",
+    "label": "Manage Social Media",
+    "description": "Post updates and respond to comments",
+    "tools": ["email_sendgrid"]
   }
 ]}
 ```
 
-`categories` → bulk: all SOPs in those categories are included.
-`sops` → individual overrides: specific SOP IDs added regardless of their category.
-Deduplication: if an individual SOP's category is also selected, it appears once.
+### Staff (`<data_dir>/staff.json`)
+Agent profile. Composed of Roles + Values. The compile target.
+
+```json
+{ "staff": [
+  {
+    "id": "support_agent",
+    "label": "Support Agent",
+    "roles": ["manage_social_media"],
+    "value_categories": ["core_values", "communication"],
+    "values": ["escalation_override"]
+  }
+]}
+```
+
+`value_categories` → bulk inclusion of all Values in those categories.
+`values` → individual Value IDs added on top.
 
 ### Settings (`os.UserConfigDir()/picomaju/settings.json`)
 
@@ -128,55 +135,25 @@ Deduplication: if an individual SOP's category is also selected, it appears once
 }
 ```
 
-Loaded at startup to determine the data directory. Editable at `/settings`; data dir changes take effect immediately (stores are reinitialized live, no restart needed).
+---
+
+## Value categories
+
+Built-in constants in `internal/value/category.go` — no separate file on disk.
+
+| ID | Label |
+|----|-------|
+| `core_values` | Core Values |
+| `communication` | Communication |
+| `skills` | Skills |
+| `escalation` | Escalation |
+| `custom` | Custom |
 
 ---
 
-## Compiler pipeline
+## Compiler
 
-`sop.Compile(roleID, categoryIDs, individualSOPIDs, allSOPs) → CompileResult`
-
-1. Collect SOPs where `sop.Category` is in `categoryIDs`
-2. Append individually selected SOPs, skipping duplicates
-3. Validate all collected SOPs (gate — abort on any failure)
-4. Sort descending by `priority` (stable sort preserves load order on ties)
-5. Assemble `policies[]` array
-
-v1 output: in-memory `CompileResult` returned to the caller (displayed in UI).
-v2: JSON manifest written to `<data_dir>/manifests/<role>.json` + hot-reload via picoclaw.
-
----
-
-## HTTP API
-
-All JSON API routes are under `/api/`. UI routes are at root.
-
-### SOPs
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/sops` | list all |
-| POST | `/api/sops` | create |
-| GET | `/api/sops/:id` | get one |
-| PUT | `/api/sops/:id` | replace |
-| DELETE | `/api/sops/:id` | delete |
-| POST | `/api/sops/:id/validate` | validate → `ValidationResult` JSON |
-
-### Roles
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/roles` | list all |
-| POST | `/api/roles` | create |
-| GET | `/api/roles/:id` | get one |
-| PUT | `/api/roles/:id` | replace |
-| DELETE | `/api/roles/:id` | delete |
-| POST | `/api/roles/:id/compile` | compile → `CompileResult` JSON |
-
-### Categories
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/categories` | list all |
-| POST | `/api/categories` | create custom |
-| DELETE | `/api/categories/:id` | delete (system categories rejected) |
+**Deferred.** Output will be multiple files per Staff member: `AGENTS.md`, `SOUL.md`, tool injection into picoclaw `config.json`. Pipeline logic exists as a stub (`value.DirectiveEntry`) but serialization is not implemented.
 
 ---
 
@@ -185,56 +162,75 @@ All JSON API routes are under `/api/`. UI routes are at root.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/setup` | onboarding (shown when no data dir configured) |
-| POST | `/setup` | complete setup → redirect `/` |
-| GET | `/` | SOP list (filterable by `?cat=<id>`) |
-| GET | `/sops/new` | SOP form (new) |
-| POST | `/sops` | create SOP → redirect `/` |
-| GET | `/sops/:id/edit` | SOP form (edit) |
-| POST | `/sops/:id` | update SOP → redirect `/` |
-| POST | `/sops/:id/delete` | delete SOP → redirect `/` |
-| POST | `/sops/:id/validate-stream` | SSE: `ValidationFragment` |
-| GET | `/roles` | role list |
-| GET | `/roles/new` | hiring form (new) |
-| POST | `/roles` | create role → redirect `/roles` |
-| GET | `/roles/:id/edit` | hiring form (edit) |
-| POST | `/roles/:id` | update role → redirect `/roles` |
-| POST | `/roles/:id/delete` | delete role → redirect `/roles` |
-| POST | `/roles/:id/compile-stream` | SSE: `CompileFragment` |
+| POST | `/setup` | complete setup → redirect `/values` |
+| GET | `/` | redirect → `/values` |
+| GET | `/values` | Value list (filterable by `?cat=<id>`) |
+| GET | `/values/new` | Value form (new) |
+| POST | `/values` | create Value → redirect `/values` |
+| GET | `/values/:id/edit` | Value form (edit) |
+| POST | `/values/:id` | update Value → redirect `/values` |
+| POST | `/values/:id/delete` | delete Value → redirect `/values` |
+| POST | `/values/:id/validate-stream` | SSE: `ValidationFragment` |
+| GET | `/tools` | Tool list |
+| GET | `/tools/new` | Tool form (new) |
+| POST | `/tools` | create Tool → redirect `/tools` |
+| GET | `/tools/:id/edit` | Tool form (edit) |
+| POST | `/tools/:id` | update Tool → redirect `/tools` |
+| POST | `/tools/:id/delete` | delete Tool → redirect `/tools` |
+| GET | `/roles` | Role list |
+| GET | `/roles/new` | Role form (new) |
+| POST | `/roles` | create Role → redirect `/roles` |
+| GET | `/roles/:id/edit` | Role form (edit) |
+| POST | `/roles/:id` | update Role → redirect `/roles` |
+| POST | `/roles/:id/delete` | delete Role → redirect `/roles` |
+| GET | `/staff` | Staff list |
+| GET | `/staff/new` | Staff form (new) |
+| POST | `/staff` | create Staff → redirect `/staff` |
+| GET | `/staff/:id/edit` | Staff form (edit) |
+| POST | `/staff/:id` | update Staff → redirect `/staff` |
+| POST | `/staff/:id/delete` | delete Staff → redirect `/staff` |
 | GET | `/settings` | settings page |
 | POST | `/settings` | save settings → redirect `/settings?saved=1` |
 | GET | `/static/*` | embedded static assets |
 
-Mutations from the UI use standard HTML form POST + redirect (no JS required for CRUD).
-Validate and compile use datastar SSE — the button triggers a POST, server responds with a merge-fragments event that patches the relevant `<div id="...">` in place.
+Mutations use standard HTML form POST + redirect (no JS required for CRUD). Validate uses datastar SSE — button triggers a POST, server responds with a merge-fragments event patching `<div id="validation-result">`.
 
-The setup gate middleware redirects all routes except `/setup` and `/static/*` to `/setup` when no data directory has been configured.
+The setup gate middleware redirects all routes except `/setup` and `/static/*` to `/setup` when no data directory is configured.
 
 ---
 
-## Sidebar
+## Navigation
 
-Every page uses the `WithSidebar` component. The sidebar is collapsible (toggle button, state persisted in `localStorage`). It contains:
+**Top nav** (sticky, `var(--topnav-h): 3rem`):
+- Left: avatar placeholder + business name
+- Center: Values | Tools | Roles | Staff (section links, `.active` on current section)
+- Right: theme toggle + settings gear
 
-- **SOPs section** — "All" link + one link per category with SOP count badges; active category highlighted
-- **Roles section** — link per role (edit page); shown only when roles exist
-- **Manage Roles / + Hire Agent** links
-- **Settings** link (bottom section)
-- **Business name** shown at the top of the nav when set
+**Sidebar** (contextual, collapsible):
+- Collapsed state: `2.25rem` wide (no icons yet — content hidden via `opacity: 0`)
+- Content switches per `ActiveSection` in `SidebarData`:
+  - `values` → category filter links with counts + New Value
+  - `tools` → All Tools + New Tool
+  - `roles` → role list + New Role
+  - `staff` → staff list + New Staff
 
-The `SidebarData` struct (in `web/templates/helpers.go`) is built by `uiHandler.sidebarData()` and passed to every page render.
+**Footer**: "Powered by PicoMaju" branding strip.
+
+`SidebarData` (in `web/templates/helpers.go`) is built by `uiHandler.sidebarData(r, section)` and passed to every page render.
 
 ---
 
 ## Theming
 
-`style.css` uses CSS custom properties throughout. Two blocks define tokens:
+`style.css` uses CSS custom properties throughout. Two token blocks:
 
 - `:root` — light mode (default)
 - `[data-theme="dark"]` — dark mode
 
 Palette: `#bf092f` crimson, `#132440` dark navy, `#16476a` mid navy, `#3b9797` teal.
+Base font-size: `1rem` (16px).
 
-The theme toggle in the top nav switches `data-theme` on `<html>` and persists the choice in `localStorage`. An inline `<script>` in `<head>` applies the saved theme before first paint to prevent flash.
+Theme toggle switches `data-theme` on `<html>` and persists in `localStorage`. Inline `<script>` in `<head>` applies the saved theme before first paint to prevent flash.
 
 ---
 
@@ -245,41 +241,32 @@ The theme toggle in the top nav switches `data-theme` on `<html>` and persists t
 | `PICOMAJU_CONFIG` | `os.UserConfigDir()/picomaju/settings.json` | override config file path |
 | `DATA_DIR` | value from settings, else empty | skip onboarding; use this data dir directly |
 | `ADDR` | `:18800` | listen address |
-| `DEV` | — | if set, serve `web/static/` from disk (CSS/JS changes apply on browser refresh) |
-
-`SOP_DIR`, `ROLES_FILE`, `CATEGORIES_FILE` no longer exist — paths are derived from `data_dir`.
+| `DEV` | — | if set, serve `web/static/` from disk |
 
 ---
 
 ## Development workflow
 
 ```bash
-# First run — opens onboarding in browser
-DEV=1 go run .
-
-# Subsequent runs — data dir already saved in settings
 DEV=1 go run .
 ```
 
-`DEV=1` serves static files from disk so CSS/JS edits apply on browser refresh without rebuilding.
-
-After editing any `.templ` file, regenerate before building:
+After editing any `.templ` file:
 
 ```bash
 templ generate
 go build ./...
-go test ./...
 ```
 
-`datastar.js` must be placed in `web/static/` manually — it is embedded into the binary at build time. Download from the data-star.dev releases page.
+`datastar.js` must be placed in `web/static/` manually — it is embedded into the binary at build time.
 
 ---
 
-## v1 / v2 boundary
+## Implementation status
 
-**v1 (built):** First-run onboarding, settings (business info + data dir), SOP authoring, category management, role definitions (job descriptions), in-memory compilation, compile result preview in UI, collapsible sidebar with category filtering.
+**Done:** First-run onboarding, settings, Values authoring + validation, Tools CRUD, Role definitions, Staff profiles, top-nav + contextual sidebar UI, light/dark theming.
 
-**v2 (not started):** JSON manifest serialization to disk, hot-reload via `POST /agent/:role/reload`, manifest versioning/hashing, compile-on-save, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
+**Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
 ---
 
@@ -287,5 +274,3 @@ go test ./...
 
 Full architecture and design decisions live in the Obsidian vault at:
 `40_projects/43_picomaju/43.02_planning/`
-
-Key files: `plan.md`, `02_sop-compiler/spec.md`, `02_sop-compiler/notes.md`.

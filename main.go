@@ -9,10 +9,11 @@ import (
 	"path/filepath"
 
 	"picomaju/internal/api"
-	"picomaju/internal/category"
 	"picomaju/internal/role"
 	"picomaju/internal/settings"
-	"picomaju/internal/sop"
+	"picomaju/internal/staff"
+	"picomaju/internal/tool"
+	"picomaju/internal/value"
 )
 
 //go:embed web/static
@@ -34,16 +35,15 @@ func main() {
 	}
 
 	// Init stores only when we have a data dir; otherwise the setup flow handles it.
-	var sopStore *sop.Store
+	var valStore *value.Store
 	var roleStore *role.Store
-	var catStore *category.Store
+	var toolStore *tool.Store
+	var staffStore *staff.Store
 	if dataDir != "" {
-		sopStore = sop.NewStore(filepath.Join(dataDir, "sops"))
+		valStore = value.NewStore(filepath.Join(dataDir, "values"))
 		roleStore = role.NewStore(filepath.Join(dataDir, "roles.json"))
-		catStore = category.NewStore(filepath.Join(dataDir, "categories.json"))
-		if err := catStore.Seed(); err != nil {
-			log.Printf("warn: could not seed categories: %v", err)
-		}
+		toolStore = tool.NewStore(filepath.Join(dataDir, "tools.json"))
+		staffStore = staff.NewStore(filepath.Join(dataDir, "staff.json"))
 	}
 
 	var static http.FileSystem
@@ -59,7 +59,7 @@ func main() {
 	}
 
 	addr := env("ADDR", ":18800")
-	r := api.NewRouter(sopStore, roleStore, catStore, settingsStore, dataDir, static)
+	r := api.NewRouter(valStore, roleStore, toolStore, staffStore, settingsStore, dataDir, static)
 
 	log.Printf("picomaju listening on %s (config: %s)", addr, configFile)
 	if err := http.ListenAndServe(addr, r); err != nil {
@@ -75,7 +75,6 @@ func configPath() string {
 	}
 	base, err := os.UserConfigDir()
 	if err != nil {
-		// Fallback for platforms where UserConfigDir fails (e.g. no $HOME).
 		base = "."
 	}
 	return filepath.Join(base, "picomaju", "settings.json")

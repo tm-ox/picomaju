@@ -1,0 +1,160 @@
+package templates
+
+import (
+	"fmt"
+	"picomaju/internal/role"
+	"picomaju/internal/staff"
+	"picomaju/internal/value"
+)
+
+templ StaffListPage(members []staff.Staff, sb SidebarData) {
+	@Layout("Staff", sb) {
+		<div class="page-header">
+			<h1>Staff</h1>
+			<a href="/staff/new" class="btn btn-primary">New Staff</a>
+		</div>
+		if len(members) == 0 {
+			<p class="empty">No staff defined yet. <a href="/staff/new">Add a member.</a></p>
+		} else {
+			<table>
+				<thead>
+					<tr>
+						<th>Label</th>
+						<th>Roles</th>
+						<th>Values</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, m := range members {
+						<tr>
+							<td>{ m.Label }</td>
+							<td>{ staffCount(len(m.Roles), "role") }</td>
+							<td>{ staffCount(len(m.ValueCategories)+len(m.Values), "value ref") }</td>
+							<td class="actions">
+								<a href={ templ.SafeURL("/staff/" + m.ID + "/edit") } class="btn btn-secondary">Edit</a>
+								<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/delete") } style="display:inline">
+									<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this staff member?')">Delete</button>
+								</form>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	}
+}
+
+templ StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb SidebarData, isNew bool, formErr string) {
+	@Layout(staffFormTitle(isNew), sb) {
+		<div class="page-header">
+			<h1>{ staffFormTitle(isNew) }</h1>
+			<a href="/staff" class="btn btn-secondary">Cancel</a>
+		</div>
+		if formErr != "" {
+			<div class="alert alert-error">{ formErr }</div>
+		}
+		<form method="post" action={ templ.SafeURL(staffFormAction(m.ID, isNew)) }>
+			<div class="card">
+				<div class="field">
+					<label for="id">ID</label>
+					if isNew {
+						<input type="text" id="id" name="id" value={ m.ID } placeholder="support_agent" required/>
+					} else {
+						<input type="text" id="id" name="id" value={ m.ID } readonly class="readonly"/>
+					}
+				</div>
+				<div class="field">
+					<label for="label">Label</label>
+					<input type="text" id="label" name="label" value={ m.Label } placeholder="Support Agent" required/>
+				</div>
+			</div>
+			if len(roles) > 0 {
+				<div class="card">
+					<h2>Roles</h2>
+					<div class="checkbox-group">
+						for _, r := range roles {
+							<label class="checkbox-item">
+								<input
+									type="checkbox"
+									name="roles"
+									value={ r.ID }
+									checked?={ includesStr(m.Roles, r.ID) }
+								/>
+								<span>{ r.Label }</span>
+								if r.Description != "" {
+									<span class="hint">{ r.Description }</span>
+								}
+							</label>
+						}
+					</div>
+				</div>
+			}
+			if len(sb.Categories) > 0 {
+				<div class="card">
+					<h2>Values</h2>
+					<p class="hint">Select categories to include all their values, or pick individual values below.</p>
+					for _, cat := range sb.Categories {
+						<div class="cat-block">
+							<label class="cat-header">
+								<input
+									type="checkbox"
+									name="value_categories"
+									value={ cat.ID }
+									checked?={ includesStr(m.ValueCategories, cat.ID) }
+								/>
+								<span class="cat-label">{ cat.Label }</span>
+							</label>
+							@staffValuePicker(cat.ID, values, m.Values)
+						</div>
+					}
+				</div>
+			}
+			<div class="form-actions" style="margin-top:1.5rem">
+				<button type="submit" class="btn btn-primary">Save</button>
+			</div>
+		</form>
+	}
+}
+
+templ staffValuePicker(catID string, values []*value.Value, selected []string) {
+	<div class="sop-picker">
+		for _, v := range values {
+			if v.Category == catID {
+				<label class="sop-item">
+					<input
+						type="checkbox"
+						name="values"
+						value={ v.ID }
+						checked?={ includesStr(selected, v.ID) }
+					/>
+					<span>{ v.Title }</span>
+				</label>
+			}
+		}
+	</div>
+}
+
+func staffFormTitle(isNew bool) string {
+	if isNew {
+		return "New Staff"
+	}
+	return "Edit Staff"
+}
+
+func staffFormAction(id string, isNew bool) string {
+	if isNew {
+		return "/staff"
+	}
+	return "/staff/" + id
+}
+
+func staffCount(n int, unit string) string {
+	if n == 0 {
+		return "—"
+	}
+	if n == 1 {
+		return "1 " + unit
+	}
+	return fmt.Sprintf("%d %ss", n, unit)
+}

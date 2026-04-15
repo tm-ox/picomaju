@@ -1,18 +1,22 @@
 # Picomaju
 
-Mobile-first agent orchestrator for small business owners. Define business rules as SOPs, assemble them into role-based policy sets, and deploy them to autonomous agents — without prompt engineering.
+Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Roles and Tools, and deploy autonomous agents — without prompt engineering.
 
 Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go static binary, <10MB RAM). Also runs on any desktop OS.
 
 ---
 
-## What it does
+## Entity model
 
-**SOPs (Standard Operating Procedures)** are atomic business rules — a trigger, a priority, and a natural-language instruction. You author them through a structured form; they're stored as Markdown with YAML frontmatter.
+**Values** are org-level directives — tone, goals, policies. Authored as Markdown with YAML frontmatter, grouped by category (Core Values, Communication, Skills, Escalation, Custom).
 
-**Roles** are job descriptions for agents. You hire a role by selecting which SOP categories it covers (bulk) and any individual SOPs on top. The compiler assembles the selected SOPs into a policy set, validates them, and sorts by priority.
+**Tools** are capabilities or integrations an agent can use (Email, WhatsApp, MCP, etc.).
 
-**Categories** group SOPs by domain. The starter set is: Core Values, Communication, Skills, Escalation, Custom.
+**Roles** are task definitions. A role describes what an agent does and which Tools it uses.
+
+**Staff** are agent profiles, composed of Roles + Values. Staff is the compile target — the entity that gets assembled into an agent directive.
+
+Relationship chain: `Staff → Roles → Tools + Values (by category or individual) → Compiled Agent Directive`
 
 ---
 
@@ -20,7 +24,7 @@ Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go s
 
 - **Go** — `chi/v5` router, `yaml.v3`, `a-h/templ`
 - **templ** — server-side HTML templates compiled to Go
-- **datastar** — SSE-based reactivity (validate/compile previews stream into the page without a full reload)
+- **datastar** — SSE-based reactivity (validate previews stream into the page without a full reload)
 - No Node.js, no build pipeline beyond `templ generate`
 
 ---
@@ -49,7 +53,6 @@ After editing any `.templ` file:
 ```sh
 templ generate
 go build ./...
-go test ./...
 ```
 
 ---
@@ -79,9 +82,9 @@ The config file lives at the platform-appropriate location:
 
 ## Project status
 
-**v1 — built:** SOP authoring, category management, role definitions, in-memory compilation with preview, sidebar navigation with category filtering, onboarding, settings.
+**Current:** Values authoring, Tools management, Role definitions, Staff profiles, top-nav UI with contextual sidebars, onboarding, settings.
 
-**v2 — not started:** JSON manifest output, hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
+**Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
 ---
 
@@ -91,10 +94,11 @@ The config file lives at the platform-appropriate location:
 main.go                  entry point
 internal/
   settings/              config file store
-  sop/                   SOP model, file store, validator, compiler
-  category/              category model + store
-  role/                  role model + store
-  api/                   HTTP handlers (JSON API + HTML UI + SSE)
+  value/                 Value model, file store, validator, category defaults
+  tool/                  Tool model + store (tools.json)
+  role/                  Role model + store (roles.json) — task definitions
+  staff/                 Staff model + store (staff.json) — agent profiles
+  api/                   HTTP handlers (HTML UI + SSE)
 web/
   templates/             templ components
   static/                style.css, datastar.js (not committed)

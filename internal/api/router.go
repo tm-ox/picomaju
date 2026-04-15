@@ -6,21 +6,23 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"picomaju/internal/category"
 	"picomaju/internal/role"
 	"picomaju/internal/settings"
-	"picomaju/internal/sop"
+	"picomaju/internal/staff"
+	"picomaju/internal/tool"
+	"picomaju/internal/value"
 )
 
-func NewRouter(sopStore *sop.Store, roleStore *role.Store, catStore *category.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
+func NewRouter(valStore *value.Store, roleStore *role.Store, toolStore *tool.Store, staffStore *staff.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
 	ui := &uiHandler{
-		sops:     sopStore,
+		values:   valStore,
 		roles:    roleStore,
-		cats:     catStore,
+		tools:    toolStore,
+		staff:    staffStore,
 		settings: settingsStore,
 		dataDir:  dataDir,
 	}
@@ -38,55 +40,49 @@ func NewRouter(sopStore *sop.Store, roleStore *role.Store, catStore *category.St
 		})
 	})
 
-	// JSON API
-	r.Route("/api", func(r chi.Router) {
-		r.Route("/sops", func(r chi.Router) {
-			h := &sopHandler{store: sopStore}
-			r.Get("/", h.list)
-			r.Post("/", h.create)
-			r.Get("/{id}", h.get)
-			r.Put("/{id}", h.update)
-			r.Delete("/{id}", h.delete)
-			r.Post("/{id}/validate", h.validate)
-		})
-		r.Route("/roles", func(r chi.Router) {
-			h := &roleHandler{roles: roleStore, sops: sopStore}
-			r.Get("/", h.list)
-			r.Post("/", h.create)
-			r.Get("/{id}", h.get)
-			r.Put("/{id}", h.update)
-			r.Delete("/{id}", h.delete)
-			r.Post("/{id}/compile", h.compile)
-		})
-		r.Route("/categories", func(r chi.Router) {
-			h := &categoryHandler{store: catStore}
-			r.Get("/", h.list)
-			r.Post("/", h.create)
-			r.Delete("/{id}", h.delete)
-		})
-	})
-
 	// Setup (onboarding)
 	r.Get("/setup", ui.setupPage)
 	r.Post("/setup", ui.completeSetup)
 
-	// HTML UI
-	r.Get("/", ui.sopList)
-	r.Get("/sops/new", ui.newSOPForm)
-	r.Get("/sops/{id}/edit", ui.editSOPForm)
-	r.Post("/sops", ui.createSOP)
-	r.Post("/sops/{id}", ui.updateSOP)
-	r.Post("/sops/{id}/delete", ui.deleteSOP)
-	r.Post("/sops/{id}/validate-stream", ui.validateSSE)
+	// Redirect root to /values
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/values", http.StatusSeeOther)
+	})
 
+	// Values
+	r.Get("/values", ui.valueList)
+	r.Get("/values/new", ui.newValueForm)
+	r.Get("/values/{id}/edit", ui.editValueForm)
+	r.Post("/values", ui.createValue)
+	r.Post("/values/{id}", ui.updateValue)
+	r.Post("/values/{id}/delete", ui.deleteValue)
+	r.Post("/values/{id}/validate-stream", ui.validateSSE)
+
+	// Tools
+	r.Get("/tools", ui.toolList)
+	r.Get("/tools/new", ui.newToolForm)
+	r.Get("/tools/{id}/edit", ui.editToolForm)
+	r.Post("/tools", ui.createTool)
+	r.Post("/tools/{id}", ui.updateTool)
+	r.Post("/tools/{id}/delete", ui.deleteTool)
+
+	// Roles
 	r.Get("/roles", ui.roleList)
 	r.Get("/roles/new", ui.newRoleForm)
 	r.Get("/roles/{id}/edit", ui.editRoleForm)
 	r.Post("/roles", ui.createRole)
 	r.Post("/roles/{id}", ui.updateRole)
 	r.Post("/roles/{id}/delete", ui.deleteRole)
-	r.Post("/roles/{id}/compile-stream", ui.compileSSE)
 
+	// Staff
+	r.Get("/staff", ui.staffList)
+	r.Get("/staff/new", ui.newStaffForm)
+	r.Get("/staff/{id}/edit", ui.editStaffForm)
+	r.Post("/staff", ui.createStaff)
+	r.Post("/staff/{id}", ui.updateStaff)
+	r.Post("/staff/{id}/delete", ui.deleteStaff)
+
+	// Settings
 	r.Get("/settings", ui.settingsPage)
 	r.Post("/settings", ui.saveSettings)
 

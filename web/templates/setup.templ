@@ -1,11 +1,11 @@
 package templates
 
 templ SetupPage(businessName, dataDir, formErr string) {
-	@Layout("Welcome") {
+	@Layout("Welcome", SidebarData{}) {
 		<div class="setup-wrap">
 			<div class="setup-card card">
 				<h1 class="setup-title">Welcome to Picomaju</h1>
-				<p class="setup-lead">Choose where your SOPs, roles, and categories will be stored.</p>
+				<p class="setup-lead">Choose where your values, roles, and staff will be stored.</p>
 				if formErr != "" {
 					<div class="alert alert-error">{ formErr }</div>
 				}
