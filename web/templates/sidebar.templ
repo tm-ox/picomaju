@@ -55,10 +55,31 @@ templ valuesSidebar(sb SidebarData) {
 }
 
 templ toolsSidebar(sb SidebarData) {
+	if len(sb.Integrations) > 0 {
+		<div class="sidebar-section">
+			<span class="sidebar-heading">Integrations</span>
+			for _, t := range sb.Integrations {
+				<a
+					href={ templ.SafeURL("/tools/" + t.ID + "/edit") }
+					class="sidebar-item"
+				>{ t.Label }</a>
+			}
+		</div>
+	}
+	if len(sb.Skills) > 0 {
+		<div class="sidebar-section">
+			<span class="sidebar-heading">Skills</span>
+			for _, t := range sb.Skills {
+				<a
+					href={ templ.SafeURL("/tools/" + t.ID + "/edit") }
+					class="sidebar-item"
+				>{ t.Label }</a>
+			}
+		</div>
+	}
 	<div class="sidebar-section">
-		<span class="sidebar-heading">Tools</span>
-		<a href="/tools" class="sidebar-item">All Tools</a>
-		<a href="/tools/new" class="sidebar-item sidebar-action">+ New Tool</a>
+		<a href="/tools/new" class="sidebar-item sidebar-action">+ Add Integration</a>
+		<a href="/tools/new/skill" class="sidebar-item sidebar-action">+ New Skill</a>
 	</div>
 }
 

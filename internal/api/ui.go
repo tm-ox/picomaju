@@ -78,6 +78,36 @@ func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 		templates.SetupPage(businessName, dataDir, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
 		return
 	}
+	http.Redirect(w, r, "/setup/integrations", http.StatusSeeOther)
+}
+
+func (h *uiHandler) integrationsPage(w http.ResponseWriter, r *http.Request) {
+	templates.IntegrationsPage(tool.CatalogByCategory(), "").Render(r.Context(), w)
+}
+
+func (h *uiHandler) completeIntegrations(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		templates.IntegrationsPage(tool.CatalogByCategory(), err.Error()).Render(r.Context(), w)
+		return
+	}
+
+	selected := r.Form["integrations"]
+	catalogIndex := tool.CatalogByID()
+
+	for _, id := range selected {
+		integ, ok := catalogIndex[id]
+		if !ok {
+			continue
+		}
+		t := &tool.Tool{
+			ID:    integ.ID,
+			Label: integ.Label,
+			Type:  integ.Type,
+		}
+		// Ignore "already exists" — onboarding may be revisited.
+		h.tools.Create(t) //nolint:errcheck
+	}
+
 	http.Redirect(w, r, "/values", http.StatusSeeOther)
 }
 
@@ -179,7 +209,12 @@ func (h *uiHandler) toolList(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) newToolForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "tools")
-	templates.ToolFormPage(&tool.Tool{}, sb, true, "").Render(r.Context(), w)
+	templates.NewIntegrationPage(tool.CatalogByCategory(), sb, "").Render(r.Context(), w)
+}
+
+func (h *uiHandler) newSkillForm(w http.ResponseWriter, r *http.Request) {
+	sb := h.sidebarData(r, "tools")
+	templates.SkillFormPage(&tool.Tool{}, sb, true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editToolForm(w http.ResponseWriter, r *http.Request) {
@@ -190,34 +225,110 @@ func (h *uiHandler) editToolForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sb := h.sidebarData(r, "tools")
-	templates.ToolFormPage(t, sb, false, "").Render(r.Context(), w)
+	if t.Type == "skill" {
+		templates.SkillFormPage(t, sb, false, "").Render(r.Context(), w)
+		return
+	}
+	templates.ToolFormPage(t, lookupIntegration(t.Type), sb, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createTool(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "tools")
-	t, err := toolFromForm(r)
-	if err != nil {
-		templates.ToolFormPage(t, sb, true, err.Error()).Render(r.Context(), w)
+	if err := r.ParseForm(); err != nil {
+		templates.NewIntegrationPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
 		return
+	}
+	integID := strings.TrimSpace(r.FormValue("integration_id"))
+	catalogIndex := tool.CatalogByID()
+	integ, ok := catalogIndex[integID]
+	if !ok {
+		templates.NewIntegrationPage(tool.CatalogByCategory(), sb, "Please select an integration.").Render(r.Context(), w)
+		return
+	}
+	t := &tool.Tool{
+		ID:    integ.ID,
+		Label: integ.Label,
+		Type:  integ.Type,
 	}
 	if err := h.tools.Create(t); err != nil {
-		templates.ToolFormPage(t, sb, true, err.Error()).Render(r.Context(), w)
+		templates.NewIntegrationPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/tools", http.StatusSeeOther)
+	http.Redirect(w, r, "/tools/"+t.ID+"/edit", http.StatusSeeOther)
+}
+
+func (h *uiHandler) createSkill(w http.ResponseWriter, r *http.Request) {
+	sb := h.sidebarData(r, "tools")
+	if err := r.ParseForm(); err != nil {
+		templates.SkillFormPage(&tool.Tool{}, sb, true, err.Error()).Render(r.Context(), w)
+		return
+	}
+	t := &tool.Tool{
+		ID:    strings.TrimSpace(r.FormValue("id")),
+		Label: strings.TrimSpace(r.FormValue("label")),
+		Type:  "skill",
+		Config: map[string]any{
+			"content": strings.TrimSpace(r.FormValue("content")),
+		},
+	}
+	if err := h.tools.Create(t); err != nil {
+		templates.SkillFormPage(t, sb, true, err.Error()).Render(r.Context(), w)
+		return
+	}
+	http.Redirect(w, r, "/tools/"+t.ID+"/edit", http.StatusSeeOther)
 }
 
 func (h *uiHandler) updateTool(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	sb := h.sidebarData(r, "tools")
-	t, err := toolFromForm(r)
+
+	existing, err := h.tools.Get(id)
 	if err != nil {
-		templates.ToolFormPage(t, sb, false, err.Error()).Render(r.Context(), w)
+		http.NotFound(w, r)
 		return
 	}
-	t.ID = id
+
+	if err := r.ParseForm(); err != nil {
+		if existing.Type == "skill" {
+			templates.SkillFormPage(existing, sb, false, err.Error()).Render(r.Context(), w)
+		} else {
+			templates.ToolFormPage(existing, lookupIntegration(existing.Type), sb, err.Error()).Render(r.Context(), w)
+		}
+		return
+	}
+
+	t := &tool.Tool{
+		ID:    id,
+		Label: strings.TrimSpace(r.FormValue("label")),
+		Type:  existing.Type,
+	}
+
+	if existing.Type == "skill" {
+		t.Config = map[string]any{
+			"content": strings.TrimSpace(r.FormValue("content")),
+		}
+	} else {
+		integ := lookupIntegration(existing.Type)
+		if integ != nil && len(integ.Fields) > 0 {
+			cfg := make(map[string]any)
+			for _, f := range integ.Fields {
+				val := strings.TrimSpace(r.FormValue("cfg_" + f.Key))
+				if val != "" {
+					cfg[f.Key] = val
+				}
+			}
+			if len(cfg) > 0 {
+				t.Config = cfg
+			}
+		}
+	}
+
 	if err := h.tools.Update(t); err != nil {
-		templates.ToolFormPage(t, sb, false, err.Error()).Render(r.Context(), w)
+		if existing.Type == "skill" {
+			templates.SkillFormPage(t, sb, false, err.Error()).Render(r.Context(), w)
+		} else {
+			templates.ToolFormPage(t, lookupIntegration(existing.Type), sb, err.Error()).Render(r.Context(), w)
+		}
 		return
 	}
 	http.Redirect(w, r, "/tools", http.StatusSeeOther)
@@ -417,7 +528,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) sidebarData(r *http.Request, section string) templates.SidebarData {
 	h.mu.RLock()
-	valStore, roleStore, staffStore := h.values, h.roles, h.staff
+	valStore, roleStore, toolStore, staffStore := h.values, h.roles, h.tools, h.staff
 	h.mu.RUnlock()
 
 	var vals []*value.Value
@@ -432,6 +543,20 @@ func (h *uiHandler) sidebarData(r *http.Request, section string) templates.Sideb
 	var roles []role.Role
 	if roleStore != nil {
 		roles, _ = roleStore.List()
+	}
+
+	var tools []tool.Tool
+	if toolStore != nil {
+		tools, _ = toolStore.List()
+	}
+	catalog := tool.CatalogByType()
+	var integrations, skills []tool.Tool
+	for _, t := range tools {
+		if _, ok := catalog[t.Type]; ok {
+			integrations = append(integrations, t)
+		} else {
+			skills = append(skills, t)
+		}
 	}
 
 	var members []staff.Staff
@@ -449,11 +574,21 @@ func (h *uiHandler) sidebarData(r *http.Request, section string) templates.Sideb
 		Categories:    value.DefaultCategories,
 		Staff:         members,
 		Roles:         roles,
+		Integrations:  integrations,
+		Skills:        skills,
 		ValueCounts:   counts,
 		ActiveCat:     r.URL.Query().Get("cat"),
 		ActiveSection: section,
 		BusinessName:  name,
 	}
+}
+
+func lookupIntegration(typeName string) *tool.Integration {
+	catalog := tool.CatalogByType()
+	if integ, ok := catalog[typeName]; ok {
+		return &integ
+	}
+	return nil
 }
 
 func valueFromForm(r *http.Request) (*value.Value, error) {
@@ -469,17 +604,6 @@ func valueFromForm(r *http.Request) (*value.Value, error) {
 		Version:  version,
 		Priority: priority,
 		Body:     strings.TrimSpace(r.FormValue("body")),
-	}, nil
-}
-
-func toolFromForm(r *http.Request) (*tool.Tool, error) {
-	if err := r.ParseForm(); err != nil {
-		return &tool.Tool{}, err
-	}
-	return &tool.Tool{
-		ID:    strings.TrimSpace(r.FormValue("id")),
-		Label: strings.TrimSpace(r.FormValue("label")),
-		Type:  r.FormValue("type"),
 	}, nil
 }
 

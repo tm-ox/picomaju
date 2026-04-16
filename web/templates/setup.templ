@@ -1,7 +1,9 @@
 package templates
 
+import "picomaju/internal/tool"
+
 templ SetupPage(businessName, dataDir, formErr string) {
-	@Layout("Welcome", SidebarData{}) {
+	@Layout("Welcome", SidebarData{HideSidebar: true}) {
 		<div class="setup-wrap">
 			<div class="setup-card card">
 				<h1 class="setup-title">Welcome to Picomaju</h1>
@@ -20,7 +22,48 @@ templ SetupPage(businessName, dataDir, formErr string) {
 						<p class="hint">Picomaju will create this directory if it does not exist.</p>
 					</div>
 					<div class="form-actions">
-						<button type="submit" class="btn btn-primary">Get Started</button>
+						<button type="submit" class="btn btn-primary">Next</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	}
+}
+
+templ IntegrationsPage(groups []tool.IntegrationGroup, formErr string) {
+	@Layout("Connect your tools", SidebarData{HideSidebar: true}) {
+		<div class="setup-wrap setup-wrap-wide">
+			<div class="setup-integrations">
+				<div class="setup-integrations-header">
+					<h1 class="setup-title">Connect your tools</h1>
+					<p class="setup-lead">Select the integrations your business uses. Credentials can be configured afterwards in <strong>Tools</strong>.</p>
+				</div>
+				if formErr != "" {
+					<div class="alert alert-error">{ formErr }</div>
+				}
+				<form method="post" action="/setup/integrations">
+					for _, group := range groups {
+						<h2 class="integration-group-heading">{ group.Category }</h2>
+						<div class="integration-group">
+							for _, integ := range group.Integrations {
+								<label class="integration-card card">
+									<input
+										type="checkbox"
+										class="integration-toggle"
+										name="integrations"
+										value={ integ.ID }
+									/>
+									<div class="integration-info">
+										<span class="integration-label">{ integ.Label }</span>
+										<span class="integration-desc">{ integ.Description }</span>
+									</div>
+								</label>
+							}
+						</div>
+					}
+					<div class="form-actions integration-actions">
+						<button type="submit" class="btn btn-primary">Save and continue</button>
+						<a href="/values" class="btn btn-secondary">Skip for now</a>
 					</div>
 				</form>
 			</div>

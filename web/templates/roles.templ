@@ -73,17 +73,17 @@ templ RoleFormPage(r *role.Role, tools []tool.Tool, sb SidebarData, isNew bool, 
 			if len(tools) > 0 {
 				<div class="field">
 					<label>Tools</label>
-					<div class="checkbox-group">
+					<div class="pick-group">
 						for _, t := range tools {
-							<label class="checkbox-item">
+							<label class="pick-chip">
 								<input
 									type="checkbox"
+									class="pick-toggle"
 									name="tools"
 									value={ t.ID }
 									checked?={ includesStr(r.Tools, t.ID) }
 								/>
-								<span>{ t.Label }</span>
-								<span class="cat-tag">{ t.Type }</span>
+								{ t.Label }<span class="cat-tag">{ t.Type }</span>
 							</label>
 						}
 					</div>

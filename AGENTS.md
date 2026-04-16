@@ -38,11 +38,11 @@ picomaju/
       layout.templ               — base HTML shell; top nav (business + avatar | section links | theme + settings)
       sidebar.templ              — contextual sidebar component (switches per active section)
       values.templ               — Value list page, Value form, ValidationFragment
-      tools.templ                — Tool list page, Tool form
+      tools.templ                — Tool list, NewIntegrationPage (radio picker), ToolFormPage (edit integration), SkillFormPage (SKILL.md editor)
       roles.templ                — Role list page, Role form (with tool picker)
       staff.templ                — Staff list page, Staff form (role + value picker)
       settings.templ             — Settings page (business info + data dir)
-      setup.templ                — First-run onboarding page
+      setup.templ                — Two-step onboarding: SetupPage + IntegrationsPage (catalog picker)
       helpers.go                 — SidebarData type, includesStr()
     static/
       style.css                  — CSS custom properties; light + dark mode; 16px REM base
@@ -53,12 +53,12 @@ picomaju/
 
 ## First run / onboarding
 
-On first launch, if no data directory is configured, **all routes redirect to `/setup`**. The setup page asks for:
+On first launch, if no data directory is configured, **all routes redirect to `/setup`**. Onboarding is two steps and renders without a sidebar (minimal header, full-width layout):
 
-- **Business Name** — shown in the top nav
-- **Data Directory** — where values, roles, tools, and staff are stored; pre-filled with `~/picomaju`
+1. **`/setup`** — Business Name + Data Directory (pre-filled `~/picomaju`)
+2. **`/setup/integrations`** — Integration picker: select from the catalog to auto-create Tool entries; credentials configured later in Tools. Both steps exempt from the setup gate middleware.
 
-On submit, the directory is created and the user is dropped into the main app. No restart required.
+On completion the user lands at `/values`. No restart required.
 
 The settings file location is platform-aware (`os.UserConfigDir()/picomaju/settings.json`). On Linux: `~/.config/picomaju/settings.json`.
 
@@ -85,11 +85,17 @@ Required fields: `id`, `title`, `version`, `priority` (0–100), `category`.
 No `trigger` field — Values are directives, not event-driven rules.
 
 ### Tool (`<data_dir>/tools.json`)
-Capabilities or integrations available to a Role.
+Capabilities available to a Role. Two kinds:
+
+- **Integration** — type matches a catalog entry (e.g. `whatsapp`, `telegram`, `shopee`). Config holds credentials keyed by `ConfigField.Key`.
+- **Skill** — type `skill`. Config holds a single `content` key containing a SKILL.md markdown document.
 
 ```json
 { "tools": [
-  { "id": "email_sendgrid", "label": "SendGrid Email", "type": "email" }
+  { "id": "whatsapp", "label": "WhatsApp Business", "type": "whatsapp",
+    "config": { "phone_number_id": "...", "access_token": "..." } },
+  { "id": "handle_escalation", "label": "Handle Escalation", "type": "skill",
+    "config": { "content": "# Handle Escalation\n\n## Purpose\n..." } }
 ]}
 ```
 
@@ -161,8 +167,10 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/setup` | onboarding (shown when no data dir configured) |
-| POST | `/setup` | complete setup → redirect `/values` |
+| GET | `/setup` | onboarding step 1 — business name + data dir |
+| POST | `/setup` | save step 1 → redirect `/setup/integrations` |
+| GET | `/setup/integrations` | onboarding step 2 — integration picker |
+| POST | `/setup/integrations` | create selected tools → redirect `/values` |
 | GET | `/` | redirect → `/values` |
 | GET | `/values` | Value list (filterable by `?cat=<id>`) |
 | GET | `/values/new` | Value form (new) |
@@ -171,11 +179,13 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 | POST | `/values/:id` | update Value → redirect `/values` |
 | POST | `/values/:id/delete` | delete Value → redirect `/values` |
 | POST | `/values/:id/validate-stream` | SSE: `ValidationFragment` |
-| GET | `/tools` | Tool list |
-| GET | `/tools/new` | Tool form (new) |
-| POST | `/tools` | create Tool → redirect `/tools` |
-| GET | `/tools/:id/edit` | Tool form (edit) |
-| POST | `/tools/:id` | update Tool → redirect `/tools` |
+| GET | `/tools` | Tool list (integrations + skills) |
+| GET | `/tools/new` | Add Integration — catalog radio card picker |
+| POST | `/tools` | create Integration from `integration_id` → redirect to edit |
+| GET | `/tools/new/skill` | New Skill — SKILL.md editor |
+| POST | `/tools/skill` | create Skill → redirect to edit |
+| GET | `/tools/:id/edit` | Edit Integration (credential fields) or Edit Skill (SKILL.md editor) |
+| POST | `/tools/:id` | update Tool/Skill → redirect `/tools` |
 | POST | `/tools/:id/delete` | delete Tool → redirect `/tools` |
 | GET | `/roles` | Role list |
 | GET | `/roles/new` | Role form (new) |
@@ -195,7 +205,7 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 
 Mutations use standard HTML form POST + redirect (no JS required for CRUD). Validate uses datastar SSE — button triggers a POST, server responds with a merge-fragments event patching `<div id="validation-result">`.
 
-The setup gate middleware redirects all routes except `/setup` and `/static/*` to `/setup` when no data directory is configured.
+The setup gate middleware redirects all routes except `/setup`, `/setup/integrations`, and `/static/*` to `/setup` when no data directory is configured.
 
 ---
 
@@ -206,11 +216,11 @@ The setup gate middleware redirects all routes except `/setup` and `/static/*` t
 - Center: Values | Tools | Roles | Staff (section links, `.active` on current section)
 - Right: theme toggle + settings gear
 
-**Sidebar** (contextual, collapsible):
+**Sidebar** (contextual, collapsible — hidden entirely during onboarding):
 - Collapsed state: `2.25rem` wide (no icons yet — content hidden via `opacity: 0`)
 - Content switches per `ActiveSection` in `SidebarData`:
   - `values` → category filter links with counts + New Value
-  - `tools` → All Tools + New Tool
+  - `tools` → **Integrations** section (catalog-type tools) + **Skills** section (type `skill`) + Add Integration / New Skill links
   - `roles` → role list + New Role
   - `staff` → staff list + New Staff
 
@@ -264,7 +274,7 @@ go build ./...
 
 ## Implementation status
 
-**Done:** First-run onboarding, settings, Values authoring + validation, Tools CRUD, Role definitions, Staff profiles, top-nav + contextual sidebar UI, light/dark theming.
+**Done:** Two-step onboarding with integration picker, settings, Values authoring + validation, Tools CRUD (integrations + skills), Integration catalog (WhatsApp, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar), SKILL.md editor, Role definitions with tool picker, Staff profiles with role + value picker, top-nav + contextual sidebar (hidden during onboarding), light/dark theming, pick-chip selection UX (no visible checkboxes).
 
 **Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 

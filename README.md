@@ -10,7 +10,9 @@ Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go s
 
 **Values** are org-level directives — tone, goals, policies. Authored as Markdown with YAML frontmatter, grouped by category (Core Values, Communication, Skills, Escalation, Custom).
 
-**Tools** are capabilities or integrations an agent can use (Email, WhatsApp, MCP, etc.).
+**Tools** are capabilities an agent can use. Two kinds:
+- **Integrations** — pre-defined catalog entries (WhatsApp Business, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar). Added via an onboarding picker or the Add Integration form; credentials configured per-integration.
+- **Skills** — custom agent behaviours authored as SKILL.md documents. Define purpose, activation conditions, step-by-step procedure, and expected output.
 
 **Roles** are task definitions. A role describes what an agent does and which Tools it uses.
 
@@ -40,7 +42,12 @@ cd picomaju
 DEV=1 go run .
 ```
 
-Open `http://localhost:18800`. On first visit you'll be asked for a business name and a data directory (defaults to `~/picomaju`). That's it — no env vars, no pre-created directories.
+Open `http://localhost:18800`. First visit runs a two-step onboarding (no sidebar):
+
+1. Business name + data directory (defaults to `~/picomaju`)
+2. Integration picker — select the platforms your business uses; credentials can be filled in afterwards under Tools
+
+That's it — no env vars, no pre-created directories.
 
 `DEV=1` serves static files from disk so CSS changes apply on browser refresh without rebuilding.
 
@@ -82,7 +89,7 @@ The config file lives at the platform-appropriate location:
 
 ## Project status
 
-**Current:** Values authoring, Tools management, Role definitions, Staff profiles, top-nav UI with contextual sidebars, onboarding, settings.
+**Current:** Two-step onboarding with integration catalog picker, Values authoring + validation, Tools management (integrations with per-type credential fields + skills with SKILL.md editor), Role definitions, Staff profiles, top-nav + contextual sidebars (hidden during onboarding), pick-chip selection UI, light/dark theming, settings.
 
 **Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
@@ -95,7 +102,7 @@ main.go                  entry point
 internal/
   settings/              config file store
   value/                 Value model, file store, validator, category defaults
-  tool/                  Tool model + store (tools.json)
+  tool/                  Tool model + store (tools.json); Integration catalog (catalog.go)
   role/                  Role model + store (roles.json) — task definitions
   staff/                 Staff model + store (staff.json) — agent profiles
   api/                   HTTP handlers (HTML UI + SSE)

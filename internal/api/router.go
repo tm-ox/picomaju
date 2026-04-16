@@ -32,6 +32,7 @@ func NewRouter(valStore *value.Store, roleStore *role.Store, toolStore *tool.Sto
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			if !ui.configured() &&
 				req.URL.Path != "/setup" &&
+				req.URL.Path != "/setup/integrations" &&
 				!strings.HasPrefix(req.URL.Path, "/static/") {
 				http.Redirect(w, req, "/setup", http.StatusSeeOther)
 				return
@@ -43,6 +44,8 @@ func NewRouter(valStore *value.Store, roleStore *role.Store, toolStore *tool.Sto
 	// Setup (onboarding)
 	r.Get("/setup", ui.setupPage)
 	r.Post("/setup", ui.completeSetup)
+	r.Get("/setup/integrations", ui.integrationsPage)
+	r.Post("/setup/integrations", ui.completeIntegrations)
 
 	// Redirect root to /values
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -61,8 +64,10 @@ func NewRouter(valStore *value.Store, roleStore *role.Store, toolStore *tool.Sto
 	// Tools
 	r.Get("/tools", ui.toolList)
 	r.Get("/tools/new", ui.newToolForm)
+	r.Get("/tools/new/skill", ui.newSkillForm)
 	r.Get("/tools/{id}/edit", ui.editToolForm)
 	r.Post("/tools", ui.createTool)
+	r.Post("/tools/skill", ui.createSkill)
 	r.Post("/tools/{id}", ui.updateTool)
 	r.Post("/tools/{id}/delete", ui.deleteTool)
 
