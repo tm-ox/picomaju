@@ -1,4 +1,4 @@
-# Picomaju
+<img src="web/static/logo-stack.svg" alt="PicoMaju" height="120"/>
 
 Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Roles and Tools, and deploy autonomous agents — without prompt engineering.
 

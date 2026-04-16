@@ -211,6 +211,7 @@ body {
 }
 .topnav-settings:hover { color: var(--color-nav-link-hover); }
 .topnav-minimal { justify-content: flex-start; }
+.topnav-logo { height: 1.625rem; width: auto; display: block; }
 
 /* ─── App layout ──────────────────────────────────────────────────────────── */
 .app-body {
@@ -246,6 +247,7 @@ h2 { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem; }
   border-top: 1px solid var(--color-border-faint);
   background: var(--color-surface);
 }
+.footer-logo { height: 0.875rem; width: auto; display: block; color: var(--color-text-muted); }
 
 /* ─── Sidebar ─────────────────────────────────────────────────────────────── */
 .sidebar {
