@@ -1,4 +1,4 @@
-<img src="web/static/logo-stack.svg" alt="PicoMaju" height="120"/>
+<img src="web/static/logo-type.svg" alt="PicoMaju" height="120"/>
 
 Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Roles and Tools, and deploy autonomous agents — without prompt engineering.
 
@@ -11,6 +11,7 @@ Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go s
 **Values** are org-level directives — tone, goals, policies. Authored as Markdown with YAML frontmatter, grouped by category (Core Values, Communication, Skills, Escalation, Custom).
 
 **Tools** are capabilities an agent can use. Two kinds:
+
 - **Integrations** — pre-defined catalog entries (WhatsApp Business, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar). Added via an onboarding picker or the Add Integration form; credentials configured per-integration.
 - **Skills** — custom agent behaviours authored as SKILL.md documents. Define purpose, activation conditions, step-by-step procedure, and expected output.
 
@@ -70,20 +71,20 @@ Settings (business name, data directory) are managed in the app at `/settings`.
 
 The config file lives at the platform-appropriate location:
 
-| Platform | Path |
-|----------|------|
-| Linux | `~/.config/picomaju/settings.json` |
-| macOS | `~/Library/Application Support/picomaju/settings.json` |
-| Android | per-app config dir via `os.UserConfigDir()` |
+| Platform | Path                                                   |
+| -------- | ------------------------------------------------------ |
+| Linux    | `~/.config/picomaju/settings.json`                     |
+| macOS    | `~/Library/Application Support/picomaju/settings.json` |
+| Android  | per-app config dir via `os.UserConfigDir()`            |
 
 **Environment variables** (advanced / managed deployments):
 
-| Var | Description |
-|-----|-------------|
-| `PICOMAJU_CONFIG` | Override config file path |
-| `DATA_DIR` | Skip onboarding; use this data directory directly |
-| `ADDR` | Listen address (default `:18800`) |
-| `DEV` | Serve static files from disk |
+| Var               | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `PICOMAJU_CONFIG` | Override config file path                         |
+| `DATA_DIR`        | Skip onboarding; use this data directory directly |
+| `ADDR`            | Listen address (default `:18800`)                 |
+| `DEV`             | Serve static files from disk                      |
 
 ---
 
