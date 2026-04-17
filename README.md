@@ -2,6 +2,8 @@
     <img src="web/static/logo-symbol.svg" alt="PicoMaju" height="120"/>
 </div>
 
+---
+
 <div align="center">
     <img src="web/static/type.svg" alt="PicoMaju" height="40"/>
 </div>
