@@ -4,6 +4,12 @@
 
 ---
 
+<div align="center">
+    <h1>PicoMaju</h1>
+</div>
+
+---
+
 Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Tasks and Tools, and deploy autonomous agents — without prompt engineering.
 
 Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go static binary, <10MB RAM). Also runs on any desktop OS.
@@ -14,10 +20,7 @@ Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go s
 
 **Values** are org-level directives — tone, goals, policies. Authored as Markdown with YAML frontmatter, grouped by category (Core Values, Communication, Skills, Escalation, Custom).
 
-**Tools** are capabilities an agent can use. Two kinds:
-
-- **Integrations** — pre-defined catalog entries (WhatsApp Business, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar). Added via an onboarding picker or the Add Integration form; credentials configured per-integration.
-- **Skills** — custom agent behaviours authored as SKILL.md documents. Define purpose, activation conditions, step-by-step procedure, and expected output.
+**Tools** are pre-defined catalog integrations (WhatsApp Business, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar). Added via an onboarding picker; credentials configured per-integration.
 
 **Tasks** are task definitions. A task describes what an agent does and which Tools it uses.
 
@@ -50,7 +53,7 @@ DEV=1 go run .
 Open `http://localhost:18800`. First visit runs a two-step onboarding (no sidebar):
 
 1. Business name + data directory (defaults to `~/picomaju`)
-2. Integration picker — select the platforms your business uses; credentials can be filled in afterwards under Tools
+2. Tool picker — select the platforms your business uses; credentials can be filled in afterwards under Tools
 
 That's it — no env vars, no pre-created directories.
 
@@ -94,7 +97,7 @@ The config file lives at the platform-appropriate location:
 
 ## Project status
 
-**Current:** Two-step onboarding with integration catalog picker, Values authoring + validation, Tools management (integrations with per-type credential fields + skills with SKILL.md editor), Task definitions, Staff profiles, top-nav + contextual sidebars (hidden during onboarding), pick-chip selection UI, light/dark theming, settings.
+**Current:** Two-step onboarding with tool catalog picker, Values authoring + validation, Tools management (catalog integrations with per-type credential fields), Task definitions, Staff profiles, top-nav + contextual collapsible sidebar with brand icons (hidden during onboarding), mobile floating sidebar, pick-chip selection UI, light/dark theming, settings.
 
 **Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
@@ -112,7 +115,7 @@ internal/
   staff/                 Staff model + store (staff.json) — agent profiles
   api/                   HTTP handlers (HTML UI + SSE)
 web/
-  templates/             templ components
-  static/                style.css, datastar.js (not committed)
+  templates/             templ components (icons.templ — tool brand SVGs)
+  static/                style.css, datastar.js (not committed), logo SVGs
 AGENTS.md                instructions for AI agents working on this codebase
 ```

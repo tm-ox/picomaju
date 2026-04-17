@@ -64,10 +64,8 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	// Tools
 	r.Get("/tools", ui.toolList)
 	r.Get("/tools/new", ui.newToolForm)
-	r.Get("/tools/new/skill", ui.newSkillForm)
 	r.Get("/tools/{id}/edit", ui.editToolForm)
 	r.Post("/tools", ui.createTool)
-	r.Post("/tools/skill", ui.createSkill)
 	r.Post("/tools/{id}", ui.updateTool)
 	r.Post("/tools/{id}/delete", ui.deleteTool)
 

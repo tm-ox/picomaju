@@ -36,10 +36,11 @@ picomaju/
       helpers.go                 — jsonOK / jsonErr
   web/
     templates/
-      layout.templ               — base HTML shell; top nav (business + avatar | section links | theme + settings)
-      sidebar.templ              — contextual sidebar component (switches per active section)
+      layout.templ               — base HTML shell; top nav (business + avatar | section links | theme + settings); logo-type.svg during onboarding; inline SVG wordmark in footer
+      sidebar.templ              — contextual sidebar (sidebarHeader component with toggle + heading inline; switches per active section)
+      icons.templ                — toolIcon(type) switch with brand SVGs; categoryIcon, taskItemIcon, staffItemIcon placeholders
       values.templ               — Value list page, Value form, ValidationFragment
-      tools.templ                — Tool list, NewIntegrationPage (radio picker), ToolFormPage (edit integration), SkillFormPage (SKILL.md editor)
+      tools.templ                — Tool list, NewToolPage (catalog radio picker), ToolFormPage (edit integration credentials)
       tasks.templ                — Task list page, Task form (with tool picker)
       staff.templ                — Staff list page, Staff form (task + value picker)
       settings.templ             — Settings page (business info + data dir)
@@ -49,7 +50,7 @@ picomaju/
       style.css                  — CSS custom properties; light + dark mode; 16px REM base
       datastar.js                — MUST be downloaded manually from data-star.dev releases
       logo-symbol.svg            — crimson PM mark (140×98)
-      logo-type.svg              — horizontal symbol + wordmark lockup
+      logo-type.svg              — horizontal symbol + wordmark lockup (used in onboarding header)
       logo-stack.svg             — stacked symbol + wordmark lockup
 ```
 
@@ -57,10 +58,10 @@ picomaju/
 
 ## First run / onboarding
 
-On first launch, if no data directory is configured, **all routes redirect to `/setup`**. Onboarding is two steps and renders without a sidebar (minimal header, full-width layout):
+On first launch, if no data directory is configured, **all routes redirect to `/setup`**. Onboarding is two steps and renders without a sidebar (minimal header with logo-type.svg, full-width layout):
 
 1. **`/setup`** — Business Name + Data Directory (pre-filled `~/picomaju`)
-2. **`/setup/integrations`** — Integration picker: select from the catalog to auto-create Tool entries; credentials configured later in Tools. Both steps exempt from the setup gate middleware.
+2. **`/setup/integrations`** — Tool picker: select from the catalog to auto-create Tool entries; credentials configured later in Tools. Both steps exempt from the setup gate middleware.
 
 On completion the user lands at `/values`. No restart required.
 
@@ -86,20 +87,14 @@ Always respond in a warm, professional tone...
 ```
 
 Required fields: `id`, `title`, `version`, `priority` (0–100), `category`.
-No `trigger` field — Values are directives, not event-driven rules.
 
 ### Tool (`<data_dir>/tools.json`)
-Capabilities available to a Task. Two kinds:
-
-- **Integration** — type matches a catalog entry (e.g. `whatsapp`, `telegram`, `shopee`). Config holds credentials keyed by `ConfigField.Key`.
-- **Skill** — type `skill`. Config holds a single `content` key containing a SKILL.md markdown document.
+Catalog-based integrations. `type` matches a catalog entry (e.g. `whatsapp`, `telegram`, `shopee`). Config holds credentials keyed by `ConfigField.Key`.
 
 ```json
 { "tools": [
   { "id": "whatsapp", "label": "WhatsApp Business", "type": "whatsapp",
-    "config": { "phone_number_id": "...", "access_token": "..." } },
-  { "id": "handle_escalation", "label": "Handle Escalation", "type": "skill",
-    "config": { "content": "# Handle Escalation\n\n## Purpose\n..." } }
+    "config": { "phone_number_id": "...", "access_token": "..." } }
 ]}
 ```
 
@@ -112,7 +107,7 @@ Task definition. Describes what the agent does and which Tools it uses.
     "id": "manage_social_media",
     "label": "Manage Social Media",
     "description": "Post updates and respond to comments",
-    "tools": ["email_sendgrid"]
+    "tools": ["tiktok_shop"]
   }
 ]}
 ```
@@ -161,6 +156,23 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 
 ---
 
+## Integration catalog
+
+8 entries in `internal/tool/catalog.go`:
+
+| ID | Label | Category |
+|----|-------|----------|
+| `whatsapp` | WhatsApp Business | messaging |
+| `telegram` | Telegram Bot | messaging |
+| `instagram` | Instagram | messaging |
+| `tiktok_shop` | TikTok Shop | commerce |
+| `shopee` | Shopee | commerce |
+| `xendit` | Xendit | payments |
+| `midtrans` | Midtrans | payments |
+| `google_calendar` | Google Calendar | utilities |
+
+---
+
 ## Compiler
 
 **Deferred.** Output will be multiple files per Staff member: `AGENTS.md`, `SOUL.md`, tool injection into picoclaw `config.json`. Pipeline logic exists as a stub (`value.DirectiveEntry`) but serialization is not implemented.
@@ -173,7 +185,7 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 |--------|------|-------------|
 | GET | `/setup` | onboarding step 1 — business name + data dir |
 | POST | `/setup` | save step 1 → redirect `/setup/integrations` |
-| GET | `/setup/integrations` | onboarding step 2 — integration picker |
+| GET | `/setup/integrations` | onboarding step 2 — tool picker |
 | POST | `/setup/integrations` | create selected tools → redirect `/values` |
 | GET | `/` | redirect → `/values` |
 | GET | `/values` | Value list (filterable by `?cat=<id>`) |
@@ -183,13 +195,11 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 | POST | `/values/:id` | update Value → redirect `/values` |
 | POST | `/values/:id/delete` | delete Value → redirect `/values` |
 | POST | `/values/:id/validate-stream` | SSE: `ValidationFragment` |
-| GET | `/tools` | Tool list (integrations + skills) |
-| GET | `/tools/new` | Add Integration — catalog radio card picker |
-| POST | `/tools` | create Integration from `integration_id` → redirect to edit |
-| GET | `/tools/new/skill` | New Skill — SKILL.md editor |
-| POST | `/tools/skill` | create Skill → redirect to edit |
-| GET | `/tools/:id/edit` | Edit Integration (credential fields) or Edit Skill (SKILL.md editor) |
-| POST | `/tools/:id` | update Tool/Skill → redirect `/tools` |
+| GET | `/tools` | Tool list |
+| GET | `/tools/new` | Add Tool — catalog radio card picker |
+| POST | `/tools` | create Tool from `integration_id` → redirect to edit |
+| GET | `/tools/:id/edit` | Edit Tool (credential fields) |
+| POST | `/tools/:id` | update Tool → redirect `/tools` |
 | POST | `/tools/:id/delete` | delete Tool → redirect `/tools` |
 | GET | `/tasks` | Task list |
 | GET | `/tasks/new` | Task form (new) |
@@ -221,16 +231,33 @@ The setup gate middleware redirects all routes except `/setup`, `/setup/integrat
 - Right: theme toggle + settings gear
 
 **Sidebar** (contextual, collapsible — hidden entirely during onboarding):
-- Collapsed state: `2.25rem` wide (no icons yet — content hidden via `opacity: 0`)
+- Header row: collapse/expand chevron (`‹`) on the left + section heading on the right, inline
+- Collapsed state: `3rem` wide icon strip; section items show icons only (labels hidden)
+- Expanded state: `13.75rem` (220px)
+- All item lists sorted alphabetically by label
+- Mobile (`≤640px`): `position: fixed` floating overlay; `.app-body` has `padding-left: 3rem` so content is never hidden behind the collapsed strip; collapse/expand behaviour identical to desktop
+- Collapsed state persists in `localStorage` (`sidebar-collapsed`); defaults to collapsed on mobile if no saved preference
 - Content switches per `ActiveSection` in `SidebarData`:
-  - `values` → category filter links with counts + New Value
-  - `tools` → **Integrations** section (catalog-type tools) + **Skills** section (type `skill`) + Add Integration / New Skill links
-  - `tasks` → task list + New Task
-  - `staff` → staff list + New Staff
+  - `values` → category filter links (tag icon) with counts + New Value
+  - `tools` → tool list (brand SVG icons via `toolIcon(type)`) + Add Tool
+  - `tasks` → task list (document icon placeholder) + New Task
+  - `staff` → staff list (person icon placeholder) + New Staff
 
-**Footer**: wordmark SVG (inline, `fill="currentColor"` — adapts to light/dark theme).
+**Footer**: inline SVG wordmark (`fill="currentColor"` — adapts to light/dark).
 
 `SidebarData` (in `web/templates/helpers.go`) is built by `uiHandler.sidebarData(r, section)` and passed to every page render.
+
+---
+
+## Icons
+
+`web/templates/icons.templ` contains:
+- `toolIcon(toolType string)` — switch over all 8 catalog types; brand SVG paths from Simple Icons; Midtrans falls back to a generic credit card; unknown types fall back to a stacked-layers icon
+- `categoryIcon()` — tag placeholder for value category items
+- `taskItemIcon()` — document placeholder for task items
+- `staffItemIcon()` — person placeholder for staff items
+
+All icons use `fill="currentColor"` and inherit color from the sidebar item's CSS.
 
 ---
 
@@ -278,7 +305,7 @@ go build ./...
 
 ## Implementation status
 
-**Done:** Two-step onboarding with integration picker, settings, Values authoring + validation, Tools CRUD (integrations + skills), Integration catalog (WhatsApp, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar), SKILL.md editor, Task definitions with tool picker, Staff profiles with task + value picker, top-nav + contextual sidebar (hidden during onboarding), light/dark theming, pick-chip selection UX (no visible checkboxes), logo SVGs (symbol, type lockup, stack lockup).
+**Done:** Two-step onboarding with tool catalog picker, settings, Values authoring + validation, Tools CRUD (catalog integrations with per-type credential fields), integration catalog (8 integrations, Indonesian market), Task definitions with tool picker, Staff profiles with task + value picker, top-nav + contextual collapsible sidebar with brand/placeholder icons (hidden during onboarding), mobile floating sidebar, alphabetical sidebar sorting, light/dark theming, pick-chip selection UX (no visible checkboxes), logo SVGs (symbol, type lockup, stack lockup).
 
 **Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 

@@ -5,15 +5,6 @@ import "fmt"
 templ sidebar(sb SidebarData) {
 	<aside class="sidebar" id="sidebar">
 		<div class="sidebar-inner">
-			<button
-				class="sidebar-toggle"
-				title="Collapse sidebar"
-				onclick="
-					var s = document.getElementById('sidebar');
-					var collapsed = s.classList.toggle('collapsed');
-					localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
-				"
-			>&#8249;</button>
 			<nav class="sidebar-nav">
 				if sb.ActiveSection == "values" {
 					@valuesSidebar(sb)
@@ -29,25 +20,46 @@ templ sidebar(sb SidebarData) {
 	</aside>
 }
 
+templ sidebarHeader(label string) {
+	<div class="sidebar-header">
+		<button
+			class="sidebar-toggle"
+			title="Collapse sidebar"
+			onclick="
+				var s = document.getElementById('sidebar');
+				var collapsed = s.classList.toggle('collapsed');
+				localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+			"
+		>&#8249;</button>
+		<span class="sidebar-heading">{ label }</span>
+	</div>
+}
+
 templ valuesSidebar(sb SidebarData) {
 	<div class="sidebar-section">
-		<span class="sidebar-heading">Values</span>
+		@sidebarHeader("Values")
 		<a
 			href="/values"
-			class={ "sidebar-item", templ.KV("active", sb.ActiveCat == "") }
+			class={ "sidebar-item sidebar-item-tool", templ.KV("active", sb.ActiveCat == "") }
 		>
-			All
-			<span class="sidebar-count">{ fmt.Sprintf("%d", totalValues(sb.ValueCounts)) }</span>
+			@categoryIcon()
+			<span class="sidebar-label">
+				All
+				<span class="sidebar-count">{ fmt.Sprintf("%d", totalValues(sb.ValueCounts)) }</span>
+			</span>
 		</a>
 		for _, cat := range sb.Categories {
 			<a
 				href={ templ.SafeURL("/values?cat=" + cat.ID) }
-				class={ "sidebar-item", templ.KV("active", sb.ActiveCat == cat.ID) }
+				class={ "sidebar-item sidebar-item-tool", templ.KV("active", sb.ActiveCat == cat.ID) }
 			>
-				{ cat.Label }
-				if sb.ValueCounts[cat.ID] > 0 {
-					<span class="sidebar-count">{ fmt.Sprintf("%d", sb.ValueCounts[cat.ID]) }</span>
-				}
+				@categoryIcon()
+				<span class="sidebar-label">
+					{ cat.Label }
+					if sb.ValueCounts[cat.ID] > 0 {
+						<span class="sidebar-count">{ fmt.Sprintf("%d", sb.ValueCounts[cat.ID]) }</span>
+					}
+				</span>
 			</a>
 		}
 		<a href="/values/new" class="sidebar-item sidebar-action">+ New Value</a>
@@ -55,42 +67,32 @@ templ valuesSidebar(sb SidebarData) {
 }
 
 templ toolsSidebar(sb SidebarData) {
-	if len(sb.Integrations) > 0 {
-		<div class="sidebar-section">
-			<span class="sidebar-heading">Integrations</span>
-			for _, t := range sb.Integrations {
-				<a
-					href={ templ.SafeURL("/tools/" + t.ID + "/edit") }
-					class="sidebar-item"
-				>{ t.Label }</a>
-			}
-		</div>
-	}
-	if len(sb.Skills) > 0 {
-		<div class="sidebar-section">
-			<span class="sidebar-heading">Skills</span>
-			for _, t := range sb.Skills {
-				<a
-					href={ templ.SafeURL("/tools/" + t.ID + "/edit") }
-					class="sidebar-item"
-				>{ t.Label }</a>
-			}
-		</div>
-	}
 	<div class="sidebar-section">
-		<a href="/tools/new" class="sidebar-item sidebar-action">+ Add Integration</a>
-		<a href="/tools/new/skill" class="sidebar-item sidebar-action">+ New Skill</a>
+		@sidebarHeader("Tools")
+		for _, t := range sb.Tools {
+			<a
+				href={ templ.SafeURL("/tools/" + t.ID + "/edit") }
+				class="sidebar-item sidebar-item-tool"
+			>
+				@toolIcon(t.Type)
+				<span class="sidebar-label">{ t.Label }</span>
+			</a>
+		}
+		<a href="/tools/new" class="sidebar-item sidebar-action">+ Add Tool</a>
 	</div>
 }
 
 templ tasksSidebar(sb SidebarData) {
 	<div class="sidebar-section">
-		<span class="sidebar-heading">Tasks</span>
+		@sidebarHeader("Tasks")
 		for _, t := range sb.Tasks {
 			<a
 				href={ templ.SafeURL("/tasks/" + t.ID + "/edit") }
-				class="sidebar-item"
-			>{ t.Label }</a>
+				class="sidebar-item sidebar-item-tool"
+			>
+				@taskItemIcon()
+				<span class="sidebar-label">{ t.Label }</span>
+			</a>
 		}
 		<a href="/tasks/new" class="sidebar-item sidebar-action">+ New Task</a>
 	</div>
@@ -98,12 +100,15 @@ templ tasksSidebar(sb SidebarData) {
 
 templ staffSidebar(sb SidebarData) {
 	<div class="sidebar-section">
-		<span class="sidebar-heading">Staff</span>
+		@sidebarHeader("Staff")
 		for _, m := range sb.Staff {
 			<a
 				href={ templ.SafeURL("/staff/" + m.ID + "/edit") }
-				class="sidebar-item"
-			>{ m.Label }</a>
+				class="sidebar-item sidebar-item-tool"
+			>
+				@staffItemIcon()
+				<span class="sidebar-label">{ m.Label }</span>
+			</a>
 		}
 		<a href="/staff/new" class="sidebar-item sidebar-action">+ New Staff</a>
 	</div>

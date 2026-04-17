@@ -12,8 +12,7 @@ type SidebarData struct {
 	Categories    []value.Category
 	Staff         []staff.Staff
 	Tasks         []task.Task
-	Integrations  []tool.Tool    // catalog-type tools
-	Skills        []tool.Tool    // skill-type tools
+	Tools         []tool.Tool    // catalog tools
 	ValueCounts   map[string]int // keyed by category ID
 	ActiveCat     string         // active category filter ("" = all)
 	ActiveSection string         // "values" | "tools" | "tasks" | "staff"
