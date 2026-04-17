@@ -5,7 +5,7 @@
 ---
 
 <div align="center">
-    <img src="web/static/type.svg" alt="PicoMaju" height="60"/>
+    <img src="web/static/type.svg" alt="PicoMaju" height="40"/>
 </div>
 
 ---
