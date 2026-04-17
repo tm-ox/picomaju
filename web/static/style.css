@@ -430,7 +430,7 @@ textarea { min-height: 140px; resize: vertical; }
 }
 .form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
 
-/* ─── Checkbox groups (role/staff forms) ──────────────────────────────────── */
+/* ─── Checkbox groups (task/staff forms) ──────────────────────────────────── */
 /* ─── Pick chips (hidden-checkbox selection) ─────────────────────────────── */
 .pick-toggle {
   display: none;

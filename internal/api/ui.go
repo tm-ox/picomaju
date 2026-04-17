@@ -9,9 +9,9 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
-	"picomaju/internal/role"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
 	"picomaju/web/templates"
@@ -20,7 +20,7 @@ import (
 type uiHandler struct {
 	mu       sync.RWMutex
 	values   *value.Store
-	roles    *role.Store
+	tasks    *task.Store
 	tools    *tool.Store
 	staff    *staff.Store
 	settings *settings.Store
@@ -40,7 +40,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 	}
 	h.mu.Lock()
 	h.values = value.NewStore(valueDir)
-	h.roles = role.NewStore(filepath.Join(dataDir, "roles.json"))
+	h.tasks = task.NewStore(filepath.Join(dataDir, "tasks.json"))
 	h.tools = tool.NewStore(filepath.Join(dataDir, "tools.json"))
 	h.staff = staff.NewStore(filepath.Join(dataDir, "staff.json"))
 	h.dataDir = dataDir
@@ -339,70 +339,70 @@ func (h *uiHandler) deleteTool(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/tools", http.StatusSeeOther)
 }
 
-// --- Roles UI ---
+// --- Tasks UI ---
 
-func (h *uiHandler) roleList(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "roles")
-	roles, _ := h.roles.List()
-	if roles == nil {
-		roles = []role.Role{}
+func (h *uiHandler) taskList(w http.ResponseWriter, r *http.Request) {
+	sb := h.sidebarData(r, "tasks")
+	tasks, _ := h.tasks.List()
+	if tasks == nil {
+		tasks = []task.Task{}
 	}
-	templates.RoleListPage(roles, sb).Render(r.Context(), w)
+	templates.TaskListPage(tasks, sb).Render(r.Context(), w)
 }
 
-func (h *uiHandler) newRoleForm(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "roles")
+func (h *uiHandler) newTaskForm(w http.ResponseWriter, r *http.Request) {
+	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	templates.RoleFormPage(&role.Role{}, tools, sb, true, "").Render(r.Context(), w)
+	templates.TaskFormPage(&task.Task{}, tools, sb, true, "").Render(r.Context(), w)
 }
 
-func (h *uiHandler) editRoleForm(w http.ResponseWriter, r *http.Request) {
+func (h *uiHandler) editTaskForm(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	ro, err := h.roles.Get(id)
+	tk, err := h.tasks.Get(id)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	sb := h.sidebarData(r, "roles")
+	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	templates.RoleFormPage(ro, tools, sb, false, "").Render(r.Context(), w)
+	templates.TaskFormPage(tk, tools, sb, false, "").Render(r.Context(), w)
 }
 
-func (h *uiHandler) createRole(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "roles")
+func (h *uiHandler) createTask(w http.ResponseWriter, r *http.Request) {
+	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	ro, err := roleFromForm(r)
+	tk, err := taskFromForm(r)
 	if err != nil {
-		templates.RoleFormPage(ro, tools, sb, true, err.Error()).Render(r.Context(), w)
+		templates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
-	if err := h.roles.Create(ro); err != nil {
-		templates.RoleFormPage(ro, tools, sb, true, err.Error()).Render(r.Context(), w)
+	if err := h.tasks.Create(tk); err != nil {
+		templates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/roles", http.StatusSeeOther)
+	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 }
 
-func (h *uiHandler) updateRole(w http.ResponseWriter, r *http.Request) {
+func (h *uiHandler) updateTask(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	sb := h.sidebarData(r, "roles")
+	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	ro, err := roleFromForm(r)
+	tk, err := taskFromForm(r)
 	if err != nil {
-		templates.RoleFormPage(ro, tools, sb, false, err.Error()).Render(r.Context(), w)
+		templates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
-	ro.ID = id
-	if err := h.roles.Update(ro); err != nil {
-		templates.RoleFormPage(ro, tools, sb, false, err.Error()).Render(r.Context(), w)
+	tk.ID = id
+	if err := h.tasks.Update(tk); err != nil {
+		templates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/roles", http.StatusSeeOther)
+	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 }
 
-func (h *uiHandler) deleteRole(w http.ResponseWriter, r *http.Request) {
-	h.roles.Delete(chi.URLParam(r, "id"))
-	http.Redirect(w, r, "/roles", http.StatusSeeOther)
+func (h *uiHandler) deleteTask(w http.ResponseWriter, r *http.Request) {
+	h.tasks.Delete(chi.URLParam(r, "id"))
+	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 }
 
 // --- Staff UI ---
@@ -418,9 +418,9 @@ func (h *uiHandler) staffList(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "staff")
-	roles, _ := h.roles.List()
+	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	templates.StaffFormPage(&staff.Staff{}, roles, vals, sb, true, "").Render(r.Context(), w)
+	templates.StaffFormPage(&staff.Staff{}, tasks, vals, sb, true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -431,22 +431,22 @@ func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sb := h.sidebarData(r, "staff")
-	roles, _ := h.roles.List()
+	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	templates.StaffFormPage(m, roles, vals, sb, false, "").Render(r.Context(), w)
+	templates.StaffFormPage(m, tasks, vals, sb, false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "staff")
-	roles, _ := h.roles.List()
+	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		templates.StaffFormPage(m, roles, vals, sb, true, err.Error()).Render(r.Context(), w)
+		templates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.staff.Create(m); err != nil {
-		templates.StaffFormPage(m, roles, vals, sb, true, err.Error()).Render(r.Context(), w)
+		templates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff", http.StatusSeeOther)
@@ -455,16 +455,16 @@ func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
 func (h *uiHandler) updateStaff(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	sb := h.sidebarData(r, "staff")
-	roles, _ := h.roles.List()
+	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		templates.StaffFormPage(m, roles, vals, sb, false, err.Error()).Render(r.Context(), w)
+		templates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	m.ID = id
 	if err := h.staff.Update(m); err != nil {
-		templates.StaffFormPage(m, roles, vals, sb, false, err.Error()).Render(r.Context(), w)
+		templates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff", http.StatusSeeOther)
@@ -504,9 +504,8 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	newDataDir := strings.TrimSpace(r.FormValue("data_dir"))
 	cfg := &settings.Settings{
-		BusinessName:    strings.TrimSpace(r.FormValue("business_name")),
-		BusinessDetails: strings.TrimSpace(r.FormValue("business_details")),
-		DataDir:         newDataDir,
+		BusinessName: strings.TrimSpace(r.FormValue("business_name")),
+		DataDir:      newDataDir,
 	}
 	if newDataDir != "" && newDataDir != activeDir {
 		if err := h.initStores(newDataDir); err != nil {
@@ -528,7 +527,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) sidebarData(r *http.Request, section string) templates.SidebarData {
 	h.mu.RLock()
-	valStore, roleStore, toolStore, staffStore := h.values, h.roles, h.tools, h.staff
+	valStore, taskStore, toolStore, staffStore := h.values, h.tasks, h.tools, h.staff
 	h.mu.RUnlock()
 
 	var vals []*value.Value
@@ -540,9 +539,9 @@ func (h *uiHandler) sidebarData(r *http.Request, section string) templates.Sideb
 		}
 	}
 
-	var roles []role.Role
-	if roleStore != nil {
-		roles, _ = roleStore.List()
+	var tasks []task.Task
+	if taskStore != nil {
+		tasks, _ = taskStore.List()
 	}
 
 	var tools []tool.Tool
@@ -573,7 +572,7 @@ func (h *uiHandler) sidebarData(r *http.Request, section string) templates.Sideb
 	return templates.SidebarData{
 		Categories:    value.DefaultCategories,
 		Staff:         members,
-		Roles:         roles,
+		Tasks:         tasks,
 		Integrations:  integrations,
 		Skills:        skills,
 		ValueCounts:   counts,
@@ -607,15 +606,15 @@ func valueFromForm(r *http.Request) (*value.Value, error) {
 	}, nil
 }
 
-func roleFromForm(r *http.Request) (*role.Role, error) {
+func taskFromForm(r *http.Request) (*task.Task, error) {
 	if err := r.ParseForm(); err != nil {
-		return &role.Role{}, err
+		return &task.Task{}, err
 	}
 	tools := r.Form["tools"]
 	if tools == nil {
 		tools = []string{}
 	}
-	return &role.Role{
+	return &task.Task{
 		ID:          strings.TrimSpace(r.FormValue("id")),
 		Label:       strings.TrimSpace(r.FormValue("label")),
 		Description: strings.TrimSpace(r.FormValue("description")),
@@ -627,9 +626,9 @@ func staffFromForm(r *http.Request) (*staff.Staff, error) {
 	if err := r.ParseForm(); err != nil {
 		return &staff.Staff{}, err
 	}
-	roles := r.Form["roles"]
-	if roles == nil {
-		roles = []string{}
+	tasks := r.Form["tasks"]
+	if tasks == nil {
+		tasks = []string{}
 	}
 	valueCats := r.Form["value_categories"]
 	if valueCats == nil {
@@ -642,7 +641,7 @@ func staffFromForm(r *http.Request) (*staff.Staff, error) {
 	return &staff.Staff{
 		ID:              strings.TrimSpace(r.FormValue("id")),
 		Label:           strings.TrimSpace(r.FormValue("label")),
-		Roles:           roles,
+		Tasks:           tasks,
 		ValueCategories: valueCats,
 		Values:          values,
 	}, nil

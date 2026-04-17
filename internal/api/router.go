@@ -6,21 +6,21 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"picomaju/internal/role"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
 )
 
-func NewRouter(valStore *value.Store, roleStore *role.Store, toolStore *tool.Store, staffStore *staff.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
+func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
 	ui := &uiHandler{
 		values:   valStore,
-		roles:    roleStore,
+		tasks:    taskStore,
 		tools:    toolStore,
 		staff:    staffStore,
 		settings: settingsStore,
@@ -71,13 +71,13 @@ func NewRouter(valStore *value.Store, roleStore *role.Store, toolStore *tool.Sto
 	r.Post("/tools/{id}", ui.updateTool)
 	r.Post("/tools/{id}/delete", ui.deleteTool)
 
-	// Roles
-	r.Get("/roles", ui.roleList)
-	r.Get("/roles/new", ui.newRoleForm)
-	r.Get("/roles/{id}/edit", ui.editRoleForm)
-	r.Post("/roles", ui.createRole)
-	r.Post("/roles/{id}", ui.updateRole)
-	r.Post("/roles/{id}/delete", ui.deleteRole)
+	// Tasks
+	r.Get("/tasks", ui.taskList)
+	r.Get("/tasks/new", ui.newTaskForm)
+	r.Get("/tasks/{id}/edit", ui.editTaskForm)
+	r.Post("/tasks", ui.createTask)
+	r.Post("/tasks/{id}", ui.updateTask)
+	r.Post("/tasks/{id}/delete", ui.deleteTask)
 
 	// Staff
 	r.Get("/staff", ui.staffList)

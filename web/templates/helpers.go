@@ -1,8 +1,8 @@
 package templates
 
 import (
-	"picomaju/internal/role"
 	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
 )
@@ -11,12 +11,12 @@ import (
 type SidebarData struct {
 	Categories    []value.Category
 	Staff         []staff.Staff
-	Roles         []role.Role
+	Tasks         []task.Task
 	Integrations  []tool.Tool    // catalog-type tools
 	Skills        []tool.Tool    // skill-type tools
 	ValueCounts   map[string]int // keyed by category ID
 	ActiveCat     string         // active category filter ("" = all)
-	ActiveSection string         // "values" | "tools" | "roles" | "staff"
+	ActiveSection string         // "values" | "tools" | "tasks" | "staff"
 	BusinessName  string
 	HideSidebar   bool
 }

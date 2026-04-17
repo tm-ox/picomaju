@@ -24,10 +24,11 @@ picomaju/
       category.go                — Category type + DefaultCategories (built-in, no separate store)
     tool/
       store.go                   — Tool type (id, label, type, config) + CRUD on tools.json
-    role/
-      store.go                   — Role type (id, label, description, tools[]) + CRUD on roles.json
+      catalog.go                 — Integration catalog: 8 entries, CatalogByCategory/ID/Type
+    task/
+      store.go                   — Task type (id, label, description, tools[]) + CRUD on tasks.json
     staff/
-      store.go                   — Staff type (id, label, roles[], value_categories[], values[]) + CRUD on staff.json
+      store.go                   — Staff type (id, label, tasks[], value_categories[], values[]) + CRUD on staff.json
     api/
       router.go                  — all routes wired here; setup gate middleware
       ui.go                      — HTML + SSE handlers; uiHandler with mutex-guarded store init
@@ -39,14 +40,17 @@ picomaju/
       sidebar.templ              — contextual sidebar component (switches per active section)
       values.templ               — Value list page, Value form, ValidationFragment
       tools.templ                — Tool list, NewIntegrationPage (radio picker), ToolFormPage (edit integration), SkillFormPage (SKILL.md editor)
-      roles.templ                — Role list page, Role form (with tool picker)
-      staff.templ                — Staff list page, Staff form (role + value picker)
+      tasks.templ                — Task list page, Task form (with tool picker)
+      staff.templ                — Staff list page, Staff form (task + value picker)
       settings.templ             — Settings page (business info + data dir)
       setup.templ                — Two-step onboarding: SetupPage + IntegrationsPage (catalog picker)
       helpers.go                 — SidebarData type, includesStr()
     static/
       style.css                  — CSS custom properties; light + dark mode; 16px REM base
       datastar.js                — MUST be downloaded manually from data-star.dev releases
+      logo-symbol.svg            — crimson PM mark (140×98)
+      logo-type.svg              — horizontal symbol + wordmark lockup
+      logo-stack.svg             — stacked symbol + wordmark lockup
 ```
 
 ---
@@ -85,7 +89,7 @@ Required fields: `id`, `title`, `version`, `priority` (0–100), `category`.
 No `trigger` field — Values are directives, not event-driven rules.
 
 ### Tool (`<data_dir>/tools.json`)
-Capabilities available to a Role. Two kinds:
+Capabilities available to a Task. Two kinds:
 
 - **Integration** — type matches a catalog entry (e.g. `whatsapp`, `telegram`, `shopee`). Config holds credentials keyed by `ConfigField.Key`.
 - **Skill** — type `skill`. Config holds a single `content` key containing a SKILL.md markdown document.
@@ -99,11 +103,11 @@ Capabilities available to a Role. Two kinds:
 ]}
 ```
 
-### Role (`<data_dir>/roles.json`)
+### Task (`<data_dir>/tasks.json`)
 Task definition. Describes what the agent does and which Tools it uses.
 
 ```json
-{ "roles": [
+{ "tasks": [
   {
     "id": "manage_social_media",
     "label": "Manage Social Media",
@@ -114,14 +118,14 @@ Task definition. Describes what the agent does and which Tools it uses.
 ```
 
 ### Staff (`<data_dir>/staff.json`)
-Agent profile. Composed of Roles + Values. The compile target.
+Agent profile. Composed of Tasks + Values. The compile target.
 
 ```json
 { "staff": [
   {
     "id": "support_agent",
     "label": "Support Agent",
-    "roles": ["manage_social_media"],
+    "tasks": ["manage_social_media"],
     "value_categories": ["core_values", "communication"],
     "values": ["escalation_override"]
   }
@@ -187,12 +191,12 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 | GET | `/tools/:id/edit` | Edit Integration (credential fields) or Edit Skill (SKILL.md editor) |
 | POST | `/tools/:id` | update Tool/Skill → redirect `/tools` |
 | POST | `/tools/:id/delete` | delete Tool → redirect `/tools` |
-| GET | `/roles` | Role list |
-| GET | `/roles/new` | Role form (new) |
-| POST | `/roles` | create Role → redirect `/roles` |
-| GET | `/roles/:id/edit` | Role form (edit) |
-| POST | `/roles/:id` | update Role → redirect `/roles` |
-| POST | `/roles/:id/delete` | delete Role → redirect `/roles` |
+| GET | `/tasks` | Task list |
+| GET | `/tasks/new` | Task form (new) |
+| POST | `/tasks` | create Task → redirect `/tasks` |
+| GET | `/tasks/:id/edit` | Task form (edit) |
+| POST | `/tasks/:id` | update Task → redirect `/tasks` |
+| POST | `/tasks/:id/delete` | delete Task → redirect `/tasks` |
 | GET | `/staff` | Staff list |
 | GET | `/staff/new` | Staff form (new) |
 | POST | `/staff` | create Staff → redirect `/staff` |
@@ -212,8 +216,8 @@ The setup gate middleware redirects all routes except `/setup`, `/setup/integrat
 ## Navigation
 
 **Top nav** (sticky, `var(--topnav-h): 3rem`):
-- Left: avatar placeholder + business name
-- Center: Values | Tools | Roles | Staff (section links, `.active` on current section)
+- Left: avatar placeholder + business name (or logo-type.svg during onboarding)
+- Center: Values | Tools | Tasks | Staff (section links, `.active` on current section)
 - Right: theme toggle + settings gear
 
 **Sidebar** (contextual, collapsible — hidden entirely during onboarding):
@@ -221,10 +225,10 @@ The setup gate middleware redirects all routes except `/setup`, `/setup/integrat
 - Content switches per `ActiveSection` in `SidebarData`:
   - `values` → category filter links with counts + New Value
   - `tools` → **Integrations** section (catalog-type tools) + **Skills** section (type `skill`) + Add Integration / New Skill links
-  - `roles` → role list + New Role
+  - `tasks` → task list + New Task
   - `staff` → staff list + New Staff
 
-**Footer**: "Powered by PicoMaju" branding strip.
+**Footer**: wordmark SVG (inline, `fill="currentColor"` — adapts to light/dark theme).
 
 `SidebarData` (in `web/templates/helpers.go`) is built by `uiHandler.sidebarData(r, section)` and passed to every page render.
 
@@ -274,7 +278,7 @@ go build ./...
 
 ## Implementation status
 
-**Done:** Two-step onboarding with integration picker, settings, Values authoring + validation, Tools CRUD (integrations + skills), Integration catalog (WhatsApp, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar), SKILL.md editor, Role definitions with tool picker, Staff profiles with role + value picker, top-nav + contextual sidebar (hidden during onboarding), light/dark theming, pick-chip selection UX (no visible checkboxes).
+**Done:** Two-step onboarding with integration picker, settings, Values authoring + validation, Tools CRUD (integrations + skills), Integration catalog (WhatsApp, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar), SKILL.md editor, Task definitions with tool picker, Staff profiles with task + value picker, top-nav + contextual sidebar (hidden during onboarding), light/dark theming, pick-chip selection UX (no visible checkboxes), logo SVGs (symbol, type lockup, stack lockup).
 
 **Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 

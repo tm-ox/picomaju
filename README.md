@@ -4,7 +4,7 @@
 
 ---
 
-Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Roles and Tools, and deploy autonomous agents — without prompt engineering.
+Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Tasks and Tools, and deploy autonomous agents — without prompt engineering.
 
 Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go static binary, <10MB RAM). Also runs on any desktop OS.
 
@@ -19,11 +19,11 @@ Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go s
 - **Integrations** — pre-defined catalog entries (WhatsApp Business, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar). Added via an onboarding picker or the Add Integration form; credentials configured per-integration.
 - **Skills** — custom agent behaviours authored as SKILL.md documents. Define purpose, activation conditions, step-by-step procedure, and expected output.
 
-**Roles** are task definitions. A role describes what an agent does and which Tools it uses.
+**Tasks** are task definitions. A task describes what an agent does and which Tools it uses.
 
-**Staff** are agent profiles, composed of Roles + Values. Staff is the compile target — the entity that gets assembled into an agent directive.
+**Staff** are agent profiles, composed of Tasks + Values. Staff is the compile target — the entity that gets assembled into an agent directive.
 
-Relationship chain: `Staff → Roles → Tools + Values (by category or individual) → Compiled Agent Directive`
+Relationship chain: `Staff → Tasks → Tools + Values (by category or individual) → Compiled Agent Directive`
 
 ---
 
@@ -94,7 +94,7 @@ The config file lives at the platform-appropriate location:
 
 ## Project status
 
-**Current:** Two-step onboarding with integration catalog picker, Values authoring + validation, Tools management (integrations with per-type credential fields + skills with SKILL.md editor), Role definitions, Staff profiles, top-nav + contextual sidebars (hidden during onboarding), pick-chip selection UI, light/dark theming, settings.
+**Current:** Two-step onboarding with integration catalog picker, Values authoring + validation, Tools management (integrations with per-type credential fields + skills with SKILL.md editor), Task definitions, Staff profiles, top-nav + contextual sidebars (hidden during onboarding), pick-chip selection UI, light/dark theming, settings.
 
 **Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
@@ -108,7 +108,7 @@ internal/
   settings/              config file store
   value/                 Value model, file store, validator, category defaults
   tool/                  Tool model + store (tools.json); Integration catalog (catalog.go)
-  role/                  Role model + store (roles.json) — task definitions
+  task/                  Task model + store (tasks.json)
   staff/                 Staff model + store (staff.json) — agent profiles
   api/                   HTTP handlers (HTML UI + SSE)
 web/

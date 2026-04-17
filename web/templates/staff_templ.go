@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"picomaju/internal/role"
 	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/value"
 )
 
@@ -58,7 +58,7 @@ func StaffListPage(members []staff.Staff, sb SidebarData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<table><thead><tr><th>Label</th><th>Roles</th><th>Values</th><th></th></tr></thead> <tbody>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<table><thead><tr><th>Label</th><th>Tasks</th><th>Values</th><th></th></tr></thead> <tbody>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -81,7 +81,7 @@ func StaffListPage(members []staff.Staff, sb SidebarData) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var4 string
-					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(staffCount(len(m.Roles), "role"))
+					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(staffCount(len(m.Tasks), "task"))
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/staff.templ`, Line: 32, Col: 45}
 					}
@@ -148,7 +148,7 @@ func StaffListPage(members []staff.Staff, sb SidebarData) templ.Component {
 	})
 }
 
-func StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb SidebarData, isNew bool, formErr string) templ.Component {
+func StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, sb SidebarData, isNew bool, formErr string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -288,18 +288,18 @@ func StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if len(roles) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"card\"><h2>Roles</h2><div class=\"pick-group\">")
+			if len(tasks) > 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"card\"><h2>Tasks</h2><div class=\"pick-group\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				for _, r := range roles {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<label class=\"pick-chip pick-chip-block\"><input type=\"checkbox\" class=\"pick-toggle\" name=\"roles\" value=\"")
+				for _, t := range tasks {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<label class=\"pick-chip pick-chip-block\"><input type=\"checkbox\" class=\"pick-toggle\" name=\"tasks\" value=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var16 string
-					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(r.ID)
+					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID)
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/staff.templ`, Line: 82, Col: 21}
 					}
@@ -311,7 +311,7 @@ func StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb 
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					if includesStr(m.Roles, r.ID) {
+					if includesStr(m.Tasks, t.ID) {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " checked")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -322,7 +322,7 @@ func StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb 
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var17 string
-					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(r.Label)
+					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(t.Label)
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/staff.templ`, Line: 85, Col: 47}
 					}
@@ -334,13 +334,13 @@ func StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb 
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					if r.Description != "" {
+					if t.Description != "" {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<span class=\"pick-chip-hint\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var18 string
-						templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(r.Description)
+						templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(t.Description)
 						if templ_7745c5c3_Err != nil {
 							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/staff.templ`, Line: 87, Col: 53}
 						}

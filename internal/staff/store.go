@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 )
 
-// Staff is an agent profile composed of Roles and Values.
+// Staff is an agent profile composed of Tasks and Values.
 // It is the top-level entity that gets compiled into an agent directive.
 type Staff struct {
-	ID             string   `json:"id"`
-	Label          string   `json:"label"`
-	Roles          []string `json:"roles,omitempty"`           // role IDs
+	ID              string   `json:"id"`
+	Label           string   `json:"label"`
+	Tasks           []string `json:"tasks,omitempty"`            // task IDs
 	ValueCategories []string `json:"value_categories,omitempty"` // bulk inclusion by category
-	Values         []string `json:"values,omitempty"`           // individual value IDs
+	Values          []string `json:"values,omitempty"`           // individual value IDs
 }
 
 type Store struct {

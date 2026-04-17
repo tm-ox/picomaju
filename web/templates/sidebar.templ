@@ -19,8 +19,8 @@ templ sidebar(sb SidebarData) {
 					@valuesSidebar(sb)
 				} else if sb.ActiveSection == "tools" {
 					@toolsSidebar(sb)
-				} else if sb.ActiveSection == "roles" {
-					@rolesSidebar(sb)
+				} else if sb.ActiveSection == "tasks" {
+					@tasksSidebar(sb)
 				} else if sb.ActiveSection == "staff" {
 					@staffSidebar(sb)
 				}
@@ -83,16 +83,16 @@ templ toolsSidebar(sb SidebarData) {
 	</div>
 }
 
-templ rolesSidebar(sb SidebarData) {
+templ tasksSidebar(sb SidebarData) {
 	<div class="sidebar-section">
-		<span class="sidebar-heading">Roles</span>
-		for _, r := range sb.Roles {
+		<span class="sidebar-heading">Tasks</span>
+		for _, t := range sb.Tasks {
 			<a
-				href={ templ.SafeURL("/roles/" + r.ID + "/edit") }
+				href={ templ.SafeURL("/tasks/" + t.ID + "/edit") }
 				class="sidebar-item"
-			>{ r.Label }</a>
+			>{ t.Label }</a>
 		}
-		<a href="/roles/new" class="sidebar-item sidebar-action">+ New Role</a>
+		<a href="/tasks/new" class="sidebar-item sidebar-action">+ New Task</a>
 	</div>
 }
 

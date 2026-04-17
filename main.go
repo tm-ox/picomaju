@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 
 	"picomaju/internal/api"
-	"picomaju/internal/role"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
 )
@@ -36,12 +36,12 @@ func main() {
 
 	// Init stores only when we have a data dir; otherwise the setup flow handles it.
 	var valStore *value.Store
-	var roleStore *role.Store
+	var taskStore *task.Store
 	var toolStore *tool.Store
 	var staffStore *staff.Store
 	if dataDir != "" {
 		valStore = value.NewStore(filepath.Join(dataDir, "values"))
-		roleStore = role.NewStore(filepath.Join(dataDir, "roles.json"))
+		taskStore = task.NewStore(filepath.Join(dataDir, "tasks.json"))
 		toolStore = tool.NewStore(filepath.Join(dataDir, "tools.json"))
 		staffStore = staff.NewStore(filepath.Join(dataDir, "staff.json"))
 	}
@@ -59,7 +59,7 @@ func main() {
 	}
 
 	addr := env("ADDR", ":18800")
-	r := api.NewRouter(valStore, roleStore, toolStore, staffStore, settingsStore, dataDir, static)
+	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, settingsStore, dataDir, static)
 
 	log.Printf("picomaju listening on %s (config: %s)", addr, configFile)
 	if err := http.ListenAndServe(addr, r); err != nil {

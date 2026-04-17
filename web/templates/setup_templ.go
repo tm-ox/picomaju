@@ -43,7 +43,7 @@ func SetupPage(businessName, dataDir, formErr string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"setup-wrap\"><div class=\"setup-card card\"><h1 class=\"setup-title\">Welcome to Picomaju</h1><p class=\"setup-lead\">Choose where your values, roles, and staff will be stored.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"setup-wrap\"><div class=\"setup-card card\"><h1 class=\"setup-title\">Welcome to Picomaju</h1><p class=\"setup-lead\">Choose where your values, tasks, and staff will be stored.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

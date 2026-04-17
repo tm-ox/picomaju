@@ -2,8 +2,8 @@ package templates
 
 import (
 	"fmt"
-	"picomaju/internal/role"
 	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/value"
 )
 
@@ -20,7 +20,7 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 				<thead>
 					<tr>
 						<th>Label</th>
-						<th>Roles</th>
+						<th>Tasks</th>
 						<th>Values</th>
 						<th></th>
 					</tr>
@@ -29,7 +29,7 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 					for _, m := range members {
 						<tr>
 							<td>{ m.Label }</td>
-							<td>{ staffCount(len(m.Roles), "role") }</td>
+							<td>{ staffCount(len(m.Tasks), "task") }</td>
 							<td>{ staffCount(len(m.ValueCategories)+len(m.Values), "value ref") }</td>
 							<td class="actions">
 								<a href={ templ.SafeURL("/staff/" + m.ID + "/edit") } class="btn btn-secondary">Edit</a>
@@ -45,7 +45,7 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 	}
 }
 
-templ StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb SidebarData, isNew bool, formErr string) {
+templ StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, sb SidebarData, isNew bool, formErr string) {
 	@Layout(staffFormTitle(isNew), sb) {
 		<div class="page-header">
 			<h1>{ staffFormTitle(isNew) }</h1>
@@ -69,22 +69,22 @@ templ StaffFormPage(m *staff.Staff, roles []role.Role, values []*value.Value, sb
 					<input type="text" id="label" name="label" value={ m.Label } placeholder="Support Agent" required/>
 				</div>
 			</div>
-			if len(roles) > 0 {
+			if len(tasks) > 0 {
 				<div class="card">
-					<h2>Roles</h2>
+					<h2>Tasks</h2>
 					<div class="pick-group">
-						for _, r := range roles {
+						for _, t := range tasks {
 							<label class="pick-chip pick-chip-block">
 								<input
 									type="checkbox"
 									class="pick-toggle"
-									name="roles"
-									value={ r.ID }
-									checked?={ includesStr(m.Roles, r.ID) }
+									name="tasks"
+									value={ t.ID }
+									checked?={ includesStr(m.Tasks, t.ID) }
 								/>
-								<span class="pick-chip-label">{ r.Label }</span>
-								if r.Description != "" {
-									<span class="pick-chip-hint">{ r.Description }</span>
+								<span class="pick-chip-label">{ t.Label }</span>
+								if t.Description != "" {
+									<span class="pick-chip-hint">{ t.Description }</span>
 								}
 							</label>
 						}
