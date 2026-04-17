@@ -8,8 +8,6 @@
     <img src="web/static/type.svg" alt="PicoMaju" height="40"/>
 </div>
 
----
-
 Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Tasks and Tools, and deploy autonomous agents — without prompt engineering.
 
 Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go static binary, <10MB RAM). Also runs on any desktop OS.
