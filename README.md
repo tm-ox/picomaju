@@ -5,7 +5,7 @@
 ---
 
 <div align="center">
-    <div style="font-size: 2em; font-weight: bold;">PicoMaju</div>
+    <sub><h1>PicoMaju</h1></sub>
 </div>
 
 ---
