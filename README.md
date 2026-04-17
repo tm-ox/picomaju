@@ -5,8 +5,10 @@
 ---
 
 <div align="center">
-    <h1 style="border-bottom:0;">PicoMaju</h1>
+    <p style="font-size: 2em; font-weight: bold;">PicoMaju</p>
 </div>
+
+---
 
 Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Tasks and Tools, and deploy autonomous agents — without prompt engineering.
 
