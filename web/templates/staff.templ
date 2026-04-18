@@ -14,7 +14,12 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 			<a href="/staff/new" class="btn btn-primary">New Staff</a>
 		</div>
 		if len(members) == 0 {
-			<p class="empty">No staff defined yet. <a href="/staff/new">Add a member.</a></p>
+			@EmptyState(EmptyStateArgs{
+				Title:        "No staff profiles",
+				Desc:         "A staff profile is an agent that represents a person or role — like a receptionist or billing clerk.",
+				PrimaryHref:  "/staff/new",
+				PrimaryLabel: "Create your first staff",
+			}, EmptyIconStaff())
 		} else {
 			<table>
 				<thead>
@@ -32,9 +37,9 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 							<td>{ staffCount(len(m.Tasks), "task") }</td>
 							<td>{ staffCount(len(m.ValueCategories)+len(m.Values), "value ref") }</td>
 							<td class="actions">
-								<a href={ templ.SafeURL("/staff/" + m.ID + "/edit") } class="btn btn-secondary">Edit</a>
-								<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/delete") } style="display:inline">
-									<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this staff member?')">Delete</button>
+								<a href={ templ.SafeURL("/staff/" + m.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
+								<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/delete") } style="display:contents">
+									<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this staff member?')" title="Delete">@iconDelete()</button>
 								</form>
 							</td>
 						</tr>

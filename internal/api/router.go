@@ -27,12 +27,19 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		dataDir:  dataDir,
 	}
 
+	// Paths that must work before the data dir is configured.
+	setupPaths := map[string]bool{
+		"/setup":                 true,
+		"/setup/languages":       true,
+		"/setup/first-staff":     true,
+		"/setup/integrations":    true,
+	}
+
 	// Gate: redirect to /setup until data dir is configured.
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			if !ui.configured() &&
-				req.URL.Path != "/setup" &&
-				req.URL.Path != "/setup/integrations" &&
+				!setupPaths[req.URL.Path] &&
 				!strings.HasPrefix(req.URL.Path, "/static/") {
 				http.Redirect(w, req, "/setup", http.StatusSeeOther)
 				return
@@ -41,16 +48,18 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		})
 	})
 
-	// Setup (onboarding)
-	r.Get("/setup", ui.setupPage)
-	r.Post("/setup", ui.completeSetup)
-	r.Get("/setup/integrations", ui.integrationsPage)
-	r.Post("/setup/integrations", ui.completeIntegrations)
+	// Setup (onboarding) — 4 steps
+	r.Get("/setup", ui.setupPage)                     // step 1 — business + data dir
+	r.Post("/setup", ui.completeSetup)                //   -> /setup/languages
+	r.Get("/setup/languages", ui.languagesPage)       // step 2 — languages / tz / hours
+	r.Post("/setup/languages", ui.completeLanguages)  //   -> /setup/first-staff
+	r.Get("/setup/first-staff", ui.firstStaffPage)    // step 3 — first staff profile
+	r.Post("/setup/first-staff", ui.completeFirstStaff) // -> /setup/integrations
+	r.Get("/setup/integrations", ui.integrationsPage) // step 4 — tool picker
+	r.Post("/setup/integrations", ui.completeIntegrations) // -> /values
 
-	// Redirect root to /values
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/values", http.StatusSeeOther)
-	})
+	// Dashboard
+	r.Get("/", ui.dashboardPage)
 
 	// Values
 	r.Get("/values", ui.valueList)
@@ -94,3 +103,6 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 
 	return r
 }
+
+// Also change completeSetup's final redirect from "/setup/integrations"
+// to "/setup/languages". See patches/README.md.

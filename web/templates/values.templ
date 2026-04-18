@@ -18,7 +18,12 @@ templ ValueListPage(values []*value.Value, sb SidebarData) {
 			<a href="/values/new" class="btn btn-primary">New Value</a>
 		</div>
 		if len(values) == 0 {
-			<p class="empty">No values here yet. <a href="/values/new">Create one.</a></p>
+			@EmptyState(EmptyStateArgs{
+				Title:        "No values yet",
+				Desc:         "Values are rules your AI agents follow — tone, do's, don'ts, escalation triggers.",
+				PrimaryHref:  "/values/new",
+				PrimaryLabel: "Create your first value",
+			}, EmptyIconValues())
 		} else {
 			@valueTable(values, sb)
 		}
@@ -46,9 +51,9 @@ templ valueTable(values []*value.Value, sb SidebarData) {
 					</td>
 					<td>{ fmt.Sprintf("%d", v.Priority) }</td>
 					<td class="actions">
-						<a href={ templ.SafeURL("/values/" + v.ID + "/edit") } class="btn btn-secondary">Edit</a>
-						<form method="post" action={ templ.SafeURL("/values/" + v.ID + "/delete") } style="display:inline">
-							<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this value?')">Delete</button>
+						<a href={ templ.SafeURL("/values/" + v.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
+						<form method="post" action={ templ.SafeURL("/values/" + v.ID + "/delete") } style="display:contents">
+							<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this value?')" title="Delete">@iconDelete()</button>
 						</form>
 					</td>
 				</tr>

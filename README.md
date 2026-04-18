@@ -2,7 +2,7 @@
     <img src="web/static/logo-symbol.svg" alt="PicoMaju" height="120"/>
 </div>
 
----
+<br>
 
 <div align="center">
     <img src="web/static/type.svg" alt="PicoMaju" height="40"/>
@@ -10,23 +10,29 @@
 
 ---
 
-Mobile-first agent orchestrator for small business owners. Define org-level directives as Values, assemble them into Staff profiles via Tasks and Tools, and deploy autonomous agents — without prompt engineering.
+**Give your small business its own AI staff — without writing a single prompt.**
 
-Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) (Go static binary, <10MB RAM). Also runs on any desktop OS.
+Picomaju lets you describe how your business operates — your tone, the tools you use, the roles that keep things running — and compiles that into autonomous AI agents ready to deploy. Set up your business profile through a simple guided flow. No IT department, no prompt engineering.
+
+Built for small businesses in markets like Indonesia, where operations routinely span WhatsApp, Instagram, TikTok Shop, and Shopee at the same time, often with a lean team.
+
+*Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) — a Go static binary under 10MB RAM. Also runs on any desktop OS.*
 
 ---
 
-## Entity model
+## How it works
 
-**Values** are org-level directives — tone, goals, policies. Authored as Markdown with YAML frontmatter, grouped by category (Core Values, Communication, Skills, Escalation, Custom).
+Everything in Picomaju maps to four building blocks:
 
-**Tools** are pre-defined catalog integrations (WhatsApp Business, Telegram, Instagram, TikTok Shop, Shopee, Xendit, Midtrans, Google Calendar). Added via an onboarding picker; credentials configured per-integration.
+**Values** are the rules your business runs by — tone of voice, escalation policies, what your staff should and shouldn't do. Written in plain text, organised by category.
 
-**Tasks** are task definitions. A task describes what an agent does and which Tools it uses.
+**Tools** are the platforms you use — WhatsApp, Instagram, TikTok Shop, Shopee, payment processors, calendars. Connect them once; your staff uses them automatically.
 
-**Staff** are agent profiles, composed of Tasks + Values. Staff is the compile target — the entity that gets assembled into an agent directive.
+**Tasks** are what your staff do — each task describes a job and the tools it needs. "Handle customer enquiries on WhatsApp." "Post daily updates to TikTok Shop."
 
-Relationship chain: `Staff → Tasks → Tools + Values (by category or individual) → Compiled Agent Directive`
+**Staff** are your AI agents. Assign them tasks and values, and Picomaju compiles everything into a complete agent directive ready to run.
+
+`Staff → Tasks → Tools + Values → Compiled Agent Directive`
 
 ---
 
@@ -50,12 +56,14 @@ cd picomaju
 DEV=1 go run .
 ```
 
-Open `http://localhost:18800`. First visit runs a two-step onboarding (no sidebar):
+Open `http://localhost:18800`. First visit runs a four-step onboarding (no sidebar):
 
 1. Business name + data directory (defaults to `~/picomaju`)
-2. Tool picker — select the platforms your business uses; credentials can be filled in afterwards under Tools
+2. Languages, timezone, and operating hours
+3. First staff profile (optional — skip to do this later)
+4. Tool picker — select the platforms your business uses; credentials configured afterwards under Tools
 
-That's it — no env vars, no pre-created directories.
+No env vars, no pre-created directories.
 
 `DEV=1` serves static files from disk so CSS changes apply on browser refresh without rebuilding.
 
@@ -74,9 +82,7 @@ go build ./...
 
 ## Configuration
 
-Settings (business name, data directory) are managed in the app at `/settings`.
-
-The config file lives at the platform-appropriate location:
+Settings are managed in the app at `/settings`. The config file lives at the platform-appropriate location:
 
 | Platform | Path                                                   |
 | -------- | ------------------------------------------------------ |
@@ -97,7 +103,7 @@ The config file lives at the platform-appropriate location:
 
 ## Project status
 
-**Current:** Two-step onboarding with tool catalog picker, Values authoring + validation, Tools management (catalog integrations with per-type credential fields), Task definitions, Staff profiles, top-nav + contextual collapsible sidebar with brand icons (hidden during onboarding), mobile floating sidebar, pick-chip selection UI, light/dark theming, settings.
+**Current:** Four-step onboarding (business info → languages/timezone/hours → first staff profile → tool picker), dashboard home screen, Values authoring + validation, Tools management (catalog integrations with per-type credential fields), Task definitions, Staff profiles, mobile-first UI (fixed bottom tab bar, floating action button, compact card rows, illustrated empty states), icon-strip collapsible sidebar, light/dark theming with icon toggle.
 
 **Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
@@ -108,14 +114,25 @@ The config file lives at the platform-appropriate location:
 ```
 main.go                  entry point
 internal/
-  settings/              config file store
+  settings/              config file store (business_name, data_dir, languages, timezone, hours)
   value/                 Value model, file store, validator, category defaults
   tool/                  Tool model + store (tools.json); Integration catalog (catalog.go)
   task/                  Task model + store (tasks.json)
   staff/                 Staff model + store (staff.json) — agent profiles
   api/                   HTTP handlers (HTML UI + SSE)
+    ui.go                core page handlers + sidebarData helper
+    ui_onboarding.go     onboarding step 2 (languages) + step 3 (first staff)
+    router.go            all routes + setup gate middleware
+    sse.go               SSEMergeFragment for datastar
 web/
-  templates/             templ components (icons.templ — tool brand SVGs)
+  templates/             templ components
+    layout.templ         base shell (topnav, sidebar, bottom tabs, FAB, footer)
+    dashboard.templ      home screen (centered logo symbol)
+    sidebar.templ        contextual collapsible sidebar
+    empty_state.templ    illustrated empty state component + section icons
+    icons.templ          tool brand SVGs, nav/tab icons, edit/delete/theme icons
+    setup.templ          four-step onboarding pages
+    values/tools/tasks/staff.templ  section pages + forms
   static/                style.css, datastar.js (not committed), logo SVGs
 AGENTS.md                instructions for AI agents working on this codebase
 ```

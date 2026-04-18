@@ -16,7 +16,8 @@ picomaju/
   go.mod                         — module: picomaju; deps: chi/v5, yaml.v3, templ
   internal/
     settings/
-      store.go                   — Settings type (business_name, business_details, data_dir) + file-backed store
+      store.go                   — Settings type (business_name, business_details, data_dir,
+                                   languages[], timezone, hours) + file-backed store
     value/
       model.go                   — Value, DirectiveEntry, ValidationResult, ValidationError types
       store.go                   — file-based CRUD (.md + YAML frontmatter)
@@ -30,27 +31,35 @@ picomaju/
     staff/
       store.go                   — Staff type (id, label, tasks[], value_categories[], values[]) + CRUD on staff.json
     api/
-      router.go                  — all routes wired here; setup gate middleware
-      ui.go                      — HTML + SSE handlers; uiHandler with mutex-guarded store init
+      router.go                  — all routes wired here; setup gate middleware (allows setup paths + /static/*)
+      ui.go                      — HTML + SSE handlers; uiHandler with mutex-guarded store init; dashboardPage
+      ui_onboarding.go           — onboarding step 2 (languagesPage/completeLanguages) + step 3 (firstStaffPage/completeFirstStaff); slugify helper
       sse.go                     — SSEMergeFragment() for datastar
       helpers.go                 — jsonOK / jsonErr
   web/
     templates/
-      layout.templ               — base HTML shell; top nav (business + avatar | section links | theme + settings); logo-type.svg during onboarding; inline SVG wordmark in footer
-      sidebar.templ              — contextual sidebar (sidebarHeader component with toggle + heading inline; switches per active section)
-      icons.templ                — toolIcon(type) switch with brand SVGs; categoryIcon, taskItemIcon, staffItemIcon placeholders
-      values.templ               — Value list page, Value form, ValidationFragment
-      tools.templ                — Tool list, NewToolPage (catalog radio picker), ToolFormPage (edit integration credentials)
-      tasks.templ                — Task list page, Task form (with tool picker)
-      staff.templ                — Staff list page, Staff form (task + value picker)
+      layout.templ               — base HTML shell; topnav (avatar | Home+Values+Tools+Tasks+Staff | theme icon + settings);
+                                   bottomTabs (5-tab mobile bar); fab (section floating action button);
+                                   tab/fab icon glyphs; initials() helper; logo-type.svg during onboarding
+      dashboard.templ            — DashboardPage: centered logo-symbol.svg home screen
+      sidebar.templ              — contextual sidebar (sidebarHeader with toggle; switches per active section)
+      empty_state.templ          — EmptyState component (illustrated card + CTA); EmptyIconValues/Tools/Tasks/Staff glyphs
+      icons.templ                — toolIcon(type) brand SVGs; categoryIcon/taskItemIcon/staffItemIcon sidebar glyphs;
+                                   tabIconHome/Values/Tools/Tasks/Staff tab bar glyphs;
+                                   iconSun/iconMoon theme toggle; iconEdit/iconDelete action buttons
+      values.templ               — Value list page (EmptyState when empty), Value form, ValidationFragment
+      tools.templ                — Tool list (EmptyState), NewToolPage (catalog radio picker), ToolFormPage
+      tasks.templ                — Task list (EmptyState), Task form (with tool picker)
+      staff.templ                — Staff list (EmptyState), Staff form (task + value picker)
       settings.templ             — Settings page (business info + data dir)
-      setup.templ                — Two-step onboarding: SetupPage + IntegrationsPage (catalog picker)
+      setup.templ                — Four-step onboarding: SetupPage, LanguagesPage, FirstStaffPage, IntegrationsPage;
+                                   setupProgress component; itoa() helper
       helpers.go                 — SidebarData type, includesStr()
     static/
-      style.css                  — CSS custom properties; light + dark mode; 16px REM base
+      style.css                  — CSS custom properties; light + dark mode; mobile-first (bottom tabs, FAB, card rows)
       datastar.js                — MUST be downloaded manually from data-star.dev releases
-      logo-symbol.svg            — crimson PM mark (140×98)
-      logo-type.svg              — horizontal symbol + wordmark lockup (used in onboarding header)
+      logo-symbol.svg            — crimson PM mark (140×98), hardcoded fill="#bf092f"
+      logo-type.svg              — horizontal wordmark lockup (used in onboarding header + footer)
       logo-stack.svg             — stacked symbol + wordmark lockup
 ```
 
@@ -58,10 +67,16 @@ picomaju/
 
 ## First run / onboarding
 
-On first launch, if no data directory is configured, **all routes redirect to `/setup`**. Onboarding is two steps and renders without a sidebar (minimal header with logo-type.svg, full-width layout):
+On first launch, if no data directory is configured, **all routes redirect to `/setup`**. Onboarding is four steps and renders without a sidebar (`HideSidebar: true`, minimal header with logo-type.svg, full-width layout):
 
 1. **`/setup`** — Business Name + Data Directory (pre-filled `~/picomaju`)
-2. **`/setup/integrations`** — Tool picker: select from the catalog to auto-create Tool entries; credentials configured later in Tools. Both steps exempt from the setup gate middleware.
+2. **`/setup/languages`** — Languages (Bahasa Indonesia / English), timezone, operating hours. Defaults: `["id","en"]`, `Asia/Jakarta`.
+3. **`/setup/first-staff`** — First staff profile (name + optional description). Skip button goes directly to step 4.
+4. **`/setup/integrations`** — Tool picker: select from the catalog to auto-create Tool entries; credentials configured later.
+
+All four setup paths plus `/static/*` are exempt from the setup gate middleware.
+
+After step 1 (`POST /setup`), user is redirected to `/setup/languages`. After step 4, redirected to `/values`.
 
 On completion the user lands at `/values`. No restart required.
 
@@ -70,6 +85,21 @@ The settings file location is platform-aware (`os.UserConfigDir()/picomaju/setti
 ---
 
 ## Data model
+
+### Settings (`os.UserConfigDir()/picomaju/settings.json`)
+
+```json
+{
+  "business_name": "Acme Co.",
+  "business_details": "...",
+  "data_dir": "/home/tm/picomaju",
+  "languages": ["id", "en"],
+  "timezone": "Asia/Jakarta",
+  "hours": "Mon–Fri, 09:00–18:00"
+}
+```
+
+`languages`, `timezone`, `hours` are `omitempty` — existing settings files without them load cleanly.
 
 ### Value (`<data_dir>/values/<id>.md`)
 Markdown file with YAML frontmatter. Org-level directives — tone, goals, policies.
@@ -99,7 +129,6 @@ Catalog-based integrations. `type` matches a catalog entry (e.g. `whatsapp`, `te
 ```
 
 ### Task (`<data_dir>/tasks.json`)
-Task definition. Describes what the agent does and which Tools it uses.
 
 ```json
 { "tasks": [
@@ -129,16 +158,6 @@ Agent profile. Composed of Tasks + Values. The compile target.
 
 `value_categories` → bulk inclusion of all Values in those categories.
 `values` → individual Value IDs added on top.
-
-### Settings (`os.UserConfigDir()/picomaju/settings.json`)
-
-```json
-{
-  "business_name": "Acme Co.",
-  "business_details": "...",
-  "data_dir": "/home/tm/picomaju"
-}
-```
 
 ---
 
@@ -183,11 +202,15 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 
 | Method | Path | Description |
 |--------|------|-------------|
+| GET | `/` | dashboard (home screen) |
 | GET | `/setup` | onboarding step 1 — business name + data dir |
-| POST | `/setup` | save step 1 → redirect `/setup/integrations` |
-| GET | `/setup/integrations` | onboarding step 2 — tool picker |
+| POST | `/setup` | save step 1 → redirect `/setup/languages` |
+| GET | `/setup/languages` | onboarding step 2 — languages / timezone / hours |
+| POST | `/setup/languages` | save step 2 → redirect `/setup/first-staff` |
+| GET | `/setup/first-staff` | onboarding step 3 — first staff profile |
+| POST | `/setup/first-staff` | create staff → redirect `/setup/integrations` |
+| GET | `/setup/integrations` | onboarding step 4 — tool picker |
 | POST | `/setup/integrations` | create selected tools → redirect `/values` |
-| GET | `/` | redirect → `/values` |
 | GET | `/values` | Value list (filterable by `?cat=<id>`) |
 | GET | `/values/new` | Value form (new) |
 | POST | `/values` | create Value → redirect `/values` |
@@ -217,33 +240,35 @@ Built-in constants in `internal/value/category.go` — no separate file on disk.
 | POST | `/settings` | save settings → redirect `/settings?saved=1` |
 | GET | `/static/*` | embedded static assets |
 
-Mutations use standard HTML form POST + redirect (no JS required for CRUD). Validate uses datastar SSE — button triggers a POST, server responds with a merge-fragments event patching `<div id="validation-result">`.
+Mutations use standard HTML form POST + redirect (no JS required for CRUD). Validate uses datastar SSE.
 
-The setup gate middleware redirects all routes except `/setup`, `/setup/integrations`, and `/static/*` to `/setup` when no data directory is configured.
+The setup gate middleware allows `/setup`, `/setup/languages`, `/setup/first-staff`, `/setup/integrations`, and `/static/*` without redirect. All other routes redirect to `/setup` when no data directory is configured.
 
 ---
 
 ## Navigation
 
-**Top nav** (sticky, `var(--topnav-h): 3rem`):
-- Left: avatar placeholder + business name (or logo-type.svg during onboarding)
-- Center: Values | Tools | Tasks | Staff (section links, `.active` on current section)
-- Right: theme toggle + settings gear
+**Top nav** (sticky, `var(--topnav-h): 3.25rem`):
+- Left: crimson avatar (business initials via `initials()`) + business name
+- Center: Home | Values | Tools | Tasks | Staff (section links, `.active` on current section)
+- Right: theme toggle icon button (moon/sun, `2rem` square) + settings gear
+- During onboarding: minimal header with logo-type.svg only
 
-**Sidebar** (contextual, collapsible — hidden entirely during onboarding):
-- Header row: collapse/expand chevron (`‹`) on the left + section heading on the right, inline
-- Collapsed state: `3rem` wide icon strip; section items show icons only (labels hidden)
-- Expanded state: `13.75rem` (220px)
-- All item lists sorted alphabetically by label
-- Mobile (`≤640px`): `position: fixed` floating overlay; `.app-body` has `padding-left: 3rem` so content is never hidden behind the collapsed strip; collapse/expand behaviour identical to desktop
-- Collapsed state persists in `localStorage` (`sidebar-collapsed`); defaults to collapsed on mobile if no saved preference
-- Content switches per `ActiveSection` in `SidebarData`:
-  - `values` → category filter links (tag icon) with counts + New Value
-  - `tools` → tool list (brand SVG icons via `toolIcon(type)`) + Add Tool
-  - `tasks` → task list (document icon placeholder) + New Task
-  - `staff` → staff list (person icon placeholder) + New Staff
+**Sidebar** (contextual, collapsible — hidden during onboarding):
+- Header row: collapse/expand chevron + section heading
+- Collapsed state: `3rem` wide icon strip (both `.sidebar` and `.sidebar-inner` collapse to `3rem` so flex centering keeps icons visible)
+- Expanded state: `13.75rem`
+- Content switches per `ActiveSection`: `values` → category filter + New Value; `tools` → tool list + Add Tool; `tasks` → task list + New Task; `staff` → staff list + New Staff; `home`/empty → empty nav
+- Collapsed state persists in `localStorage` (`sidebar-collapsed`)
 
-**Footer**: inline SVG wordmark (`fill="currentColor"` — adapts to light/dark).
+**Mobile (≤640px):**
+- Sidebar hidden; top nav center links hidden
+- Fixed bottom tab bar: 5 tabs — Home | Values | Tools | Tasks | Staff (`grid-template-columns: repeat(5, 1fr)`)
+- Floating action button (crimson circle, `3.25rem`) above tab bar for the active section's primary create action
+- `viewport-fit=cover` + `env(safe-area-inset-bottom)` for iOS home bar
+- Tables render as compact flex-row cards: label left (`flex: 1`), secondary columns hidden, action icon buttons right
+
+**Footer**: logo-type.svg (`color: var(--color-text-muted)`)
 
 `SidebarData` (in `web/templates/helpers.go`) is built by `uiHandler.sidebarData(r, section)` and passed to every page render.
 
@@ -252,12 +277,32 @@ The setup gate middleware redirects all routes except `/setup`, `/setup/integrat
 ## Icons
 
 `web/templates/icons.templ` contains:
-- `toolIcon(toolType string)` — switch over all 8 catalog types; brand SVG paths from Simple Icons; Midtrans falls back to a generic credit card; unknown types fall back to a stacked-layers icon
-- `categoryIcon()` — tag placeholder for value category items
-- `taskItemIcon()` — document placeholder for task items
-- `staffItemIcon()` — person placeholder for staff items
 
-All icons use `fill="currentColor"` and inherit color from the sidebar item's CSS.
+**Sidebar / section:**
+- `toolIcon(toolType string)` — switch over all 8 catalog types; brand SVG paths from Simple Icons; Midtrans → generic credit card; unknown → stacked-layers
+- `categoryIcon()` — tag glyph for value category items
+- `taskItemIcon()` — document glyph for task items
+- `staffItemIcon()` — person glyph for staff items
+
+**Tab bar (stroke, 1.8px, `viewBox="0 0 24 24"`):**
+- `tabIconHome()` — house glyph
+- `tabIconValues()` — star glyph
+- `tabIconTools()` — wrench glyph
+- `tabIconTasks()` — rounded rectangle + checkmark glyph
+- `tabIconStaff()` — person circle glyph
+
+**Theme toggle (stroke, `viewBox="0 0 24 24"`):**
+- `iconSun()` — `class="icon-sun"` — shown in dark mode (click → light); hidden in light mode via CSS
+- `iconMoon()` — `class="icon-moon"` — shown in light mode (click → dark); hidden in dark mode via CSS
+
+**Action buttons (stroke, `viewBox="0 0 16 16"`):**
+- `iconEdit()` — pencil glyph; used in `.btn-icon` edit links
+- `iconDelete()` — trash glyph; used in `.btn-icon.btn-icon-danger` delete buttons
+
+**FAB:**
+- `fabPlus()` — plus glyph
+
+All sidebar/tab icons use `stroke="currentColor"` or `fill="currentColor"` and inherit color from the parent element's CSS.
 
 ---
 
@@ -269,7 +314,6 @@ All icons use `fill="currentColor"` and inherit color from the sidebar item's CS
 - `[data-theme="dark"]` — dark mode
 
 Palette: `#bf092f` crimson, `#132440` dark navy, `#16476a` mid navy, `#3b9797` teal.
-Base font-size: `1rem` (16px).
 
 Theme toggle switches `data-theme` on `<html>` and persists in `localStorage`. Inline `<script>` in `<head>` applies the saved theme before first paint to prevent flash.
 
@@ -301,11 +345,16 @@ go build ./...
 
 `datastar.js` must be placed in `web/static/` manually — it is embedded into the binary at build time.
 
+Build excludes the `patches/` directory (contains design drop-in files, not a Go package):
+```bash
+go build ./internal/... ./web/... .
+```
+
 ---
 
 ## Implementation status
 
-**Done:** Two-step onboarding with tool catalog picker, settings, Values authoring + validation, Tools CRUD (catalog integrations with per-type credential fields), integration catalog (8 integrations, Indonesian market), Task definitions with tool picker, Staff profiles with task + value picker, top-nav + contextual collapsible sidebar with brand/placeholder icons (hidden during onboarding), mobile floating sidebar, alphabetical sidebar sorting, light/dark theming, pick-chip selection UX (no visible checkboxes), logo SVGs (symbol, type lockup, stack lockup).
+**Done:** Four-step onboarding (business info → languages/timezone/hours → first staff → tool picker), dashboard home screen, settings, Values authoring + validation, Tools CRUD (catalog integrations with per-type credential fields), integration catalog (8 integrations, Indonesian market focus), Task definitions with tool picker, Staff profiles with task + value picker, mobile-first UI (bottom tab bar, FAB, compact card rows, illustrated empty states, icon-only edit/delete buttons), icon-strip collapsible sidebar, light/dark theming with sun/moon icon toggle, logo SVGs.
 
 **Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 

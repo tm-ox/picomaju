@@ -13,7 +13,12 @@ templ TaskListPage(tasks []task.Task, sb SidebarData) {
 			<a href="/tasks/new" class="btn btn-primary">New Task</a>
 		</div>
 		if len(tasks) == 0 {
-			<p class="empty">No tasks defined yet. <a href="/tasks/new">Create one.</a></p>
+			@EmptyState(EmptyStateArgs{
+				Title:        "No tasks defined",
+				Desc:         "Tasks are playbooks — a sequence of steps a staff profile can carry out end-to-end.",
+				PrimaryHref:  "/tasks/new",
+				PrimaryLabel: "Create your first task",
+			}, EmptyIconTasks())
 		} else {
 			<table>
 				<thead>
@@ -31,9 +36,9 @@ templ TaskListPage(tasks []task.Task, sb SidebarData) {
 							<td>{ t.Description }</td>
 							<td>{ taskToolCount(t) }</td>
 							<td class="actions">
-								<a href={ templ.SafeURL("/tasks/" + t.ID + "/edit") } class="btn btn-secondary">Edit</a>
-								<form method="post" action={ templ.SafeURL("/tasks/" + t.ID + "/delete") } style="display:inline">
-									<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this task?')">Delete</button>
+								<a href={ templ.SafeURL("/tasks/" + t.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
+								<form method="post" action={ templ.SafeURL("/tasks/" + t.ID + "/delete") } style="display:contents">
+									<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this task?')" title="Delete">@iconDelete()</button>
 								</form>
 							</td>
 						</tr>

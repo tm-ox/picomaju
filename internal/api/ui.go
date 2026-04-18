@@ -49,6 +49,12 @@ func (h *uiHandler) initStores(dataDir string) error {
 	return nil
 }
 
+// --- Dashboard ---
+
+func (h *uiHandler) dashboardPage(w http.ResponseWriter, r *http.Request) {
+	templates.DashboardPage(h.sidebarData(r, "home")).Render(r.Context(), w)
+}
+
 // --- Setup (onboarding) ---
 
 func (h *uiHandler) setupPage(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +85,7 @@ func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 		templates.SetupPage(businessName, dataDir, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/setup/integrations", http.StatusSeeOther)
+	http.Redirect(w, r, "/setup/languages", http.StatusSeeOther)
 }
 
 func (h *uiHandler) integrationsPage(w http.ResponseWriter, r *http.Request) {

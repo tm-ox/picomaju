@@ -9,7 +9,12 @@ templ ToolListPage(tools []tool.Tool, sb SidebarData) {
 			<a href="/tools/new" class="btn btn-primary">Add Tool</a>
 		</div>
 		if len(tools) == 0 {
-			<p class="empty">No tools added yet. <a href="/tools/new">Add one.</a></p>
+			@EmptyState(EmptyStateArgs{
+				Title:        "No tools added",
+				Desc:         "Connect the integrations your business uses so staff can read and write to them.",
+				PrimaryHref:  "/tools/new",
+				PrimaryLabel: "Add your first tool",
+			}, EmptyIconTools())
 		} else {
 			<table>
 				<thead>
@@ -25,9 +30,9 @@ templ ToolListPage(tools []tool.Tool, sb SidebarData) {
 							<td>{ t.Label }</td>
 							<td><span class="cat-tag">{ t.Type }</span></td>
 							<td class="actions">
-								<a href={ templ.SafeURL("/tools/" + t.ID + "/edit") } class="btn btn-secondary">Edit</a>
-								<form method="post" action={ templ.SafeURL("/tools/" + t.ID + "/delete") } style="display:inline">
-									<button type="submit" class="btn btn-danger" onclick="return confirm('Delete this tool?')">Delete</button>
+								<a href={ templ.SafeURL("/tools/" + t.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
+								<form method="post" action={ templ.SafeURL("/tools/" + t.ID + "/delete") } style="display:contents">
+									<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this tool?')" title="Delete">@iconDelete()</button>
 								</form>
 							</td>
 						</tr>

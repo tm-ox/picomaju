@@ -7,9 +7,12 @@ import (
 )
 
 type Settings struct {
-	BusinessName    string `json:"business_name"`
-	BusinessDetails string `json:"business_details"`
-	DataDir         string `json:"data_dir"`
+	BusinessName    string   `json:"business_name"`
+	BusinessDetails string   `json:"business_details"`
+	DataDir         string   `json:"data_dir"`
+	Languages       []string `json:"languages,omitempty"`
+	Timezone        string   `json:"timezone,omitempty"`
+	Hours           string   `json:"hours,omitempty"`
 }
 
 type Store struct {
