@@ -24,7 +24,7 @@ templ SetupPage(businessName, dataDir, formErr string) {
 		<div class="setup-wrap">
 			<div class="setup-card card">
 				@setupProgress(1, 4, "About your business")
-				<h1 class="setup-title">Welcome to Picomaju</h1>
+				<h1 class="setup-title">Welcome to PicoMaju</h1>
 				<p class="setup-lead">Tell us about your business and where its data should live. You can change any of this later.</p>
 				if formErr != "" {
 					<div class="alert alert-error">{ formErr }</div>
@@ -37,7 +37,7 @@ templ SetupPage(businessName, dataDir, formErr string) {
 					<div class="field">
 						<label for="data_dir">Data directory</label>
 						<input type="text" id="data_dir" name="data_dir" value={ dataDir } required/>
-						<p class="hint">Picomaju will create this folder if it does not exist.</p>
+						<p class="hint">PicoMaju will create this folder if it does not exist.</p>
 					</div>
 					<div class="form-actions">
 						<button type="submit" class="btn btn-primary">Continue</button>
@@ -55,7 +55,7 @@ templ LanguagesPage(langs []string, timezone, hours, formErr string) {
 			<div class="setup-card card">
 				@setupProgress(2, 4, "How you operate")
 				<h1 class="setup-title">How do you operate?</h1>
-				<p class="setup-lead">Picomaju uses these defaults when drafting replies, routing tasks, and checking timing-sensitive rules.</p>
+				<p class="setup-lead">PicoMaju uses these defaults when drafting replies, routing tasks, and checking timing-sensitive rules.</p>
 				if formErr != "" {
 					<div class="alert alert-error">{ formErr }</div>
 				}

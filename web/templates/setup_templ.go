@@ -5,10 +5,12 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"picomaju/internal/tool"
 
-import "picomaju/internal/tool"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+)
 
 // setupProgress renders the progress bar + step label common to all
 // onboarding pages. `step` is 1-indexed and `total` is the total number
@@ -151,7 +153,7 @@ func SetupPage(businessName, dataDir, formErr string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<h1 class=\"setup-title\">Welcome to Picomaju</h1><p class=\"setup-lead\">Tell us about your business and where its data should live. You can change any of this later.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<h1 class=\"setup-title\">Welcome to PicoMaju</h1><p class=\"setup-lead\">Tell us about your business and where its data should live. You can change any of this later.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -200,7 +202,7 @@ func SetupPage(businessName, dataDir, formErr string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" required><p class=\"hint\">Picomaju will create this folder if it does not exist.</p></div><div class=\"form-actions\"><button type=\"submit\" class=\"btn btn-primary\">Continue</button></div></form></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" required><p class=\"hint\">PicoMaju will create this folder if it does not exist.</p></div><div class=\"form-actions\"><button type=\"submit\" class=\"btn btn-primary\">Continue</button></div></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -256,7 +258,7 @@ func LanguagesPage(langs []string, timezone, hours, formErr string) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<h1 class=\"setup-title\">How do you operate?</h1><p class=\"setup-lead\">Picomaju uses these defaults when drafting replies, routing tasks, and checking timing-sensitive rules.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<h1 class=\"setup-title\">How do you operate?</h1><p class=\"setup-lead\">PicoMaju uses these defaults when drafting replies, routing tasks, and checking timing-sensitive rules.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,11 +1,11 @@
 <div align="center">
-    <img src="web/static/logo-symbol.svg" alt="PicoMaju" height="120"/>
+    <img src="web/static/logo-symbol.svg" alt="PicoMaju" width="170"/>
 </div>
 
 <br>
 
 <div align="center">
-    <img src="web/static/type.svg" alt="PicoMaju" height="40"/>
+    <img src="web/static/type.svg" alt="PicoMaju" width="170"/>
 </div>
 
 ---
@@ -16,7 +16,7 @@ Picomaju lets you describe how your business operates — your tone, the tools y
 
 Built for small businesses in markets like Indonesia, where operations routinely span WhatsApp, Instagram, TikTok Shop, and Shopee at the same time, often with a lean team.
 
-*Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) — a Go static binary under 10MB RAM. Also runs on any desktop OS.*
+_Runs locally on Android via [picoclaw](https://github.com/sipeed/picoclaw) — a Go static binary under 10MB RAM. Also runs on any desktop OS._
 
 ---
 
