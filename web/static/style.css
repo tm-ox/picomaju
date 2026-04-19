@@ -1221,3 +1221,145 @@ code {
         display: none;
     } /* primary action moves to FAB */
 }
+
+/* ── Welcome screen ──────────────────────────────────────────────────────── */
+
+.welcome-body {
+    min-height: 100dvh;
+    display: flex;
+    align-items: stretch;
+    background: var(--color-bg);
+}
+
+.welcome-screen {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem calc(2rem + env(safe-area-inset-bottom, 0px));
+    gap: 2rem;
+}
+
+.welcome-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding-top: 3rem;
+}
+
+.welcome-symbol-wrap {
+    width: 5rem;
+    height: auto;
+}
+
+.welcome-symbol {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.welcome-copy {
+    text-align: center;
+}
+
+.welcome-brand {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 0.625rem;
+}
+
+.welcome-tagline {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin: 0 0 0.75rem;
+}
+
+.welcome-tagline em {
+    font-style: normal;
+    color: var(--color-accent);
+}
+
+.welcome-desc {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    line-height: 1.55;
+    margin: 0;
+}
+
+.welcome-features {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    text-align: left;
+}
+
+.welcome-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.welcome-feature-icon {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-accent);
+    margin-top: 0.0625rem;
+}
+
+.welcome-feature-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.welcome-feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.welcome-feature-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.welcome-feature-desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+.welcome-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+}
+
+.welcome-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.welcome-cta-btn {
+    width: 100%;
+}
+
+.welcome-hint {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: 0;
+}

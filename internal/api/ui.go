@@ -62,30 +62,49 @@ func (h *uiHandler) setupPage(w http.ResponseWriter, r *http.Request) {
 	if home, err := os.UserHomeDir(); err == nil {
 		suggested = filepath.Join(home, "picomaju")
 	}
-	templates.SetupPage("", suggested, "").Render(r.Context(), w)
+	cfg, _ := h.settings.Load()
+	tz := "Asia/Jakarta"
+	hours := ""
+	if cfg != nil {
+		if cfg.Timezone != "" {
+			tz = cfg.Timezone
+		}
+		hours = cfg.Hours
+	}
+	templates.SetupPage("", suggested, tz, hours, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		templates.SetupPage("", "", err.Error()).Render(r.Context(), w)
+		templates.SetupPage("", "", "Asia/Jakarta", "", err.Error()).Render(r.Context(), w)
 		return
 	}
 	businessName := strings.TrimSpace(r.FormValue("business_name"))
 	dataDir := strings.TrimSpace(r.FormValue("data_dir"))
+	tz := strings.TrimSpace(r.FormValue("timezone"))
+	hours := strings.TrimSpace(r.FormValue("hours"))
 	if dataDir == "" {
-		templates.SetupPage(businessName, dataDir, "Data directory is required.").Render(r.Context(), w)
+		templates.SetupPage(businessName, dataDir, tz, hours, "Data directory is required.").Render(r.Context(), w)
 		return
 	}
-	cfg := &settings.Settings{BusinessName: businessName, DataDir: dataDir}
+	// Load existing settings to preserve Languages set on welcome screen.
+	cfg, _ := h.settings.Load()
+	if cfg == nil {
+		cfg = &settings.Settings{}
+	}
+	cfg.BusinessName = businessName
+	cfg.DataDir = dataDir
+	cfg.Timezone = tz
+	cfg.Hours = hours
 	if err := h.settings.Save(cfg); err != nil {
-		templates.SetupPage(businessName, dataDir, "Could not save settings: "+err.Error()).Render(r.Context(), w)
+		templates.SetupPage(businessName, dataDir, tz, hours, "Could not save settings: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.initStores(dataDir); err != nil {
-		templates.SetupPage(businessName, dataDir, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
+		templates.SetupPage(businessName, dataDir, tz, hours, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/setup/languages", http.StatusSeeOther)
+	http.Redirect(w, r, "/setup/first-staff", http.StatusSeeOther)
 }
 
 func (h *uiHandler) integrationsPage(w http.ResponseWriter, r *http.Request) {

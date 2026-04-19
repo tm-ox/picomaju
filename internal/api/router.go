@@ -29,33 +29,33 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 
 	// Paths that must work before the data dir is configured.
 	setupPaths := map[string]bool{
+		"/welcome":               true,
 		"/setup":                 true,
-		"/setup/languages":       true,
 		"/setup/first-staff":     true,
 		"/setup/integrations":    true,
 	}
 
-	// Gate: redirect to /setup until data dir is configured.
+	// Gate: redirect to /welcome until data dir is configured.
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			if !ui.configured() &&
 				!setupPaths[req.URL.Path] &&
 				!strings.HasPrefix(req.URL.Path, "/static/") {
-				http.Redirect(w, req, "/setup", http.StatusSeeOther)
+				http.Redirect(w, req, "/welcome", http.StatusSeeOther)
 				return
 			}
 			next.ServeHTTP(w, req)
 		})
 	})
 
-	// Setup (onboarding) — 4 steps
-	r.Get("/setup", ui.setupPage)                     // step 1 — business + data dir
-	r.Post("/setup", ui.completeSetup)                //   -> /setup/languages
-	r.Get("/setup/languages", ui.languagesPage)       // step 2 — languages / tz / hours
-	r.Post("/setup/languages", ui.completeLanguages)  //   -> /setup/first-staff
-	r.Get("/setup/first-staff", ui.firstStaffPage)    // step 3 — first staff profile
-	r.Post("/setup/first-staff", ui.completeFirstStaff) // -> /setup/integrations
-	r.Get("/setup/integrations", ui.integrationsPage) // step 4 — tool picker
+	// Setup (onboarding) — welcome + 3 steps
+	r.Get("/welcome", ui.welcomePage)                   // welcome — language picker
+	r.Post("/welcome", ui.completeWelcome)              //   -> /setup
+	r.Get("/setup", ui.setupPage)                       // step 1 — business + data dir + tz + hours
+	r.Post("/setup", ui.completeSetup)                  //   -> /setup/first-staff
+	r.Get("/setup/first-staff", ui.firstStaffPage)      // step 2 — first staff profile
+	r.Post("/setup/first-staff", ui.completeFirstStaff) //   -> /setup/integrations
+	r.Get("/setup/integrations", ui.integrationsPage)   // step 3 — tool picker
 	r.Post("/setup/integrations", ui.completeIntegrations) // -> /values
 
 	// Dashboard
@@ -103,6 +103,3 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 
 	return r
 }
-
-// Also change completeSetup's final redirect from "/setup/integrations"
-// to "/setup/languages". See patches/README.md.
