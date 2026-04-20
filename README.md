@@ -56,10 +56,10 @@ cd picomaju
 DEV=1 go run .
 ```
 
-Open `http://localhost:18800`. First visit runs a four-step onboarding (no sidebar):
+Open `http://localhost:18800`. First visit runs a welcome screen then three onboarding steps (no sidebar):
 
-1. Business name + data directory (defaults to `~/picomaju`)
-2. Languages, timezone, and operating hours
+1. Welcome — choose your language (English / Bahasa Indonesia)
+2. Business name, data directory, timezone, and operating hours
 3. First staff profile (optional — skip to do this later)
 4. Tool picker — select the platforms your business uses; credentials configured afterwards under Tools
 
@@ -75,7 +75,7 @@ After editing any `.templ` file:
 
 ```sh
 templ generate
-go build ./...
+go build ./internal/... ./web/... .
 ```
 
 ---
@@ -103,7 +103,7 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 
 ## Project status
 
-**Current:** Four-step onboarding (business info → languages/timezone/hours → first staff profile → tool picker), dashboard home screen, Values authoring + validation, Tools management (catalog integrations with per-type credential fields), Task definitions, Staff profiles, mobile-first UI (fixed bottom tab bar, floating action button, compact card rows, illustrated empty states), icon-strip collapsible sidebar, light/dark theming with icon toggle.
+**Current:** Welcome screen (language picker) + three-step onboarding (business info/timezone/hours → first staff profile → tool picker), dashboard home screen, Values authoring + validation, Tools management (catalog integrations with per-type credential fields), Task definitions, Staff profiles, mobile-first UI (fixed bottom tab bar, floating action button, compact card rows, illustrated empty states), icon-strip collapsible sidebar, light/dark theming with icon toggle.
 
 **Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
@@ -121,7 +121,7 @@ internal/
   staff/                 Staff model + store (staff.json) — agent profiles
   api/                   HTTP handlers (HTML UI + SSE)
     ui.go                core page handlers + sidebarData helper
-    ui_onboarding.go     onboarding step 2 (languages) + step 3 (first staff)
+    ui_onboarding.go     welcome screen handlers + onboarding step 2 (first staff)
     router.go            all routes + setup gate middleware
     sse.go               SSEMergeFragment for datastar
 web/
@@ -131,7 +131,7 @@ web/
     sidebar.templ        contextual collapsible sidebar
     empty_state.templ    illustrated empty state component + section icons
     icons.templ          tool brand SVGs, nav/tab icons, edit/delete/theme icons
-    setup.templ          four-step onboarding pages
+    setup.templ          welcome screen + three-step onboarding pages
     values/tools/tasks/staff.templ  section pages + forms
   static/                style.css, datastar.js (not committed), logo SVGs
 AGENTS.md                instructions for AI agents working on this codebase
