@@ -10,11 +10,13 @@ Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Life
 picomaju/
   main.go                        — entry point; loads settings; conditionally inits stores
   go.mod                         — module: picomaju; deps: chi/v5, yaml.v3, templ
+  design/
+    tokens.json                  — W3C DTCG design tokens (canonical); import to Pencil/Penpot via Phase 3
   internal/                      — see internal/CLAUDE.md
   web/                           — see web/templates/CLAUDE.md
     templates/
     static/
-      style.css
+      style.css                  — all CSS; :root has full token system (lines 1–111)
       app.js                     — theme init (pre-paint) + sidebar restore; loaded sync in <head>
       datastar.js                — MUST be downloaded manually from data-star.dev releases
       logo-symbol.svg            — crimson PM mark (140×98), hardcoded fill="#bf092f"
@@ -53,7 +55,9 @@ go build ./internal/... ./web/... .
 
 ## Implementation status
 
-**Done:** Welcome screen (language picker) + three-step onboarding (business info/timezone/hours → first staff → tool picker), dashboard home screen, settings, Values authoring + validation, Tools CRUD (catalog integrations with per-type credential fields), integration catalog (8 integrations, Indonesian market focus), Task definitions with tool picker, Staff profiles with task + value picker, mobile-first UI (bottom tab bar, FAB, compact card rows, illustrated empty states, icon-only edit/delete buttons), icon-strip collapsible sidebar, light/dark theming with sun/moon icon toggle, logo SVGs.
+**Done:** Welcome screen (language picker) + three-step onboarding (business info/timezone/hours → first staff → tool picker), dashboard home screen, settings, Values authoring + validation, Tools CRUD (catalog integrations with per-type credential fields), integration catalog (8 integrations, Indonesian market focus), Task definitions with tool picker, Staff profiles with task + value picker, mobile-first UI (bottom tab bar, FAB, compact card rows, illustrated empty states, icon-only edit/delete buttons), icon-strip collapsible sidebar, light/dark theming with sun/moon icon toggle, logo SVGs. Accessibility fixes (aria-labels, focus-visible, aria-expanded). Shared templ components (`rowActions`, form helpers). Full CSS token system: spacing/type/weight/z/duration scales in `:root`; DTCG token file at `design/tokens.json`.
+
+**In progress:** Design system extraction — Pencil/Penpot import (Phase 3), component library build (Phase 4). See `.omc/research/ui-review.md`.
 
 **Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 

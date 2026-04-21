@@ -80,8 +80,8 @@
   "hotPaths": [
     {
       "path": "web/static/style.css",
-      "accessCount": 23,
-      "lastAccessed": 1776742537878,
+      "accessCount": 124,
+      "lastAccessed": 1776756980342,
       "type": "file"
     },
     {
@@ -133,15 +133,21 @@
       "type": "file"
     },
     {
-      "path": "web/templates/setup.templ",
-      "accessCount": 4,
-      "lastAccessed": 1776742062042,
+      "path": "CLAUDE.md",
+      "accessCount": 5,
+      "lastAccessed": 1776757910829,
       "type": "file"
     },
     {
       "path": "web/static/CLAUDE.md",
-      "accessCount": 3,
-      "lastAccessed": 1776743822953,
+      "accessCount": 5,
+      "lastAccessed": 1776757922271,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/setup.templ",
+      "accessCount": 4,
+      "lastAccessed": 1776742062042,
       "type": "file"
     },
     {
@@ -187,12 +193,6 @@
       "type": "file"
     },
     {
-      "path": "CLAUDE.md",
-      "accessCount": 2,
-      "lastAccessed": 1776743881942,
-      "type": "file"
-    },
-    {
       "path": "README.md",
       "accessCount": 2,
       "lastAccessed": 1776743885696,
@@ -202,6 +202,12 @@
       "path": "web/static/app.js",
       "accessCount": 1,
       "lastAccessed": 1776742048054,
+      "type": "file"
+    },
+    {
+      "path": "design/tokens.json",
+      "accessCount": 1,
+      "lastAccessed": 1776757514378,
       "type": "file"
     }
   ],

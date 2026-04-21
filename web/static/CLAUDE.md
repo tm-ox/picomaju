@@ -11,13 +11,24 @@ logo-type.svg   — horizontal wordmark lockup (used in onboarding header + foot
 logo-stack.svg  — stacked symbol + wordmark lockup
 ```
 
-## Theming (`style.css`)
+## Theming and token system (`style.css`)
 
-CSS custom properties throughout. Two token blocks:
+CSS custom properties throughout. Token blocks in `:root` (lines 1–111):
 
-- `:root` — light mode (default)
-- `[data-theme="dark"]` — dark mode
+- Palette primitives (`--crimson`, `--navy-dark`, `--navy`, `--teal`)
+- Light mode semantic colors (`--color-*`, `--shadow-*`)
+- Spacing scale (`--space-1` → `--space-13`, 0.125rem–2.5rem)
+- Type scale (`--font-size-2xs` → `--font-size-3xl`, 0.6875rem–1.75rem)
+- Font weight scale (`--font-weight-regular/medium/semibold/bold`)
+- Z-index scale (`--z-sticky/fab/overlay`)
+- Duration scale (`--duration-fast/base/slow`)
+
+Dark mode overrides in `[data-theme="dark"]` (colors only — scales are theme-invariant).
 
 Palette: `#bf092f` crimson, `#132440` dark navy, `#16476a` mid navy, `#3b9797` teal.
 
 Theme toggle switches `data-theme` on `<html>` and persists in `localStorage`. `app.js` is loaded synchronously (no defer) in `<head>` to apply the saved theme before first paint — prevents flash.
+
+## Design tokens
+
+`design/tokens.json` (repo root) is the DTCG-format canonical token file. It mirrors `:root` exactly. A Style Dictionary pipeline to auto-generate CSS from it is deferred — edit `style.css` `:root` and `tokens.json` in sync when changing token values.
