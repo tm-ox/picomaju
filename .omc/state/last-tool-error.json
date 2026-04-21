@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__pencil__get_guidelines",
+  "tool_input_preview": "{\"category\":\"general\"}",
+  "error": "MCP error -32603: Unknown category: \"general\". Valid categories: guide, style",
+  "timestamp": "2026-04-21T07:53:45.742Z",
+  "retry_count": 1
+}

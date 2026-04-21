@@ -16,7 +16,7 @@
 - [x] M8 — Replace raw rgba values with tokens
 - [x] Phase 1 — Normalize CSS spacing/type/weight/z-index scales
 - [x] Phase 2 — Author `design/tokens.json` (DTCG format)
-- [ ] Phase 3 — Import tokens into Penpot/Pencil
+- [x] Phase 3 — Import tokens into Penpot/Pencil
 - [ ] Phase 4 — Build top-10 components in design tool
 
 ---

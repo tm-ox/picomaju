@@ -1,0 +1,6 @@
+{"t":0,"agent":"a422c8a","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"af3e170","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"af35639","agent_type":"claude-code-guide","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"af35639","agent_type":"claude-code-guide","event":"agent_stop","success":true,"duration_ms":20714}
+{"t":0,"agent":"a0a696f","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"a48e5bf","agent_type":"unknown","event":"agent_stop","success":true}

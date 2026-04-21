@@ -1,4 +1,69 @@
 {
-  "updatedAt": "2026-04-21T07:08:41.919Z",
-  "missions": []
+  "updatedAt": "2026-04-21T08:52:42.985Z",
+  "missions": [
+    {
+      "id": "session:b617b9b6-ca88-415e-934e-6b75cefa311d:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-04-21T08:44:33.167Z",
+      "updatedAt": "2026-04-21T08:52:42.985Z",
+      "status": "done",
+      "workerCount": 1,
+      "taskCounts": {
+        "total": 1,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 0,
+        "completed": 1,
+        "failed": 0
+      },
+      "agents": [
+        {
+          "name": "claude-code-guide:af35639",
+          "role": "claude-code-guide",
+          "ownership": "af35639b95691a3e9",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-21T08:52:42.985Z"
+        }
+      ],
+      "timeline": [
+        {
+          "id": "session-start:af35639b95691a3e9:2026-04-21T08:44:33.167Z",
+          "at": "2026-04-21T08:44:33.167Z",
+          "kind": "update",
+          "agent": "claude-code-guide:af35639",
+          "detail": "started claude-code-guide:af35639",
+          "sourceKey": "session-start:af35639b95691a3e9"
+        },
+        {
+          "id": "session-stop:af35639b95691a3e9:2026-04-21T08:44:53.881Z",
+          "at": "2026-04-21T08:44:53.881Z",
+          "kind": "completion",
+          "agent": "claude-code-guide:af35639",
+          "detail": "completed",
+          "sourceKey": "session-stop:af35639b95691a3e9"
+        },
+        {
+          "id": "session-stop:a0a696f630cdcb50f:2026-04-21T08:48:12.530Z",
+          "at": "2026-04-21T08:48:12.530Z",
+          "kind": "completion",
+          "agent": "claude-code-guide:af35639",
+          "detail": "completed",
+          "sourceKey": "session-stop:a0a696f630cdcb50f"
+        },
+        {
+          "id": "session-stop:a48e5bf2590b0668e:2026-04-21T08:52:42.985Z",
+          "at": "2026-04-21T08:52:42.985Z",
+          "kind": "completion",
+          "agent": "claude-code-guide:af35639",
+          "detail": "completed",
+          "sourceKey": "session-stop:a48e5bf2590b0668e"
+        }
+      ]
+    }
+  ]
 }

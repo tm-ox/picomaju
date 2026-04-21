@@ -151,6 +151,12 @@
       "type": "file"
     },
     {
+      "path": "design/tokens.json",
+      "accessCount": 4,
+      "lastAccessed": 1776759072373,
+      "type": "file"
+    },
+    {
       "path": "web/templates/CLAUDE.md",
       "accessCount": 3,
       "lastAccessed": 1776743839286,
@@ -205,9 +211,9 @@
       "type": "file"
     },
     {
-      "path": "design/tokens.json",
+      "path": "design/tokens-penpot.json",
       "accessCount": 1,
-      "lastAccessed": 1776757514378,
+      "lastAccessed": 1776760016777,
       "type": "file"
     }
   ],
