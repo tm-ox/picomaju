@@ -50,12 +50,7 @@ templ valueTable(values []*value.Value, sb SidebarData) {
 						</a>
 					</td>
 					<td>{ fmt.Sprintf("%d", v.Priority) }</td>
-					<td class="actions">
-						<a href={ templ.SafeURL("/values/" + v.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
-						<form method="post" action={ templ.SafeURL("/values/" + v.ID + "/delete") } style="display:contents">
-							<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this value?')" title="Delete">@iconDelete()</button>
-						</form>
-					</td>
+					@rowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
 				</tr>
 			}
 		</tbody>
@@ -63,15 +58,15 @@ templ valueTable(values []*value.Value, sb SidebarData) {
 }
 
 templ ValueFormPage(v *value.Value, sb SidebarData, isNew bool, formErr string) {
-	@Layout(valueFormTitle(isNew), sb) {
+	@Layout(formTitle("Value", isNew), sb) {
 		<div class="page-header">
-			<h1>{ valueFormTitle(isNew) }</h1>
+			<h1>{ formTitle("Value", isNew) }</h1>
 			<a href="/values" class="btn btn-secondary">Cancel</a>
 		</div>
 		if formErr != "" {
 			<div class="alert alert-error">{ formErr }</div>
 		}
-		<form method="post" action={ templ.SafeURL(valueFormAction(v.ID, isNew)) } class="card">
+		<form method="post" action={ templ.SafeURL(formAction("/values", v.ID, isNew)) } class="card">
 			<div class="field">
 				<label for="id">ID</label>
 				if isNew {
@@ -145,20 +140,6 @@ templ ValidationFragment(res value.ValidationResult) {
 			</div>
 		}
 	</div>
-}
-
-func valueFormTitle(isNew bool) string {
-	if isNew {
-		return "New Value"
-	}
-	return "Edit Value"
-}
-
-func valueFormAction(id string, isNew bool) string {
-	if isNew {
-		return "/values"
-	}
-	return "/values/" + id
 }
 
 func categoryLabel(cats []value.Category, id string) string {

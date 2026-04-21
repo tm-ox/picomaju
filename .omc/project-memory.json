@@ -1,0 +1,191 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1776740758053,
+  "projectRoot": "/home/tm/Documents/40_projects/43_picomaju",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Go",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "go.mod"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "go",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "internal": {
+      "path": "internal",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1776740758048,
+      "keyFiles": [
+        "CLAUDE.md"
+      ]
+    },
+    "web": {
+      "path": "web",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1776740758050,
+      "keyFiles": []
+    },
+    "internal/api": {
+      "path": "internal/api",
+      "purpose": "API routes",
+      "fileCount": 5,
+      "lastAccessed": 1776740758051,
+      "keyFiles": [
+        "helpers.go",
+        "router.go",
+        "sse.go"
+      ]
+    },
+    "web/static": {
+      "path": "web/static",
+      "purpose": "Static files",
+      "fileCount": 6,
+      "lastAccessed": 1776740758051,
+      "keyFiles": [
+        "CLAUDE.md",
+        "logo-stack.svg",
+        "logo-symbol.svg"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "web/static/style.css",
+      "accessCount": 23,
+      "lastAccessed": 1776742537878,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/staff.templ",
+      "accessCount": 14,
+      "lastAccessed": 1776742435579,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/tasks.templ",
+      "accessCount": 13,
+      "lastAccessed": 1776742433387,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/layout.templ",
+      "accessCount": 10,
+      "lastAccessed": 1776742057626,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/values.templ",
+      "accessCount": 10,
+      "lastAccessed": 1776742425178,
+      "type": "file"
+    },
+    {
+      "path": "web/templates",
+      "accessCount": 9,
+      "lastAccessed": 1776742370561,
+      "type": "directory"
+    },
+    {
+      "path": "web/templates/tools.templ",
+      "accessCount": 7,
+      "lastAccessed": 1776742392156,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/sidebar.templ",
+      "accessCount": 5,
+      "lastAccessed": 1776741984923,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/helpers.go",
+      "accessCount": 5,
+      "lastAccessed": 1776742353435,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/setup.templ",
+      "accessCount": 4,
+      "lastAccessed": 1776742062042,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/settings.templ",
+      "accessCount": 2,
+      "lastAccessed": 1776741027231,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/empty_state.templ",
+      "accessCount": 2,
+      "lastAccessed": 1776741027549,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/icons.templ",
+      "accessCount": 2,
+      "lastAccessed": 1776741027934,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/dashboard.templ",
+      "accessCount": 2,
+      "lastAccessed": 1776741028741,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1776741044411,
+      "type": "directory"
+    },
+    {
+      "path": "web/templates/shared.templ",
+      "accessCount": 2,
+      "lastAccessed": 1776742478761,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/CLAUDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1776741037993,
+      "type": "file"
+    },
+    {
+      "path": "web/static/app.js",
+      "accessCount": 1,
+      "lastAccessed": 1776742048054,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

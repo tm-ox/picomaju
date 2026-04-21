@@ -24,13 +24,17 @@ templ sidebarHeader(label string) {
 	<div class="sidebar-header">
 		<button
 			class="sidebar-toggle"
-			title="Collapse sidebar"
+			aria-label="Collapse sidebar"
+			aria-expanded="true"
+			aria-controls="sidebar"
 			onclick="
 				var s = document.getElementById('sidebar');
 				var collapsed = s.classList.toggle('collapsed');
 				localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+				this.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+				this.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
 			"
-		>&#8249;</button>
+		><span aria-hidden="true">&#8249;</span></button>
 		<span class="sidebar-heading">{ label }</span>
 	</div>
 }

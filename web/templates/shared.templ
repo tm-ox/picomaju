@@ -1,0 +1,10 @@
+package templates
+
+templ rowActions(editHref, deleteHref, noun string) {
+	<td class="actions">
+		<a href={ templ.SafeURL(editHref) } class="btn btn-icon" title="Edit">@iconEdit()</a>
+		<form method="post" action={ templ.SafeURL(deleteHref) } style="display:contents">
+			<button type="submit" class="btn btn-icon btn-icon-danger" data-noun={ noun } onclick="return confirm('Delete this '+this.dataset.noun+'?')" title="Delete">@iconDelete()</button>
+		</form>
+	</td>
+}

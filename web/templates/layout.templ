@@ -11,15 +11,8 @@ templ Layout(title string, sb SidebarData) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 			<title>{ title } — PicoMaju</title>
 			<link rel="stylesheet" href="/static/style.css"/>
+			<script src="/static/app.js"></script>
 			<script type="module" src="/static/datastar.js"></script>
-			<!-- Apply saved theme before first paint -->
-			<script>
-				(function(){
-					var t = localStorage.getItem('theme') ||
-						(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-					document.documentElement.setAttribute('data-theme', t);
-				})();
-			</script>
 		</head>
 		<body>
 			if sb.HideSidebar {
@@ -55,17 +48,19 @@ templ Layout(title string, sb SidebarData) {
 					<div class="topnav-right">
 						<button
 							class="theme-toggle"
-							title="Toggle theme"
+							aria-label="Toggle theme"
+							aria-pressed="false"
 							onclick="
 								var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
 								document.documentElement.setAttribute('data-theme', t);
 								localStorage.setItem('theme', t);
+								this.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
 							"
 						>
 							@iconMoon()
 							@iconSun()
 						</button>
-						<a href="/settings" class="topnav-settings" title="Settings">&#9881;</a>
+						<a href="/settings" class="topnav-settings" aria-label="Settings"><span aria-hidden="true">&#9881;</span></a>
 					</div>
 				</header>
 				<div class="app-body">
@@ -79,15 +74,6 @@ templ Layout(title string, sb SidebarData) {
 				</footer>
 				@bottomTabs(sb)
 				@fab(sb)
-				<!-- Restore sidebar collapsed state after render -->
-				<script>
-					(function(){
-						if (localStorage.getItem('sidebar-collapsed') === '1') {
-							var s = document.getElementById('sidebar');
-							if (s) s.classList.add('collapsed');
-						}
-					})();
-				</script>
 			}
 		</body>
 	</html>

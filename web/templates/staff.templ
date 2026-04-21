@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"fmt"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/value"
@@ -34,14 +33,9 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 					for _, m := range members {
 						<tr>
 							<td>{ m.Label }</td>
-							<td>{ staffCount(len(m.Tasks), "task") }</td>
-							<td>{ staffCount(len(m.ValueCategories)+len(m.Values), "value ref") }</td>
-							<td class="actions">
-								<a href={ templ.SafeURL("/staff/" + m.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
-								<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/delete") } style="display:contents">
-									<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this staff member?')" title="Delete">@iconDelete()</button>
-								</form>
-							</td>
+							<td>{ countWord(len(m.Tasks), "task", "tasks") }</td>
+							<td>{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</td>
+							@rowActions("/staff/"+m.ID+"/edit", "/staff/"+m.ID+"/delete", "staff member")
 						</tr>
 					}
 				</tbody>
@@ -51,15 +45,15 @@ templ StaffListPage(members []staff.Staff, sb SidebarData) {
 }
 
 templ StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, sb SidebarData, isNew bool, formErr string) {
-	@Layout(staffFormTitle(isNew), sb) {
+	@Layout(formTitle("Staff", isNew), sb) {
 		<div class="page-header">
-			<h1>{ staffFormTitle(isNew) }</h1>
+			<h1>{ formTitle("Staff", isNew) }</h1>
 			<a href="/staff" class="btn btn-secondary">Cancel</a>
 		</div>
 		if formErr != "" {
 			<div class="alert alert-error">{ formErr }</div>
 		}
-		<form method="post" action={ templ.SafeURL(staffFormAction(m.ID, isNew)) }>
+		<form method="post" action={ templ.SafeURL(formAction("/staff", m.ID, isNew)) }>
 			<div class="card">
 				<div class="field">
 					<label for="id">ID</label>
@@ -141,28 +135,4 @@ templ staffValuePicker(catID string, values []*value.Value, selected []string) {
 			}
 		}
 	</div>
-}
-
-func staffFormTitle(isNew bool) string {
-	if isNew {
-		return "New Staff"
-	}
-	return "Edit Staff"
-}
-
-func staffFormAction(id string, isNew bool) string {
-	if isNew {
-		return "/staff"
-	}
-	return "/staff/" + id
-}
-
-func staffCount(n int, unit string) string {
-	if n == 0 {
-		return "—"
-	}
-	if n == 1 {
-		return "1 " + unit
-	}
-	return fmt.Sprintf("%d %ss", n, unit)
 }

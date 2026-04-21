@@ -29,12 +29,7 @@ templ ToolListPage(tools []tool.Tool, sb SidebarData) {
 						<tr>
 							<td>{ t.Label }</td>
 							<td><span class="cat-tag">{ t.Type }</span></td>
-							<td class="actions">
-								<a href={ templ.SafeURL("/tools/" + t.ID + "/edit") } class="btn btn-icon" title="Edit">@iconEdit()</a>
-								<form method="post" action={ templ.SafeURL("/tools/" + t.ID + "/delete") } style="display:contents">
-									<button type="submit" class="btn btn-icon btn-icon-danger" onclick="return confirm('Delete this tool?')" title="Delete">@iconDelete()</button>
-								</form>
-							</td>
+							@rowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
 						</tr>
 					}
 				</tbody>

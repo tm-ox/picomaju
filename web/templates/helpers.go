@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"fmt"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
@@ -27,4 +28,28 @@ func includesStr(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func formTitle(noun string, isNew bool) string {
+	if isNew {
+		return "New " + noun
+	}
+	return "Edit " + noun
+}
+
+func formAction(base, id string, isNew bool) string {
+	if isNew {
+		return base
+	}
+	return base + "/" + id
+}
+
+func countWord(n int, singular, plural string) string {
+	if n == 0 {
+		return "—"
+	}
+	if n == 1 {
+		return "1 " + singular
+	}
+	return fmt.Sprintf("%d %s", n, plural)
 }
