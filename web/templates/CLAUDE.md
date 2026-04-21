@@ -7,6 +7,7 @@ layout.templ        — base HTML shell; topnav (avatar | Home+Values+Tools+Task
                       bottomTabs (5-tab mobile bar); fab (section floating action button);
                       tab/fab icon glyphs; initials() helper; logo-type.svg during onboarding
 dashboard.templ     — DashboardPage: centered logo-symbol.svg home screen
+shared.templ        — rowActions(editHref, deleteHref, noun): shared edit-link + delete-form used in all list tables
 sidebar.templ       — contextual sidebar (sidebarHeader with toggle; switches per active section)
 empty_state.templ   — EmptyState component (illustrated card + CTA); EmptyIconValues/Tools/Tasks/Staff glyphs
 icons.templ         — toolIcon(type) brand SVGs; categoryIcon/taskItemIcon/staffItemIcon sidebar glyphs;

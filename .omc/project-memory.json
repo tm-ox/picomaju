@@ -139,6 +139,24 @@
       "type": "file"
     },
     {
+      "path": "web/static/CLAUDE.md",
+      "accessCount": 3,
+      "lastAccessed": 1776743822953,
+      "type": "file"
+    },
+    {
+      "path": "web/templates/CLAUDE.md",
+      "accessCount": 3,
+      "lastAccessed": 1776743839286,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1776743865086,
+      "type": "directory"
+    },
+    {
       "path": "web/templates/settings.templ",
       "accessCount": 2,
       "lastAccessed": 1776741027231,
@@ -163,21 +181,21 @@
       "type": "file"
     },
     {
-      "path": "",
-      "accessCount": 2,
-      "lastAccessed": 1776741044411,
-      "type": "directory"
-    },
-    {
       "path": "web/templates/shared.templ",
       "accessCount": 2,
       "lastAccessed": 1776742478761,
       "type": "file"
     },
     {
-      "path": "web/templates/CLAUDE.md",
-      "accessCount": 1,
-      "lastAccessed": 1776741037993,
+      "path": "CLAUDE.md",
+      "accessCount": 2,
+      "lastAccessed": 1776743881942,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 2,
+      "lastAccessed": 1776743885696,
       "type": "file"
     },
     {

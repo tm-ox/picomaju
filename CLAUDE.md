@@ -15,6 +15,7 @@ picomaju/
     templates/
     static/
       style.css
+      app.js                     — theme init (pre-paint) + sidebar restore; loaded sync in <head>
       datastar.js                — MUST be downloaded manually from data-star.dev releases
       logo-symbol.svg            — crimson PM mark (140×98), hardcoded fill="#bf092f"
       logo-type.svg              — horizontal wordmark lockup

@@ -128,11 +128,12 @@ web/
   templates/             templ components
     layout.templ         base shell (topnav, sidebar, bottom tabs, FAB, footer)
     dashboard.templ      home screen (centered logo symbol)
+    shared.templ         rowActions component (edit + delete) used in all list tables
     sidebar.templ        contextual collapsible sidebar
     empty_state.templ    illustrated empty state component + section icons
     icons.templ          tool brand SVGs, nav/tab icons, edit/delete/theme icons
     setup.templ          welcome screen + three-step onboarding pages
     values/tools/tasks/staff.templ  section pages + forms
-  static/                style.css, datastar.js (not committed), logo SVGs
+  static/                style.css, app.js, datastar.js (not committed), logo SVGs
 AGENTS.md                instructions for AI agents working on this codebase
 ```
