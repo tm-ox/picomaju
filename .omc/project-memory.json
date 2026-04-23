@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1776740758053,
+  "lastScanned": 1776923992216,
   "projectRoot": "/home/tm/Documents/40_projects/43_picomaju",
   "techStack": {
     "languages": [
@@ -38,11 +38,24 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "design": {
+      "path": "design",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1776923992209,
+      "keyFiles": [
+        "URWGothic-Book.ttf",
+        "URWGothic-Demi.ttf",
+        "buttons.pen",
+        "tokens-penpot.json",
+        "tokens.json"
+      ]
+    },
     "internal": {
       "path": "internal",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1776740758048,
+      "lastAccessed": 1776923992213,
       "keyFiles": [
         "CLAUDE.md"
       ]
@@ -51,14 +64,14 @@
       "path": "web",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1776740758050,
+      "lastAccessed": 1776923992214,
       "keyFiles": []
     },
     "internal/api": {
       "path": "internal/api",
       "purpose": "API routes",
       "fileCount": 5,
-      "lastAccessed": 1776740758051,
+      "lastAccessed": 1776923992214,
       "keyFiles": [
         "helpers.go",
         "router.go",
@@ -68,20 +81,26 @@
     "web/static": {
       "path": "web/static",
       "purpose": "Static files",
-      "fileCount": 6,
-      "lastAccessed": 1776740758051,
+      "fileCount": 7,
+      "lastAccessed": 1776923992215,
       "keyFiles": [
         "CLAUDE.md",
-        "logo-stack.svg",
-        "logo-symbol.svg"
+        "app.js",
+        "logo-stack.svg"
       ]
     }
   },
   "hotPaths": [
     {
       "path": "web/static/style.css",
-      "accessCount": 124,
-      "lastAccessed": 1776756980342,
+      "accessCount": 150,
+      "lastAccessed": 1776926629961,
+      "type": "file"
+    },
+    {
+      "path": "design/tokens-penpot.json",
+      "accessCount": 21,
+      "lastAccessed": 1776906490493,
       "type": "file"
     },
     {
@@ -115,6 +134,12 @@
       "type": "directory"
     },
     {
+      "path": "design/tokens.json",
+      "accessCount": 9,
+      "lastAccessed": 1776926090237,
+      "type": "file"
+    },
+    {
       "path": "web/templates/tools.templ",
       "accessCount": 7,
       "lastAccessed": 1776742392156,
@@ -146,14 +171,8 @@
     },
     {
       "path": "web/templates/setup.templ",
-      "accessCount": 4,
-      "lastAccessed": 1776742062042,
-      "type": "file"
-    },
-    {
-      "path": "design/tokens.json",
-      "accessCount": 4,
-      "lastAccessed": 1776759072373,
+      "accessCount": 5,
+      "lastAccessed": 1776906493746,
       "type": "file"
     },
     {
@@ -208,12 +227,6 @@
       "path": "web/static/app.js",
       "accessCount": 1,
       "lastAccessed": 1776742048054,
-      "type": "file"
-    },
-    {
-      "path": "design/tokens-penpot.json",
-      "accessCount": 1,
-      "lastAccessed": 1776760016777,
       "type": "file"
     }
   ],
