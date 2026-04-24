@@ -1,0 +1,104 @@
+package templates
+
+import (
+	"picomaju/ui/components/alert"
+	"picomaju/ui/components/button"
+	"picomaju/ui/components/label"
+)
+
+templ WorkshopPage() {
+	@Layout("Workshop") {
+		<div class="max-w-2xl mx-auto px-6 py-12 flex flex-col gap-12">
+			<div>
+				<h1 class="text-2xl font-bold text-foreground mb-1">Workshop</h1>
+				<p class="text-sm text-muted-foreground">Component styleguide for the Picomaju UI.</p>
+			</div>
+			@workshopSection("Button") {
+				<div class="flex flex-wrap gap-3">
+					@button.Button() {
+						Default
+					}
+					@button.Button(button.Props{Variant: button.VariantOutline}) {
+						Outline
+					}
+					@button.Button(button.Props{Variant: button.VariantSecondary}) {
+						Secondary
+					}
+					@button.Button(button.Props{Variant: button.VariantDestructive}) {
+						Destructive
+					}
+					@button.Button(button.Props{Variant: button.VariantGhost}) {
+						Ghost
+					}
+					@button.Button(button.Props{Variant: button.VariantLink}) {
+						Link
+					}
+				</div>
+				<div class="flex flex-wrap gap-3 mt-4">
+					@button.Button(button.Props{Size: button.SizeSm}) {
+						Small
+					}
+					@button.Button() {
+						Default
+					}
+					@button.Button(button.Props{Size: button.SizeLg}) {
+						Large
+					}
+				</div>
+				<div class="mt-4">
+					@button.Button(button.Props{FullWidth: true}) {
+						Full width
+					}
+				</div>
+			}
+			@workshopSection("Alert") {
+				<div class="flex flex-col gap-3">
+					@alert.Alert() {
+						@alert.Title() {
+							Heads up
+						}
+						@alert.Description() {
+							This is a default alert with a title and description.
+						}
+					}
+					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+						@alert.Title() {
+							Something went wrong
+						}
+						@alert.Description() {
+							Could not save your settings. Please try again.
+						}
+					}
+				</div>
+			}
+			@workshopSection("Theme") {
+				<p class="text-sm text-muted-foreground">Toggle is fixed top-right on all pages. Persists to <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">localStorage</code> under key <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">theme</code>. Shared with the legacy frontend.</p>
+				<div class="flex items-center gap-3">
+					@ThemeToggle()
+					<span class="text-sm text-muted-foreground">← click to toggle (also visible top-right)</span>
+				</div>
+			}
+			@workshopSection("Label + Select") {
+				<div class="flex flex-col gap-1.5 max-w-xs">
+					@label.Label(label.Props{For: "lang-demo"}) {
+						Language / Bahasa
+					}
+					<select
+						id="lang-demo"
+						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring"
+					>
+						<option>English</option>
+						<option>Bahasa Indonesia</option>
+					</select>
+				</div>
+			}
+		</div>
+	}
+}
+
+templ workshopSection(title string) {
+	<section class="flex flex-col gap-4">
+		<h2 class="text-base font-semibold text-foreground border-b border-border pb-2">{ title }</h2>
+		{ children... }
+	</section>
+}

@@ -14,6 +14,7 @@ import (
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
+	"picomaju/ui/templates"
 )
 
 //go:embed web/static
@@ -60,6 +61,17 @@ func main() {
 
 	addr := env("ADDR", ":18800")
 	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, settingsStore, dataDir, static)
+
+	// ui/assets served from disk during active development
+	r.Handle("GET /ui/assets/*", http.StripPrefix("/ui/assets/", http.FileServer(http.Dir("ui/assets"))))
+
+	// new frontend routes
+	r.Get("/welcome", func(w http.ResponseWriter, req *http.Request) {
+		templates.WelcomePage("", "").Render(req.Context(), w)
+	})
+	r.Get("/ui/workshop", func(w http.ResponseWriter, req *http.Request) {
+		templates.WorkshopPage().Render(req.Context(), w)
+	})
 
 	log.Printf("picomaju listening on %s (config: %s)", addr, configFile)
 	if err := http.ListenAndServe(addr, r); err != nil {

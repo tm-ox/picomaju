@@ -1,7 +1,0 @@
-{
-  "tool_name": "mcp__pencil__open_document",
-  "tool_input_preview": "{\"filePathOrNew\":\"/home/tm/Documents/40_projects/43_picomaju/design/buttons.pen\"}",
-  "error": "required argument \"filePathOrTemplate\" not found",
-  "timestamp": "2026-04-23T06:35:24.905Z",
-  "retry_count": 1
-}

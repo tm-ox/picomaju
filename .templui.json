@@ -1,0 +1,7 @@
+{
+  "componentsDir": "ui/components",
+  "utilsDir": "ui/utils",
+  "moduleName": "picomaju",
+  "jsDir": "ui/assets/js",
+  "jsPublicPath": "/assets/js"
+}

@@ -8,7 +8,8 @@ import (
 
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
-	"picomaju/web/templates"
+	webtemplates "picomaju/web/templates"
+	uitemplates "picomaju/ui/templates"
 )
 
 // ─── Welcome screen ─────────────────────────────────────────────────────────
@@ -19,12 +20,12 @@ func (h *uiHandler) welcomePage(w http.ResponseWriter, r *http.Request) {
 	if cfg != nil && len(cfg.Languages) > 0 {
 		lang = cfg.Languages[0]
 	}
-	templates.WelcomePage(lang, "").Render(r.Context(), w)
+	webtemplates.WelcomePage(lang, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		templates.WelcomePage("", err.Error()).Render(r.Context(), w)
+		uitemplates.WelcomePage("", err.Error()).Render(r.Context(), w)
 		return
 	}
 	lang := strings.TrimSpace(r.FormValue("language"))
@@ -38,7 +39,7 @@ func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 	}
 	cfg.Languages = []string{lang}
 	if err := h.settings.Save(cfg); err != nil {
-		templates.WelcomePage(lang, "Could not save: "+err.Error()).Render(r.Context(), w)
+		uitemplates.WelcomePage(lang, "Could not save: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -48,18 +49,18 @@ func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 // ─── Step 2 — First staff profile ──────────────────────────────────────────
 
 func (h *uiHandler) firstStaffPage(w http.ResponseWriter, r *http.Request) {
-	templates.FirstStaffPage("", "", "").Render(r.Context(), w)
+	webtemplates.FirstStaffPage("", "", "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		templates.FirstStaffPage("", "", err.Error()).Render(r.Context(), w)
+		webtemplates.FirstStaffPage("", "", err.Error()).Render(r.Context(), w)
 		return
 	}
 	label := strings.TrimSpace(r.FormValue("label"))
 	role := strings.TrimSpace(r.FormValue("role"))
 	if label == "" {
-		templates.FirstStaffPage(label, role, "Please provide a profile name.").Render(r.Context(), w)
+		webtemplates.FirstStaffPage(label, role, "Please provide a profile name.").Render(r.Context(), w)
 		return
 	}
 
@@ -73,7 +74,7 @@ func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.staff.Create(m); err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
-			templates.FirstStaffPage(label, role, err.Error()).Render(r.Context(), w)
+			webtemplates.FirstStaffPage(label, role, err.Error()).Render(r.Context(), w)
 			return
 		}
 	}

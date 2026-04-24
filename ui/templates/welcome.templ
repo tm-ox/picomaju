@@ -1,0 +1,100 @@
+package templates
+
+import (
+	"picomaju/ui/components/alert"
+	"picomaju/ui/components/button"
+	"picomaju/ui/components/label"
+)
+
+templ WelcomePage(lang, formErr string) {
+	@Layout("Welcome — Picomaju") {
+		<div class="min-h-dvh flex flex-col items-center">
+			<div class="w-full max-w-2xl flex flex-col flex-1 px-6 py-12 gap-12">
+				<div class="flex flex-col items-center gap-8 pt-10">
+					<img src="/static/logo-symbol.svg" alt="" class="w-20 h-auto"/>
+					<div class="text-center">
+						<h1 class="text-3xl font-bold tracking-tight text-foreground leading-snug mb-3">
+							Your AI <em class="not-italic text-primary">staff</em>, on your terms.
+						</h1>
+						<p class="text-muted-foreground leading-relaxed">
+							Build, configure, and orchestrate AI agents that run on your device and speak your business.
+						</p>
+						<ul class="mt-6 flex flex-col gap-4 text-left">
+							<li class="flex items-start gap-3">
+								<span class="mt-0.5 shrink-0 size-5 text-primary" aria-hidden="true">
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+										<circle cx="12" cy="8" r="3.5"></circle>
+										<path d="M4.5 20c.8-3.8 4-6 7.5-6s6.7 2.2 7.5 6"></path>
+									</svg>
+								</span>
+								<div class="flex flex-col gap-0.5">
+									<span class="text-sm font-semibold text-foreground">Staff profiles</span>
+									<span class="text-sm text-muted-foreground">Receptionist, clerk, analyst — roles you can shape.</span>
+								</div>
+							</li>
+							<li class="flex items-start gap-3">
+								<span class="mt-0.5 shrink-0 size-5 text-primary" aria-hidden="true">
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+										<path d="M14.7 6.3a4 4 0 105.7 5.7l-2.8-2.8 1.4-1.4 2.8 2.8a6 6 0 11-8.5-8.5l2.8 2.8-1.4 1.4z"></path>
+										<path d="M3 21l7.5-7.5"></path>
+									</svg>
+								</span>
+								<div class="flex flex-col gap-0.5">
+									<span class="text-sm font-semibold text-foreground">Connect your tools</span>
+									<span class="text-sm text-muted-foreground">WhatsApp, Shopee, Xendit, Calendar &amp; more.</span>
+								</div>
+							</li>
+							<li class="flex items-start gap-3">
+								<span class="mt-0.5 shrink-0 size-5 text-primary" aria-hidden="true">
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+										<path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.3 6.8 19l1-5.8L3.6 9.1l5.8-.8L12 3z"></path>
+									</svg>
+								</span>
+								<div class="flex flex-col gap-0.5">
+									<span class="text-sm font-semibold text-foreground">Your values, enforced</span>
+									<span class="text-sm text-muted-foreground">Tone, rules, do's and don'ts — baked in.</span>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="flex flex-col gap-6 pb-safe">
+					if formErr != "" {
+						@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+							@alert.Description() {
+								{ formErr }
+							}
+						}
+					}
+					<form method="post" action="/welcome" class="flex flex-col gap-4">
+						<div class="flex flex-col gap-1.5">
+							@label.Label(label.Props{For: "language"}) {
+								Language / Bahasa
+							}
+							<select
+								id="language"
+								name="language"
+								class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring"
+							>
+								@welcomeLangOption("en", "English", lang == "en" || lang == "")
+								@welcomeLangOption("id", "Bahasa Indonesia", lang == "id")
+							</select>
+						</div>
+						@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+							Get started
+						}
+					</form>
+					<p class="text-sm text-muted-foreground text-center">Runs entirely on your device.</p>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ welcomeLangOption(value, label string, selected bool) {
+	if selected {
+		<option value={ value } selected>{ label }</option>
+	} else {
+		<option value={ value }>{ label }</option>
+	}
+}

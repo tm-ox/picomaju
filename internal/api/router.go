@@ -30,6 +30,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	// Paths that must work before the data dir is configured.
 	setupPaths := map[string]bool{
 		"/welcome":               true,
+		"/legacy/welcome":        true,
 		"/setup":                 true,
 		"/setup/first-staff":     true,
 		"/setup/integrations":    true,
@@ -40,7 +41,8 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			if !ui.configured() &&
 				!setupPaths[req.URL.Path] &&
-				!strings.HasPrefix(req.URL.Path, "/static/") {
+				!strings.HasPrefix(req.URL.Path, "/static/") &&
+				!strings.HasPrefix(req.URL.Path, "/ui/") {
 				http.Redirect(w, req, "/welcome", http.StatusSeeOther)
 				return
 			}
@@ -49,7 +51,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	})
 
 	// Setup (onboarding) — welcome + 3 steps
-	r.Get("/welcome", ui.welcomePage)                   // welcome — language picker
+	r.Get("/legacy/welcome", ui.welcomePage)            // legacy — kept until new UI is complete
 	r.Post("/welcome", ui.completeWelcome)              //   -> /setup
 	r.Get("/setup", ui.setupPage)                       // step 1 — business + data dir + tz + hours
 	r.Post("/setup", ui.completeSetup)                  //   -> /setup/first-staff

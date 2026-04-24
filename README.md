@@ -41,7 +41,9 @@ Everything in Picomaju maps to four building blocks:
 - **Go** — `chi/v5` router, `yaml.v3`, `a-h/templ`
 - **templ** — server-side HTML templates compiled to Go
 - **datastar** — SSE-based reactivity (validate previews stream into the page without a full reload)
-- No Node.js, no build pipeline beyond `templ generate`
+- **templui** — component library (CLI workflow; source in `ui/components/`)
+- **Tailwind CSS v4** — CSS-first config via `@theme`; standalone CLI binary (no Node.js)
+- No Node.js, no npm
 
 ---
 
@@ -52,6 +54,8 @@ git clone <repo>
 cd picomaju
 
 # Download datastar.js from https://data-star.dev (place in web/static/)
+# Build Tailwind CSS output
+tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css
 
 DEV=1 go run .
 ```
@@ -65,17 +69,25 @@ Open `http://localhost:18800`. First visit runs a welcome screen then three onbo
 
 No env vars, no pre-created directories.
 
-`DEV=1` serves static files from disk so CSS changes apply on browser refresh without rebuilding.
-
 ---
 
 ## Development
 
-After editing any `.templ` file:
+Hot reload (recommended):
+
+```sh
+task dev
+# access via http://localhost:7331
+```
+
+Saving any `.templ` or `.go` file triggers auto-rebuild and browser reload. CSS changes rebuild automatically; manual browser refresh applies them.
+
+Manual workflow:
 
 ```sh
 templ generate
 go build ./internal/... ./web/... .
+tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css
 ```
 
 ---
@@ -103,37 +115,35 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 
 ## Project status
 
-**Current:** Welcome screen (language picker) + three-step onboarding (business info/timezone/hours → first staff profile → tool picker), dashboard home screen, Values authoring + validation, Tools management (catalog integrations with per-type credential fields), Task definitions, Staff profiles, mobile-first UI (fixed bottom tab bar, floating action button, compact card rows, illustrated empty states), icon-strip collapsible sidebar, light/dark theming with icon toggle.
+**Current:** Full legacy UI complete across all sections (onboarding, dashboard, values, tools, tasks, staff, settings). New frontend (`/ui`) in progress — welcome screen migrated, component workshop at `/ui/workshop`. Both frontends run simultaneously; legacy routes preserved under `/legacy/*` during migration.
 
-**Deferred:** Compiled output to multiple files (AGENTS.md, SOUL.md, picoclaw config.json tool injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
+**Deferred:** Compiled output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
 ---
 
 ## Repo layout
 
 ```
-main.go                  entry point
+main.go                  entry point; mounts both /web and /ui routes
+Taskfile.yml             task dev (hot reload), task build:css
+.templui.json            templui CLI config
 internal/
-  settings/              config file store (business_name, data_dir, languages, timezone, hours)
-  value/                 Value model, file store, validator, category defaults
-  tool/                  Tool model + store (tools.json); Integration catalog (catalog.go)
-  task/                  Task model + store (tasks.json)
-  staff/                 Staff model + store (staff.json) — agent profiles
+  settings/              config file store
+  value/ tool/ task/ staff/  domain models + file stores
   api/                   HTTP handlers (HTML UI + SSE)
-    ui.go                core page handlers + sidebarData helper
-    ui_onboarding.go     welcome screen handlers + onboarding step 2 (first staff)
     router.go            all routes + setup gate middleware
-    sse.go               SSEMergeFragment for datastar
-web/
-  templates/             templ components
-    layout.templ         base shell (topnav, sidebar, bottom tabs, FAB, footer)
-    dashboard.templ      home screen (centered logo symbol)
-    shared.templ         rowActions component (edit + delete) used in all list tables
-    sidebar.templ        contextual collapsible sidebar
-    empty_state.templ    illustrated empty state component + section icons
-    icons.templ          tool brand SVGs, nav/tab icons, edit/delete/theme icons
-    setup.templ          welcome screen + three-step onboarding pages
-    values/tools/tasks/staff.templ  section pages + forms
+    ui.go                core page handlers
+    ui_onboarding.go     onboarding step handlers
+web/                     legacy frontend (preserved during migration)
+  templates/             templ components (layout, all section pages)
   static/                style.css, app.js, datastar.js (not committed), logo SVGs
-AGENTS.md                instructions for AI agents working on this codebase
+ui/                      new frontend (templui + Tailwind CSS v4)
+  assets/css/input.css   Tailwind @theme config + brand tokens (oklch)
+  assets/css/output.css  generated; gitignored
+  assets/js/             templui component JS
+  components/            templui components (CLI workflow)
+  utils/templui.go       TwMerge + script helpers
+  templates/             layout, welcome, workshop
+design/
+  tokens.json            W3C DTCG design tokens (canonical)
 ```

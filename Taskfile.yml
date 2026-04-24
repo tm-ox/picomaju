@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  templ:
+    desc: Watch templ files and regenerate
+    cmds:
+      - templ generate --watch --proxy="http://localhost:18800" --cmd="go run ./main.go" --open-browser=false
+
+  tailwind:
+    desc: Watch Tailwind CSS changes
+    cmds:
+      - tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css --watch
+
+  dev:
+    desc: Start dev server with hot reload
+    cmds:
+      - task --parallel tailwind templ
+
+  build:css:
+    desc: Build CSS for production
+    cmds:
+      - tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css --minify

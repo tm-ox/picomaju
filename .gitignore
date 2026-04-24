@@ -4,5 +4,8 @@ picomaju
 # Datastar — download manually from data-star.dev releases
 web/static/datastar.js
 
+# Generated CSS — run `tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css`
+ui/assets/css/output.css
+
 # OS
 .DS_Store
