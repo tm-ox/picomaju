@@ -1,0 +1,196 @@
+package templates
+
+import (
+	"strconv"
+	"picomaju/internal/tool"
+	"picomaju/ui/components/alert"
+	"picomaju/ui/components/button"
+	"picomaju/ui/components/input"
+	"picomaju/ui/components/label"
+)
+
+// ─── Shared ──────────────────────────────────────────────────────────────────
+
+templ setupProgress(step, total int) {
+	<div class="flex flex-col gap-2">
+		<h5>Step { strconv.Itoa(step) } of { strconv.Itoa(total) }</h5>
+		<div class="flex gap-1.5">
+			for i := 1; i <= total; i++ {
+				if i <= step {
+					<div class="h-1 flex-1 rounded-full bg-primary"></div>
+				} else {
+					<div class="h-1 flex-1 rounded-full bg-border"></div>
+				}
+			}
+		</div>
+	</div>
+}
+
+// ─── Step 1 — About your business ────────────────────────────────────────────
+
+templ SetupStep1Page(businessName, dataDir, timezone, hours, formErr string) {
+	@Layout("Setup — Picomaju") {
+		<div class="min-h-dvh flex flex-col items-center">
+			<div class="w-full max-w-2xl flex flex-col px-6 py-12 gap-8">
+				@setupProgress(1, 3)
+				<div>
+					<h1>About your business</h1>
+					<p>Tell us about your business and where its data should live. You can change this later.</p>
+				</div>
+				if formErr != "" {
+					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+						@alert.Description() {
+							{ formErr }
+						}
+					}
+				}
+				<form method="post" action="/setup" class="flex flex-col gap-5">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "business_name"}) {
+							Business name
+						}
+						@input.Input(input.Props{ID: "business_name", Name: "business_name", Value: businessName, Placeholder: "Acme Co.", Required: true})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "data_dir"}) {
+							Data directory
+						}
+						@input.Input(input.Props{ID: "data_dir", Name: "data_dir", Value: dataDir, Required: true})
+						<div class="text-sm text-muted-foreground">Picomaju will create this folder if it does not exist.</div>
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "timezone"}) {
+							Timezone
+						}
+						<select id="timezone" name="timezone">
+							@tzOption("Asia/Jakarta", timezone)
+							@tzOption("Asia/Makassar", timezone)
+							@tzOption("Asia/Jayapura", timezone)
+							@tzOption("Asia/Singapore", timezone)
+							@tzOption("Asia/Bangkok", timezone)
+							@tzOption("Asia/Hong_Kong", timezone)
+							@tzOption("Asia/Tokyo", timezone)
+							@tzOption("Australia/Sydney", timezone)
+							@tzOption("Europe/London", timezone)
+							@tzOption("America/New_York", timezone)
+							@tzOption("UTC", timezone)
+						</select>
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "hours"}) {
+							Operating hours
+						}
+						@input.Input(input.Props{ID: "hours", Name: "hours", Value: hours, Placeholder: "Mon–Fri, 09:00–18:00"})
+						<div class="text-sm text-muted-foreground">Free text — e.g. "24/7" or "Mon–Sat, 08:00–20:00".</div>
+					</div>
+					@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+						Continue
+					}
+				</form>
+			</div>
+		</div>
+	}
+}
+
+templ tzOption(tz, selected string) {
+	if tz == selected {
+		<option value={ tz } selected>{ tz }</option>
+	} else {
+		<option value={ tz }>{ tz }</option>
+	}
+}
+
+// ─── Step 2 — First staff profile ────────────────────────────────────────────
+
+templ SetupStep2Page(staffName, staffRole, formErr string) {
+	@Layout("Setup — Picomaju") {
+		<div class="min-h-dvh flex flex-col items-center">
+			<div class="w-full max-w-2xl flex flex-col px-6 py-12 gap-8">
+				@setupProgress(2, 3)
+				<div>
+					<h1>Your first staff profile</h1>
+					<p>A staff profile is an agent that represents a role — like a receptionist or billing clerk. You can edit or add more later.</p>
+				</div>
+				if formErr != "" {
+					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+						@alert.Description() {
+							{ formErr }
+						}
+					}
+				}
+				<form method="post" action="/setup/first-staff" class="flex flex-col gap-5">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "label"}) {
+							Profile name
+						}
+						@input.Input(input.Props{ID: "label", Name: "label", Value: staffName, Placeholder: "Reception Desk", Required: true})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "role"}) {
+							Short description
+						}
+						@input.Input(input.Props{ID: "role", Name: "role", Value: staffRole, Placeholder: "Greets customers, answers basic questions"})
+						<h5>Optional</h5>
+					</div>
+					<div class="flex flex-col gap-2 pt-2">
+						@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+							Continue
+						}
+						<a href="/setup/integrations" class="flex h-9 w-full items-center justify-center rounded-md text-sm text-muted-foreground hover:text-foreground transition-colors">
+							Skip for now
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	}
+}
+
+// ─── Step 3 — Tool picker ─────────────────────────────────────────────────────
+
+templ SetupStep3Page(groups []tool.IntegrationGroup, formErr string) {
+	@Layout("Setup — Picomaju") {
+		<div class="min-h-dvh flex flex-col items-center">
+			<div class="w-full max-w-2xl flex flex-col px-6 py-12 gap-8">
+				@setupProgress(3, 3)
+				<div>
+					<h1>Connect your tools</h1>
+					<p>Select the integrations your business uses. You can configure credentials later under Tools.</p>
+				</div>
+				if formErr != "" {
+					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+						@alert.Description() {
+							{ formErr }
+						}
+					}
+				}
+				<form method="post" action="/setup/integrations" class="flex flex-col gap-8">
+					for _, group := range groups {
+						<div class="flex flex-col gap-3">
+							<h5>{ group.Category }</h5>
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								for _, integ := range group.Integrations {
+									<label class="flex items-start gap-3 p-4 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+										<input type="checkbox" name="integrations" value={ integ.ID } class="mt-0.5 shrink-0 accent-primary"/>
+										<div class="flex flex-col gap-0.5 min-w-0">
+											<h4>{ integ.Label }</h4>
+											<div class="text-sm text-muted-foreground">{ integ.Description }</div>
+										</div>
+									</label>
+								}
+							</div>
+						</div>
+					}
+					<div class="flex flex-col gap-2">
+						@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+							Finish setup
+						}
+						<a href="/values" class="flex h-9 w-full items-center justify-center rounded-md text-sm text-muted-foreground hover:text-foreground transition-colors">
+							Skip for now
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	}
+}

@@ -1,8 +1,11 @@
 package templates
 
 import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
+	"picomaju/ui/components/card"
+	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
 )
 
@@ -10,9 +13,100 @@ templ WorkshopPage() {
 	@Layout("Workshop") {
 		<div class="max-w-2xl mx-auto px-6 py-12 flex flex-col gap-12">
 			<div>
-				<h1 class="text-2xl font-bold text-foreground mb-1">Workshop</h1>
-				<p class="text-sm text-muted-foreground">Component styleguide for the Picomaju UI.</p>
+				<h1>Workshop</h1>
+				<h3 class="text-muted-foreground">Component styleguide for Picomaju UI.</h3>
 			</div>
+			@workshopSection("Colors") {
+				<div class="flex flex-col gap-6">
+					<div class="flex flex-col gap-2">
+						<h4>Brand</h4>
+						<div class="grid grid-cols-4 gap-3">
+							@colorSwatchHex("#bf092f", "crimson")
+							@colorSwatchHex("#132440", "navy-dark")
+							@colorSwatchHex("#16476a", "navy")
+							@colorSwatchHex("#3b9797", "teal")
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h4>Light — backgrounds &amp; surfaces</h4>
+						<div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+							@colorSwatchHex("#f4f7fa", "bg")
+							@colorSwatchHex("#ffffff", "surface")
+							@colorSwatchHex("#edf2f6", "surface-subtle")
+							@colorSwatchHex("#dbe4ec", "border")
+							@colorSwatchHex("#eef3f7", "border-faint")
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h4>Light — text</h4>
+						<div class="grid grid-cols-4 sm:grid-cols-4 gap-3">
+							@colorSwatchHex("#0f1f38", "text")
+							@colorSwatchHex("#4a6179", "text-secondary")
+							@colorSwatchHex("#7b92a8", "text-muted")
+							@colorSwatchHex("#3b9797", "text-faint")
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h4>Dark — backgrounds &amp; surfaces</h4>
+						<div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+							@colorSwatchHex("#0c1826", "bg")
+							@colorSwatchHex("#142640", "surface")
+							@colorSwatchHex("#1a3251", "surface-subtle")
+							@colorSwatchHex("#1e3a55", "border")
+							@colorSwatchHex("#080f1a", "nav-bg")
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h4>Dark — text</h4>
+						<div class="grid grid-cols-4 sm:grid-cols-3 gap-3">
+							@colorSwatchHex("#d8eaf4", "text")
+							@colorSwatchHex("#9abdd0", "text-secondary")
+							@colorSwatchHex("#5a8a9f", "text-muted")
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h4>Status</h4>
+						<div class="grid grid-cols-4 sm:grid-cols-4 gap-3">
+							@colorSwatchHex("#fceaee", "accent-soft")
+							@colorSwatchHex("#a50827", "accent-hover")
+							@colorSwatchHex("#f0faf4", "ok-bg")
+							@colorSwatchHex("#6dbf8e", "ok-border")
+							@colorSwatchHex("#fdf0f2", "error-bg")
+							@colorSwatchHex("#e87a90", "error-border")
+							@colorSwatchHex("#fdf8ec", "warn-bg")
+							@colorSwatchHex("#e0b84a", "warn-border")
+						</div>
+					</div>
+				</div>
+			}
+			@workshopSection("Typography") {
+				<div class="flex flex-col gap-8">
+					<div class="flex flex-col gap-2">
+						<h5>h1 — text-5xl/6xl · font-brand · font-bold · tracking-wide</h5>
+						<h1>The quick brown fox</h1>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>h2 — text-4xl/5xl · font-brand · font-semibold · tracking-wide</h5>
+						<h2>The quick brown fox</h2>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>h3 — text-2xl/3xl · font-brand · tracking-wide</h5>
+						<h3>The quick brown fox</h3>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>h4 — text-lg · font-brand · font-bold · tracking-wide</h5>
+						<h4>The quick brown fox</h4>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>h5 — text-sm · font-mono · uppercase · muted</h5>
+						<h5>The quick brown fox</h5>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>p — text-lg/xl · muted-foreground · leading-tight</h5>
+						<p>The quick brown fox jumps over the lazy dog.</p>
+					</div>
+				</div>
+			}
 			@workshopSection("Button") {
 				<div class="flex flex-wrap gap-3">
 					@button.Button() {
@@ -34,7 +128,7 @@ templ WorkshopPage() {
 						Link
 					}
 				</div>
-				<div class="flex flex-wrap gap-3 mt-4">
+				<div class="flex flex-wrap gap-3">
 					@button.Button(button.Props{Size: button.SizeSm}) {
 						Small
 					}
@@ -45,10 +139,95 @@ templ WorkshopPage() {
 						Large
 					}
 				</div>
-				<div class="mt-4">
+				<div>
 					@button.Button(button.Props{FullWidth: true}) {
 						Full width
 					}
+				</div>
+			}
+			@workshopSection("Icons") {
+				<div class="flex flex-wrap items-center gap-4 text-foreground">
+					<div class="flex flex-col items-center gap-2">
+						@icons.Users(templ.Attributes{"class": "size-5"})
+						<h5>Users</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Plug(templ.Attributes{"class": "size-5"})
+						<h5>Plug</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.ShieldCheck(templ.Attributes{"class": "size-5"})
+						<h5>ShieldCheck</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.LayoutDashboard(templ.Attributes{"class": "size-5"})
+						<h5>LayoutDashboard</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Settings(templ.Attributes{"class": "size-5"})
+						<h5>Settings</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Sun(templ.Attributes{"class": "size-5"})
+						<h5>Sun</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Moon(templ.Attributes{"class": "size-5"})
+						<h5>Moon</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Plus(templ.Attributes{"class": "size-5"})
+						<h5>Plus</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.ChevronRight(templ.Attributes{"class": "size-5"})
+						<h5>ChevronRight</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Trash2(templ.Attributes{"class": "size-5"})
+						<h5>Trash2</h5>
+					</div>
+				</div>
+				<div class="flex items-center gap-3">
+					<div class="text-primary">
+						@icons.Users(templ.Attributes{"class": "size-6"})
+					</div>
+					<div class="text-muted-foreground">
+						@icons.Users(templ.Attributes{"class": "size-6"})
+					</div>
+					<div class="text-destructive">
+						@icons.Users(templ.Attributes{"class": "size-6"})
+					</div>
+					<h5>color via parent text-* class</h5>
+				</div>
+			}
+			@workshopSection("Input") {
+				<div class="flex flex-col gap-4 max-w-xs">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "demo-text"}) {
+							Text input
+						}
+						@input.Input(input.Props{ID: "demo-text", Placeholder: "Type something…"})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "demo-hint"}) {
+							With hint text
+						}
+						@input.Input(input.Props{ID: "demo-hint", Placeholder: "Mon–Fri, 09:00–18:00"})
+						<div class="text-sm text-muted-foreground">Free text — shown below the field.</div>
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "demo-disabled"}) {
+							Disabled
+						}
+						@input.Input(input.Props{ID: "demo-disabled", Value: "Cannot edit this", Disabled: true})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "demo-error"}) {
+							Error state
+						}
+						@input.Input(input.Props{ID: "demo-error", Value: "Bad value", HasError: true})
+					</div>
 				</div>
 			}
 			@workshopSection("Alert") {
@@ -71,11 +250,41 @@ templ WorkshopPage() {
 					}
 				</div>
 			}
+			@workshopSection("Card") {
+				<div class="grid grid-cols-3 gap-3">
+					@card.Card() {
+						@card.Content(card.ContentProps{Class: "flex flex-col items-center text-center"}) {
+							<div class="text-primary size-9 mb-4" aria-hidden="true">
+								@icons.Users(templ.Attributes{"class": "size-full"})
+							</div>
+							<h4>Staff profiles</h4>
+							<div class="text-muted-foreground">Receptionist, clerk, analyst — roles you can shape.</div>
+						}
+					}
+					@card.Card() {
+						@card.Content(card.ContentProps{Class: "flex flex-col items-center text-center"}) {
+							<div class="text-primary size-9 mb-4" aria-hidden="true">
+								@icons.Plug(templ.Attributes{"class": "size-full"})
+							</div>
+							<h4>Your tools</h4>
+							<div class="text-muted-foreground">WhatsApp, Shopee, Xendit, Calendar &amp; more.</div>
+						}
+					}
+					@card.Card() {
+						@card.Content(card.ContentProps{Class: "flex flex-col items-center text-center"}) {
+							<div class="text-primary size-9 mb-4" aria-hidden="true">
+								@icons.ShieldCheck(templ.Attributes{"class": "size-full"})
+							</div>
+							<h4>Enforced values</h4>
+							<div class="text-muted-foreground">Tone, rules, do's and don'ts — baked in.</div>
+						}
+					}
+				</div>
+			}
 			@workshopSection("Theme") {
-				<p class="text-sm text-muted-foreground">Toggle is fixed top-right on all pages. Persists to <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">localStorage</code> under key <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">theme</code>. Shared with the legacy frontend.</p>
 				<div class="flex items-center gap-3">
 					@ThemeToggle()
-					<span class="text-sm text-muted-foreground">← click to toggle (also visible top-right)</span>
+					<h5>fixed top-right on all pages · localStorage key: theme</h5>
 				</div>
 			}
 			@workshopSection("Label + Select") {
@@ -83,10 +292,7 @@ templ WorkshopPage() {
 					@label.Label(label.Props{For: "lang-demo"}) {
 						Language / Bahasa
 					}
-					<select
-						id="lang-demo"
-						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring"
-					>
+					<select id="lang-demo">
 						<option>English</option>
 						<option>Bahasa Indonesia</option>
 					</select>
@@ -98,7 +304,14 @@ templ WorkshopPage() {
 
 templ workshopSection(title string) {
 	<section class="flex flex-col gap-4">
-		<h2 class="text-base font-semibold text-foreground border-b border-border pb-2">{ title }</h2>
+		<h3 class="border-b border-border pb-2">{ title }</h3>
 		{ children... }
 	</section>
+}
+
+templ colorSwatchHex(hex, name string) {
+	<div class="flex flex-col gap-1.5">
+		<div class="h-10 rounded-md border border-border" style={ "background-color: " + hex }></div>
+		<h5>{ name }</h5>
+	</div>
 }

@@ -15,7 +15,8 @@ import (
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
-	"picomaju/web/templates"
+	webtemplates "picomaju/web/templates"
+	uitemplates "picomaju/ui/templates"
 )
 
 type uiHandler struct {
@@ -52,7 +53,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 // --- Dashboard ---
 
 func (h *uiHandler) dashboardPage(w http.ResponseWriter, r *http.Request) {
-	templates.DashboardPage(h.sidebarData(r, "home")).Render(r.Context(), w)
+	webtemplates.DashboardPage(h.sidebarData(r, "home")).Render(r.Context(), w)
 }
 
 // --- Setup (onboarding) ---
@@ -71,12 +72,29 @@ func (h *uiHandler) setupPage(w http.ResponseWriter, r *http.Request) {
 		}
 		hours = cfg.Hours
 	}
-	templates.SetupPage("", suggested, tz, hours, "").Render(r.Context(), w)
+	uitemplates.SetupStep1Page("", suggested, tz, hours, "").Render(r.Context(), w)
+}
+
+func (h *uiHandler) legacySetupPage(w http.ResponseWriter, r *http.Request) {
+	suggested := ""
+	if home, err := os.UserHomeDir(); err == nil {
+		suggested = filepath.Join(home, "picomaju")
+	}
+	cfg, _ := h.settings.Load()
+	tz := "Asia/Jakarta"
+	hours := ""
+	if cfg != nil {
+		if cfg.Timezone != "" {
+			tz = cfg.Timezone
+		}
+		hours = cfg.Hours
+	}
+	webtemplates.SetupPage("", suggested, tz, hours, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		templates.SetupPage("", "", "Asia/Jakarta", "", err.Error()).Render(r.Context(), w)
+		uitemplates.SetupStep1Page("", "", "Asia/Jakarta", "", err.Error()).Render(r.Context(), w)
 		return
 	}
 	businessName := strings.TrimSpace(r.FormValue("business_name"))
@@ -84,7 +102,7 @@ func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 	tz := strings.TrimSpace(r.FormValue("timezone"))
 	hours := strings.TrimSpace(r.FormValue("hours"))
 	if dataDir == "" {
-		templates.SetupPage(businessName, dataDir, tz, hours, "Data directory is required.").Render(r.Context(), w)
+		uitemplates.SetupStep1Page(businessName, dataDir, tz, hours, "Data directory is required.").Render(r.Context(), w)
 		return
 	}
 	// Load existing settings to preserve Languages set on welcome screen.
@@ -97,23 +115,27 @@ func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 	cfg.Timezone = tz
 	cfg.Hours = hours
 	if err := h.settings.Save(cfg); err != nil {
-		templates.SetupPage(businessName, dataDir, tz, hours, "Could not save settings: "+err.Error()).Render(r.Context(), w)
+		uitemplates.SetupStep1Page(businessName, dataDir, tz, hours, "Could not save settings: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.initStores(dataDir); err != nil {
-		templates.SetupPage(businessName, dataDir, tz, hours, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
+		uitemplates.SetupStep1Page(businessName, dataDir, tz, hours, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/setup/first-staff", http.StatusSeeOther)
 }
 
 func (h *uiHandler) integrationsPage(w http.ResponseWriter, r *http.Request) {
-	templates.IntegrationsPage(tool.CatalogByCategory(), "").Render(r.Context(), w)
+	uitemplates.SetupStep3Page(tool.CatalogByCategory(), "").Render(r.Context(), w)
+}
+
+func (h *uiHandler) legacyIntegrationsPage(w http.ResponseWriter, r *http.Request) {
+	webtemplates.IntegrationsPage(tool.CatalogByCategory(), "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeIntegrations(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		templates.IntegrationsPage(tool.CatalogByCategory(), err.Error()).Render(r.Context(), w)
+		uitemplates.SetupStep3Page(tool.CatalogByCategory(), err.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -157,12 +179,12 @@ func (h *uiHandler) valueList(w http.ResponseWriter, r *http.Request) {
 		}
 		vals = filtered
 	}
-	templates.ValueListPage(vals, sb).Render(r.Context(), w)
+	webtemplates.ValueListPage(vals, sb).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newValueForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "values")
-	templates.ValueFormPage(&value.Value{Version: 1, Priority: 50}, sb, true, "").Render(r.Context(), w)
+	webtemplates.ValueFormPage(&value.Value{Version: 1, Priority: 50}, sb, true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editValueForm(w http.ResponseWriter, r *http.Request) {
@@ -173,18 +195,18 @@ func (h *uiHandler) editValueForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sb := h.sidebarData(r, "values")
-	templates.ValueFormPage(v, sb, false, "").Render(r.Context(), w)
+	webtemplates.ValueFormPage(v, sb, false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createValue(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "values")
 	v, err := valueFromForm(r)
 	if err != nil {
-		templates.ValueFormPage(v, sb, true, err.Error()).Render(r.Context(), w)
+		webtemplates.ValueFormPage(v, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.values.Create(v); err != nil {
-		templates.ValueFormPage(v, sb, true, err.Error()).Render(r.Context(), w)
+		webtemplates.ValueFormPage(v, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/values", http.StatusSeeOther)
@@ -195,12 +217,12 @@ func (h *uiHandler) updateValue(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "values")
 	v, err := valueFromForm(r)
 	if err != nil {
-		templates.ValueFormPage(v, sb, false, err.Error()).Render(r.Context(), w)
+		webtemplates.ValueFormPage(v, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	v.ID = id
 	if err := h.values.Update(v); err != nil {
-		templates.ValueFormPage(v, sb, false, err.Error()).Render(r.Context(), w)
+		webtemplates.ValueFormPage(v, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/values", http.StatusSeeOther)
@@ -219,7 +241,7 @@ func (h *uiHandler) validateSSE(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res := value.Validate(v)
-	SSEMergeFragment(r.Context(), w, templates.ValidationFragment(res))
+	SSEMergeFragment(r.Context(), w, webtemplates.ValidationFragment(res))
 }
 
 // --- Tools UI ---
@@ -230,12 +252,12 @@ func (h *uiHandler) toolList(w http.ResponseWriter, r *http.Request) {
 	if tools == nil {
 		tools = []tool.Tool{}
 	}
-	templates.ToolListPage(tools, sb).Render(r.Context(), w)
+	webtemplates.ToolListPage(tools, sb).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newToolForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "tools")
-	templates.NewToolPage(tool.CatalogByCategory(), sb, "").Render(r.Context(), w)
+	webtemplates.NewToolPage(tool.CatalogByCategory(), sb, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editToolForm(w http.ResponseWriter, r *http.Request) {
@@ -246,20 +268,20 @@ func (h *uiHandler) editToolForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sb := h.sidebarData(r, "tools")
-	templates.ToolFormPage(t, lookupIntegration(t.Type), sb, "").Render(r.Context(), w)
+	webtemplates.ToolFormPage(t, lookupIntegration(t.Type), sb, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createTool(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "tools")
 	if err := r.ParseForm(); err != nil {
-		templates.NewToolPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
+		webtemplates.NewToolPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
 		return
 	}
 	integID := strings.TrimSpace(r.FormValue("integration_id"))
 	catalogIndex := tool.CatalogByID()
 	integ, ok := catalogIndex[integID]
 	if !ok {
-		templates.NewToolPage(tool.CatalogByCategory(), sb, "Please select a tool.").Render(r.Context(), w)
+		webtemplates.NewToolPage(tool.CatalogByCategory(), sb, "Please select a tool.").Render(r.Context(), w)
 		return
 	}
 	t := &tool.Tool{
@@ -268,7 +290,7 @@ func (h *uiHandler) createTool(w http.ResponseWriter, r *http.Request) {
 		Type:  integ.Type,
 	}
 	if err := h.tools.Create(t); err != nil {
-		templates.NewToolPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
+		webtemplates.NewToolPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tools/"+t.ID+"/edit", http.StatusSeeOther)
@@ -285,7 +307,7 @@ func (h *uiHandler) updateTool(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		templates.ToolFormPage(existing, lookupIntegration(existing.Type), sb, err.Error()).Render(r.Context(), w)
+		webtemplates.ToolFormPage(existing, lookupIntegration(existing.Type), sb, err.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -310,7 +332,7 @@ func (h *uiHandler) updateTool(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.tools.Update(t); err != nil {
-		templates.ToolFormPage(t, integ, sb, err.Error()).Render(r.Context(), w)
+		webtemplates.ToolFormPage(t, integ, sb, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tools", http.StatusSeeOther)
@@ -329,13 +351,13 @@ func (h *uiHandler) taskList(w http.ResponseWriter, r *http.Request) {
 	if tasks == nil {
 		tasks = []task.Task{}
 	}
-	templates.TaskListPage(tasks, sb).Render(r.Context(), w)
+	webtemplates.TaskListPage(tasks, sb).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newTaskForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	templates.TaskFormPage(&task.Task{}, tools, sb, true, "").Render(r.Context(), w)
+	webtemplates.TaskFormPage(&task.Task{}, tools, sb, true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editTaskForm(w http.ResponseWriter, r *http.Request) {
@@ -347,7 +369,7 @@ func (h *uiHandler) editTaskForm(w http.ResponseWriter, r *http.Request) {
 	}
 	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	templates.TaskFormPage(tk, tools, sb, false, "").Render(r.Context(), w)
+	webtemplates.TaskFormPage(tk, tools, sb, false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createTask(w http.ResponseWriter, r *http.Request) {
@@ -355,11 +377,11 @@ func (h *uiHandler) createTask(w http.ResponseWriter, r *http.Request) {
 	tools, _ := h.tools.List()
 	tk, err := taskFromForm(r)
 	if err != nil {
-		templates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
+		webtemplates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.tasks.Create(tk); err != nil {
-		templates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
+		webtemplates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
@@ -371,12 +393,12 @@ func (h *uiHandler) updateTask(w http.ResponseWriter, r *http.Request) {
 	tools, _ := h.tools.List()
 	tk, err := taskFromForm(r)
 	if err != nil {
-		templates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
+		webtemplates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	tk.ID = id
 	if err := h.tasks.Update(tk); err != nil {
-		templates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
+		webtemplates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
@@ -395,14 +417,14 @@ func (h *uiHandler) staffList(w http.ResponseWriter, r *http.Request) {
 	if members == nil {
 		members = []staff.Staff{}
 	}
-	templates.StaffListPage(members, sb).Render(r.Context(), w)
+	webtemplates.StaffListPage(members, sb).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "staff")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	templates.StaffFormPage(&staff.Staff{}, tasks, vals, sb, true, "").Render(r.Context(), w)
+	webtemplates.StaffFormPage(&staff.Staff{}, tasks, vals, sb, true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -415,7 +437,7 @@ func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
 	sb := h.sidebarData(r, "staff")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	templates.StaffFormPage(m, tasks, vals, sb, false, "").Render(r.Context(), w)
+	webtemplates.StaffFormPage(m, tasks, vals, sb, false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
@@ -424,11 +446,11 @@ func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
 	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		templates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
+		webtemplates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.staff.Create(m); err != nil {
-		templates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
+		webtemplates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff", http.StatusSeeOther)
@@ -441,12 +463,12 @@ func (h *uiHandler) updateStaff(w http.ResponseWriter, r *http.Request) {
 	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		templates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
+		webtemplates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	m.ID = id
 	if err := h.staff.Update(m); err != nil {
-		templates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
+		webtemplates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff", http.StatusSeeOther)
@@ -468,7 +490,7 @@ func (h *uiHandler) settingsPage(w http.ResponseWriter, r *http.Request) {
 	h.mu.RLock()
 	activeDir := h.dataDir
 	h.mu.RUnlock()
-	templates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), saved, "").Render(r.Context(), w)
+	webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), saved, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
@@ -481,7 +503,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		if cfg == nil {
 			cfg = &settings.Settings{}
 		}
-		templates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, err.Error()).Render(r.Context(), w)
+		webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	newDataDir := strings.TrimSpace(r.FormValue("data_dir"))
@@ -491,7 +513,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if newDataDir != "" && newDataDir != activeDir {
 		if err := h.initStores(newDataDir); err != nil {
-			templates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, "Cannot use that directory: "+err.Error()).Render(r.Context(), w)
+			webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, "Cannot use that directory: "+err.Error()).Render(r.Context(), w)
 			return
 		}
 	}
@@ -499,7 +521,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		h.mu.RLock()
 		activeDir = h.dataDir
 		h.mu.RUnlock()
-		templates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, err.Error()).Render(r.Context(), w)
+		webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/settings?saved=1", http.StatusSeeOther)
@@ -507,7 +529,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 
 // --- Helpers ---
 
-func (h *uiHandler) sidebarData(r *http.Request, section string) templates.SidebarData {
+func (h *uiHandler) sidebarData(r *http.Request, section string) webtemplates.SidebarData {
 	h.mu.RLock()
 	valStore, taskStore, toolStore, staffStore := h.values, h.tasks, h.tools, h.staff
 	h.mu.RUnlock()
@@ -545,7 +567,7 @@ func (h *uiHandler) sidebarData(r *http.Request, section string) templates.Sideb
 		name = cfg.BusinessName
 	}
 
-	return templates.SidebarData{
+	return webtemplates.SidebarData{
 		Categories:    value.DefaultCategories,
 		Staff:         members,
 		Tasks:         tasks,

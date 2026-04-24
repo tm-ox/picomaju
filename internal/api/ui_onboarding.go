@@ -49,18 +49,22 @@ func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 // ─── Step 2 — First staff profile ──────────────────────────────────────────
 
 func (h *uiHandler) firstStaffPage(w http.ResponseWriter, r *http.Request) {
+	uitemplates.SetupStep2Page("", "", "").Render(r.Context(), w)
+}
+
+func (h *uiHandler) legacyFirstStaffPage(w http.ResponseWriter, r *http.Request) {
 	webtemplates.FirstStaffPage("", "", "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		webtemplates.FirstStaffPage("", "", err.Error()).Render(r.Context(), w)
+		uitemplates.SetupStep2Page("", "", err.Error()).Render(r.Context(), w)
 		return
 	}
 	label := strings.TrimSpace(r.FormValue("label"))
 	role := strings.TrimSpace(r.FormValue("role"))
 	if label == "" {
-		webtemplates.FirstStaffPage(label, role, "Please provide a profile name.").Render(r.Context(), w)
+		uitemplates.SetupStep2Page(label, role, "Please provide a profile name.").Render(r.Context(), w)
 		return
 	}
 

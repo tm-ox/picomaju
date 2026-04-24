@@ -42,6 +42,7 @@ Everything in Picomaju maps to four building blocks:
 - **templ** — server-side HTML templates compiled to Go
 - **datastar** — SSE-based reactivity (validate previews stream into the page without a full reload)
 - **templui** — component library (CLI workflow; source in `ui/components/`)
+- **go-templ-lucide-icons** — Lucide icon set as typed templ components
 - **Tailwind CSS v4** — CSS-first config via `@theme`; standalone CLI binary (no Node.js)
 - No Node.js, no npm
 

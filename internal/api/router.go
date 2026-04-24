@@ -29,11 +29,14 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 
 	// Paths that must work before the data dir is configured.
 	setupPaths := map[string]bool{
-		"/welcome":               true,
-		"/legacy/welcome":        true,
-		"/setup":                 true,
-		"/setup/first-staff":     true,
-		"/setup/integrations":    true,
+		"/welcome":                        true,
+		"/legacy/welcome":                 true,
+		"/setup":                          true,
+		"/setup/first-staff":              true,
+		"/setup/integrations":             true,
+		"/legacy/setup":                   true,
+		"/legacy/setup/first-staff":       true,
+		"/legacy/setup/integrations":      true,
 	}
 
 	// Gate: redirect to /welcome until data dir is configured.
@@ -51,14 +54,17 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	})
 
 	// Setup (onboarding) — welcome + 3 steps
-	r.Get("/legacy/welcome", ui.welcomePage)            // legacy — kept until new UI is complete
-	r.Post("/welcome", ui.completeWelcome)              //   -> /setup
-	r.Get("/setup", ui.setupPage)                       // step 1 — business + data dir + tz + hours
-	r.Post("/setup", ui.completeSetup)                  //   -> /setup/first-staff
-	r.Get("/setup/first-staff", ui.firstStaffPage)      // step 2 — first staff profile
-	r.Post("/setup/first-staff", ui.completeFirstStaff) //   -> /setup/integrations
-	r.Get("/setup/integrations", ui.integrationsPage)   // step 3 — tool picker
-	r.Post("/setup/integrations", ui.completeIntegrations) // -> /values
+	r.Get("/legacy/welcome", ui.welcomePage)                          // legacy
+	r.Get("/legacy/setup", ui.legacySetupPage)                        // legacy
+	r.Get("/legacy/setup/first-staff", ui.legacyFirstStaffPage)       // legacy
+	r.Get("/legacy/setup/integrations", ui.legacyIntegrationsPage)    // legacy
+	r.Post("/welcome", ui.completeWelcome)                            //   -> /setup
+	r.Get("/setup", ui.setupPage)                                     // step 1 — business + data dir + tz + hours
+	r.Post("/setup", ui.completeSetup)                                //   -> /setup/first-staff
+	r.Get("/setup/first-staff", ui.firstStaffPage)                    // step 2 — first staff profile
+	r.Post("/setup/first-staff", ui.completeFirstStaff)               //   -> /setup/integrations
+	r.Get("/setup/integrations", ui.integrationsPage)                 // step 3 — tool picker
+	r.Post("/setup/integrations", ui.completeIntegrations)            // -> /values
 
 	// Dashboard
 	r.Get("/", ui.dashboardPage)
