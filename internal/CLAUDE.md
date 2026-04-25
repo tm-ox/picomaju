@@ -20,8 +20,8 @@ staff/
   store.go        — Staff type (id, label, tasks[], value_categories[], values[]) + CRUD on staff.json
 api/
   router.go       — all routes wired here; setup gate middleware (allows /welcome + setup paths + /static/*)
-  ui.go           — HTML + SSE handlers; uiHandler with mutex-guarded store init; dashboardPage; setupPage/completeSetup
-  ui_onboarding.go — welcomePage/completeWelcome; firstStaffPage/completeFirstStaff; slugify helper
+  ui.go           — HTML + SSE handlers; uiHandler with mutex-guarded store init; navData() helper
+  ui_onboarding.go — completeWelcome; firstStaffPage/completeFirstStaff; slugify helper
   sse.go          — SSEMergeFragment() for datastar
   helpers.go      — jsonOK / jsonErr
 ```

@@ -116,7 +116,7 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 
 ## Project status
 
-**Current:** Full legacy UI complete across all sections (onboarding, dashboard, values, tools, tasks, staff, settings). New frontend (`/ui`) in progress — welcome screen migrated, component workshop at `/ui/workshop`. Both frontends run simultaneously; legacy routes preserved under `/legacy/*` during migration.
+**Current:** Full migration to new frontend (`/ui`, templui + Tailwind CSS v4) complete. All sections live: onboarding, dashboard, values (with SSE validation), tools, tasks, staff, settings. Mobile-first shell with sticky top nav, bottom tab bar, per-section FAB. Component workshop at `/ui/workshop`.
 
 **Deferred:** Compiled output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 
@@ -135,16 +135,16 @@ internal/
     router.go            all routes + setup gate middleware
     ui.go                core page handlers
     ui_onboarding.go     onboarding step handlers
-web/                     legacy frontend (preserved during migration)
-  templates/             templ components (layout, all section pages)
+web/                     legacy frontend (preserved for reference; not active)
+  templates/             templ components (all section pages)
   static/                style.css, app.js, datastar.js (not committed), logo SVGs
-ui/                      new frontend (templui + Tailwind CSS v4)
+ui/                      active frontend (templui + Tailwind CSS v4)
   assets/css/input.css   Tailwind @theme config + brand tokens (oklch)
   assets/css/output.css  generated; gitignored
   assets/js/             templui component JS
   components/            templui components (CLI workflow)
   utils/templui.go       TwMerge + script helpers
-  templates/             layout, welcome, workshop
+  templates/             all page templates + nav shell + shared primitives
 design/
   tokens.json            W3C DTCG design tokens (canonical)
 ```

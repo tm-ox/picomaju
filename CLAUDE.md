@@ -15,16 +15,16 @@ picomaju/
   design/
     tokens.json                  — W3C DTCG design tokens (canonical); import to Pencil/Penpot via Phase 3
   internal/                      — see internal/CLAUDE.md
-  web/                           — LEGACY frontend (preserved until new UI complete); see web/templates/CLAUDE.md
+  web/                           — legacy frontend (preserved for reference; routes removed); see web/templates/CLAUDE.md
     templates/
     static/
       style.css                  — all CSS; :root has full token system (lines 1–111)
       app.js                     — theme init (pre-paint) + sidebar restore; loaded sync in <head>
-      datastar.js                — MUST be downloaded manually from data-star.dev releases
+      datastar.js                — MUST be downloaded manually from data-star.dev releases; embedded + served at /static/*
       logo-symbol.svg            — crimson PM mark (140×98), hardcoded fill="#bf092f"
       logo-type.svg              — horizontal wordmark lockup
       logo-stack.svg             — stacked symbol + wordmark lockup
-  ui/                            — NEW frontend (templui + Tailwind CSS v4); replaces /web when complete
+  ui/                            — active frontend (templui + Tailwind CSS v4); migration complete
     assets/
       css/
         input.css                — Tailwind v4 @theme config; full brand token set in oklch
@@ -37,8 +37,18 @@ picomaju/
     utils/
       templui.go                 — TwMerge, RandomID, ComponentScript, SetupScriptRoutes
     templates/
-      layout.templ               — HTML shell; inline theme-init script; fixed ThemeToggle button
-      welcome.templ              — welcome screen (language picker); WelcomePage(lang, formErr)
+      layout.templ               — AppLayout (authenticated shell: topnav + tabbar + FAB); ThemeToggle
+      nav.templ                  — NavData struct; AppTopNav, AppBottomTabBar, AppFAB
+      shared.templ               — pageHeader, emptyState, rowList, rowItem, badge, rowActions, formCard, field
+      helpers.go                 — pure Go helpers: formTitle, formAction, countWord, categoryLabel, configValue
+      welcome.templ              — WelcomePage(lang, formErr)
+      setup.templ                — SetupStep1Page, SetupStep2Page, SetupStep3Page
+      dashboard.templ            — DashboardPage(nd NavData)
+      values.templ               — ValueListPage, ValueFormPage, ValidationFragment
+      tools.templ                — ToolListPage, NewToolPage, ToolFormPage
+      tasks.templ                — TaskListPage, TaskFormPage
+      staff.templ                — StaffListPage, StaffFormPage
+      settings.templ             — SettingsPage
       workshop.templ             — component styleguide at /ui/workshop
 ```
 
@@ -61,12 +71,6 @@ Access via `http://localhost:7331` (templ proxy — injects SSE reload script).
 Saving any `.templ` or `.go` file → auto-rebuild + browser reload.  
 CSS changes: tailwind rebuilds `output.css` automatically; manual browser refresh picks it up.
 
-**Legacy frontend (no hot reload):**
-```bash
-DEV=1 go run .
-# access via localhost:18800
-```
-
 **After editing `.templ` files manually:**
 ```bash
 templ generate
@@ -87,9 +91,9 @@ go build ./internal/... ./web/... .
 
 ## Implementation status
 
-**Done (legacy `/web` frontend):** Welcome screen (language picker) + three-step onboarding, dashboard home screen, settings, Values authoring + validation, Tools CRUD, integration catalog (8 integrations, Indonesian market focus), Task definitions, Staff profiles, mobile-first UI (bottom tab bar, FAB, compact card rows, illustrated empty states), icon-strip collapsible sidebar, light/dark theming, logo SVGs. Accessibility fixes. Full CSS token system; DTCG token file at `design/tokens.json`.
+**Done (new `/ui` frontend):** Full migration to templui + Tailwind CSS v4 complete. All screens active: welcome, 3-step onboarding, dashboard, values (with SSE validation), tools, tasks, staff, settings. Mobile-first shell: sticky top nav, bottom tab bar, per-section FAB. Legacy `/legacy/*` routes removed; `web/` preserved for reference. Brand tokens in oklch across light/dark. Theme persisted in `localStorage` key `theme`. See token notes below.
 
-**In progress (new `/ui` frontend):** Migrating screens to templui + Tailwind CSS v4. Currently done: welcome screen, component workshop. Brand color tokens fully mapped to oklch across light/dark modes. Theme switcher persistent via `localStorage` key `theme` (shared with legacy). Old routes preserved under `/legacy/*` during migration. See new frontend token notes below.
+**Done (legacy `/web` frontend, reference only):** Welcome + onboarding, dashboard, all CRUD sections, collapsible sidebar, full CSS token system, DTCG token file at `design/tokens.json`.
 
 **Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
 

@@ -1,5 +1,7 @@
 # web/templates/
 
+> **Legacy — preserved for reference.** All routes now use `ui/templates/`. This folder is not active.
+
 ## Files
 
 ```
