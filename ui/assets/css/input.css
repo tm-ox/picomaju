@@ -45,6 +45,8 @@
 
 :root {
     --radius: 0.65rem;
+    --topnav-h: 3.25rem;
+    --tabbar-h: 4.25rem;
     /* #f4f7fa — blue-tinted off-white page bg */
     --background: oklch(0.972 0.006 240);
     /* #0f1f38 — dark navy text */
@@ -132,7 +134,7 @@
         @apply text-5xl sm:text-6xl font-brand font-bold text-foreground tracking-wide;
     }
     h2 {
-        @apply text-4xl sm:text-5xl font-brand text-foreground tracking-wide;
+        @apply text-4xl sm:text-5xl font-brand font-semibold text-foreground tracking-wide;
     }
     h3 {
         @apply text-2xl sm:text-3xl font-brand text-foreground tracking-wide;
@@ -148,5 +150,8 @@
     }
     select {
         @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring;
+    }
+    textarea {
+        @apply flex min-h-[7rem] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring resize-y;
     }
 }

@@ -1,0 +1,86 @@
+package templates
+
+import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"picomaju/ui/components/button"
+)
+
+// pageHeader renders a section heading row with an optional right-slot action.
+templ pageHeader(title string) {
+	<div class="flex items-center justify-between gap-4 pb-4 border-b border-border">
+		<h3 class="font-semibold text-foreground">{ title }</h3>
+		{ children... }
+	</div>
+}
+
+// emptyState renders the zero-items illustration with a primary CTA.
+templ emptyState(title, desc, href, label string) {
+	<div class="flex flex-col items-center justify-center text-center py-16 gap-5">
+		<div class="flex flex-col gap-1.5 max-w-xs">
+			<h4>{ title }</h4>
+			<p class="text-base">{ desc }</p>
+		</div>
+		@button.Button(button.Props{Href: href}) {
+			{ label }
+		}
+	</div>
+}
+
+// rowList wraps a set of list rows in a bordered card container.
+templ rowList() {
+	<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
+		{ children... }
+	</div>
+}
+
+// rowItem is a flex row inside a rowList.
+templ rowItem() {
+	<div class="flex items-center gap-3 px-4 py-3">
+		{ children... }
+	</div>
+}
+
+// badge renders a muted pill tag for category/type labels.
+templ badge(label string) {
+	<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-secondary text-secondary-foreground">
+		{ label }
+	</span>
+}
+
+// rowActions renders edit + delete icon buttons for a list row.
+templ rowActions(editHref, deleteHref, confirmNoun string) {
+	<div class="flex items-center gap-0.5 ml-auto shrink-0">
+		<a
+			href={ templ.SafeURL(editHref) }
+			class="inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+			aria-label={ "Edit " + confirmNoun }
+		>
+			@icons.Pencil(templ.Attributes{"class": "size-3.5"})
+		</a>
+		<form method="post" action={ templ.SafeURL(deleteHref) }>
+			<button
+				type="submit"
+				class="inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+				aria-label={ "Delete " + confirmNoun }
+				data-noun={ confirmNoun }
+				onclick="return confirm('Delete this '+this.dataset.noun+'?')"
+			>
+				@icons.Trash2(templ.Attributes{"class": "size-3.5"})
+			</button>
+		</form>
+	</div>
+}
+
+// formCard wraps form content in a surface card.
+templ formCard() {
+	<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+		{ children... }
+	</div>
+}
+
+// field wraps a label+input pair with consistent spacing.
+templ field() {
+	<div class="flex flex-col gap-1.5">
+		{ children... }
+	</div>
+}

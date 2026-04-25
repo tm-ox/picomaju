@@ -15,9 +15,39 @@ templ Layout(title string) {
 				})();
 			</script>
 		</head>
-		<body class="bg-background text-foreground">
+		<body>
 			@ThemeToggle()
 			{ children... }
+		</body>
+	</html>
+}
+
+// AppLayout is the authenticated app shell with top nav, bottom tab bar, and FAB.
+templ AppLayout(title string, nd NavData) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+			<title>{ title } — Picomaju</title>
+			<link rel="stylesheet" href="/ui/assets/css/output.css"/>
+			<script type="module" src="/static/datastar.js"></script>
+			<script>
+				(function(){
+					var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+					if(t==='dark')document.documentElement.classList.add('dark');
+				})();
+			</script>
+		</head>
+		<body>
+			@AppTopNav(nd)
+			<div class="flex min-h-dvh pt-[var(--topnav-h)] pb-[var(--tabbar-h)] sm:pb-0">
+				<main class="flex-1 min-w-0">
+					{ children... }
+				</main>
+			</div>
+			@AppBottomTabBar(nd)
+			@AppFAB(nd)
 		</body>
 	</html>
 }
@@ -29,11 +59,11 @@ templ ThemeToggle() {
 		onclick="var d=document.documentElement,dark=d.classList.toggle('dark');localStorage.setItem('theme',dark?'dark':'light');this.setAttribute('aria-pressed',dark?'true':'false');"
 	>
 		<svg class="block dark:hidden size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-			<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+			<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
 		</svg>
 		<svg class="hidden dark:block size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-			<circle cx="12" cy="12" r="4"/>
-			<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+			<circle cx="12" cy="12" r="4"></circle>
+			<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
 		</svg>
 	</button>
 }

@@ -72,6 +72,13 @@ func main() {
 	r.Get("/ui/workshop", func(w http.ResponseWriter, req *http.Request) {
 		templates.WorkshopPage().Render(req.Context(), w)
 	})
+	r.Get("/ui/home", func(w http.ResponseWriter, req *http.Request) {
+		nd := templates.NavData{ActiveSection: "home"}
+		if cfg != nil {
+			nd.BusinessName = cfg.BusinessName
+		}
+		templates.DashboardPage(nd).Render(req.Context(), w)
+	})
 
 	log.Printf("picomaju listening on %s (config: %s)", addr, configFile)
 	if err := http.ListenAndServe(addr, r); err != nil {

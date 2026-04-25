@@ -1,0 +1,155 @@
+package templates
+
+import (
+	"picomaju/internal/staff"
+	"picomaju/internal/task"
+	"picomaju/internal/value"
+	"picomaju/ui/components/alert"
+	"picomaju/ui/components/button"
+	"picomaju/ui/components/input"
+	"picomaju/ui/components/label"
+)
+
+templ StaffListPage(members []staff.Staff, nd NavData) {
+	@AppLayout("Staff", nd) {
+		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
+			@pageHeader("Staff") {
+				@button.Button(button.Props{Href: "/staff/new", Size: button.SizeSm}) {
+					New Staff
+				}
+			}
+			if len(members) == 0 {
+				@emptyState(
+					"No staff profiles",
+					"A staff profile is an agent that represents a person or role — like a receptionist or billing clerk.",
+					"/staff/new",
+					"Create your first staff",
+				)
+			} else {
+				@rowList() {
+					for _, m := range members {
+						@rowItem() {
+							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+								<span class="text-sm font-brand font-semibold text-foreground truncate">{ m.Label }</span>
+								<span class="text-xs text-muted-foreground font-mono">{ m.ID }</span>
+							</div>
+							<div class="hidden sm:flex items-center gap-2 shrink-0">
+								<span class="text-xs text-muted-foreground">{ countWord(len(m.Tasks), "task", "tasks") }</span>
+								<span class="text-xs text-muted-foreground">{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
+							</div>
+							@rowActions("/staff/"+m.ID+"/edit", "/staff/"+m.ID+"/delete", "staff member")
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, cats []value.Category, nd NavData, isNew bool, formErr string) {
+	@AppLayout(formTitle("Staff", isNew), nd) {
+		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
+			@pageHeader(formTitle("Staff", isNew)) {
+				@button.Button(button.Props{Href: "/staff", Variant: button.VariantGhost, Size: button.SizeSm}) {
+					Cancel
+				}
+			}
+			if formErr != "" {
+				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+					@alert.Description() {
+						{ formErr }
+					}
+				}
+			}
+			<form method="post" action={ templ.SafeURL(formAction("/staff", m.ID, isNew)) } class="flex flex-col gap-5">
+				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+					@field() {
+						@label.Label(label.Props{For: "id"}) {
+							ID
+						}
+						if isNew {
+							@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Placeholder: "support_agent", Required: true})
+						} else {
+							@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Disabled: true})
+						}
+					}
+					@field() {
+						@label.Label(label.Props{For: "staff-label"}) {
+							Label
+						}
+						@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
+					}
+				</div>
+				if len(tasks) > 0 {
+					<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
+						<h5>Tasks</h5>
+						<div class="flex flex-col gap-2">
+							for _, t := range tasks {
+								<label class="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+									<input
+										type="checkbox"
+										name="tasks"
+										value={ t.ID }
+										checked?={ includesStr(m.Tasks, t.ID) }
+										class="size-4 rounded border-input accent-primary mt-0.5"
+									/>
+									<div class="flex flex-col gap-0.5 min-w-0">
+										<span class="text-sm font-brand font-semibold text-foreground">{ t.Label }</span>
+										if t.Description != "" {
+											<span class="text-xs text-muted-foreground">{ t.Description }</span>
+										}
+									</div>
+								</label>
+							}
+						</div>
+					</div>
+				}
+				if len(cats) > 0 {
+					<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+						<div class="flex flex-col gap-0.5">
+							<h5>Values</h5>
+							<p class="text-sm text-muted-foreground">Select a category to include all its values, or pick individual values below.</p>
+						</div>
+						for _, cat := range cats {
+							<div class="flex flex-col gap-2">
+								<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/50 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+									<input
+										type="checkbox"
+										name="value_categories"
+										value={ cat.ID }
+										checked?={ includesStr(m.ValueCategories, cat.ID) }
+										class="size-4 rounded border-input accent-primary"
+									/>
+									<span class="text-sm font-brand font-semibold text-foreground">{ cat.Label }</span>
+								</label>
+								@staffValuePicker(cat.ID, values, m.Values)
+							</div>
+						}
+					</div>
+				}
+				@button.Button(button.Props{Type: button.TypeSubmit}) {
+					Save
+				}
+			</form>
+		</div>
+	}
+}
+
+templ staffValuePicker(catID string, values []*value.Value, selected []string) {
+	<div class="pl-4 flex flex-col gap-1.5">
+		for _, v := range values {
+			if v.Category == catID {
+				<label class="flex items-center gap-2.5 px-3 py-2 rounded-md cursor-pointer text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors has-[:checked]:text-foreground">
+					<input
+						type="checkbox"
+						name="values"
+						value={ v.ID }
+						checked?={ includesStr(selected, v.ID) }
+						class="size-3.5 rounded border-input accent-primary"
+					/>
+					{ v.Title }
+				</label>
+			}
+		}
+	</div>
+}

@@ -1,0 +1,170 @@
+package templates
+
+import (
+	"picomaju/internal/tool"
+	"picomaju/ui/components/alert"
+	"picomaju/ui/components/button"
+	"picomaju/ui/components/input"
+	"picomaju/ui/components/label"
+)
+
+templ ToolListPage(tools []tool.Tool, nd NavData) {
+	@AppLayout("Tools", nd) {
+		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
+			@pageHeader("Tools") {
+				@button.Button(button.Props{Href: "/tools/new", Size: button.SizeSm}) {
+					Add Tool
+				}
+			}
+			if len(tools) == 0 {
+				@emptyState(
+					"No tools added",
+					"Connect the integrations your business uses so staff can read and write to them.",
+					"/tools/new",
+					"Add your first tool",
+				)
+			} else {
+				@rowList() {
+					for _, t := range tools {
+						@rowItem() {
+							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+								<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
+								<span class="text-xs text-muted-foreground font-mono">{ t.ID }</span>
+							</div>
+							<div class="hidden sm:block shrink-0">
+								@badge(t.Type)
+							</div>
+							@rowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ NewToolPage(groups []tool.IntegrationGroup, nd NavData, formErr string) {
+	@AppLayout("Add Tool", nd) {
+		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
+			@pageHeader("Add Tool") {
+				@button.Button(button.Props{Href: "/tools", Variant: button.VariantGhost, Size: button.SizeSm}) {
+					Cancel
+				}
+			}
+			if formErr != "" {
+				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+					@alert.Description() {
+						{ formErr }
+					}
+				}
+			}
+			<form method="post" action="/tools" class="flex flex-col gap-8">
+				for _, group := range groups {
+					<div class="flex flex-col gap-2">
+						<h5>{ group.Category }</h5>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							for _, integ := range group.Integrations {
+								<label class="flex items-start gap-3 p-4 rounded-lg border border-border cursor-pointer transition-colors bg-card hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+									<input type="radio" name="integration_id" value={ integ.ID } class="hidden"/>
+									<div class="flex flex-col gap-0.5 min-w-0">
+										<span class="text-sm font-brand font-semibold text-foreground">{ integ.Label }</span>
+										<span class="text-sm text-muted-foreground">{ integ.Description }</span>
+									</div>
+								</label>
+							}
+						</div>
+					</div>
+				}
+				@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+					Add and Configure
+				}
+			</form>
+		</div>
+	}
+}
+
+templ ToolFormPage(t *tool.Tool, integ *tool.Integration, nd NavData, formErr string) {
+	@AppLayout("Edit Tool", nd) {
+		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
+			@pageHeader(t.Label) {
+				@button.Button(button.Props{Href: "/tools", Variant: button.VariantGhost, Size: button.SizeSm}) {
+					Cancel
+				}
+			}
+			if formErr != "" {
+				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+					@alert.Description() {
+						{ formErr }
+					}
+				}
+			}
+			<form method="post" action={ templ.SafeURL("/tools/" + t.ID) } class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+				@field() {
+					@label.Label(label.Props{For: "tool-id"}) {
+						ID
+					}
+					@input.Input(input.Props{ID: "tool-id", Value: t.ID, Disabled: true})
+				}
+				@field() {
+					@label.Label(label.Props{For: "label"}) {
+						Label
+					}
+					@input.Input(input.Props{ID: "label", Name: "label", Value: t.Label, Required: true})
+				}
+				@field() {
+					<div class="flex flex-col gap-1">
+						<span class="text-sm font-medium text-foreground">Type</span>
+						@badge(t.Type)
+					</div>
+				}
+				if integ != nil && len(integ.Fields) > 0 {
+					<div class="flex flex-col gap-4 pt-2 border-t border-border">
+						<h5>Credentials</h5>
+						for _, f := range integ.Fields {
+							@field() {
+								@label.Label(label.Props{For: "cfg_" + f.Key}) {
+									{ f.Label }
+								}
+								if f.Secret {
+									@input.Input(input.Props{
+										ID:          "cfg_" + f.Key,
+										Name:        "cfg_" + f.Key,
+										Value:       configValue(t.Config, f.Key),
+										Placeholder: f.Placeholder,
+										Type:        "password",
+										Attributes:  templ.Attributes{"autocomplete": "off"},
+									})
+								} else {
+									@input.Input(input.Props{
+										ID:          "cfg_" + f.Key,
+										Name:        "cfg_" + f.Key,
+										Value:       configValue(t.Config, f.Key),
+										Placeholder: f.Placeholder,
+									})
+								}
+							}
+						}
+					</div>
+				}
+				@button.Button(button.Props{Type: button.TypeSubmit}) {
+					Save
+				}
+			</form>
+			<div class="flex flex-col gap-3 pt-2">
+				<h5>Danger zone</h5>
+				<form method="post" action={ templ.SafeURL("/tools/" + t.ID + "/delete") }>
+					@button.Button(button.Props{
+						Type:    button.TypeSubmit,
+						Variant: button.VariantDestructive,
+						Size:    button.SizeSm,
+						Attributes: templ.Attributes{
+							"onclick": "return confirm('Delete this tool?')",
+						},
+					}) {
+						Delete tool
+					}
+				</form>
+			</div>
+		</div>
+	}
+}

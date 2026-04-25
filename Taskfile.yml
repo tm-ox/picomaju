@@ -14,6 +14,7 @@ tasks:
   dev:
     desc: Start dev server with hot reload
     cmds:
+      - fuser -k 18800/tcp 2>/dev/null || true
       - task --parallel tailwind templ
 
   build:css:

@@ -8,20 +8,8 @@ import (
 
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
-	webtemplates "picomaju/web/templates"
 	uitemplates "picomaju/ui/templates"
 )
-
-// ─── Welcome screen ─────────────────────────────────────────────────────────
-
-func (h *uiHandler) welcomePage(w http.ResponseWriter, r *http.Request) {
-	cfg, _ := h.settings.Load()
-	lang := ""
-	if cfg != nil && len(cfg.Languages) > 0 {
-		lang = cfg.Languages[0]
-	}
-	webtemplates.WelcomePage(lang, "").Render(r.Context(), w)
-}
 
 func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
@@ -52,10 +40,6 @@ func (h *uiHandler) firstStaffPage(w http.ResponseWriter, r *http.Request) {
 	uitemplates.SetupStep2Page("", "", "").Render(r.Context(), w)
 }
 
-func (h *uiHandler) legacyFirstStaffPage(w http.ResponseWriter, r *http.Request) {
-	webtemplates.FirstStaffPage("", "", "").Render(r.Context(), w)
-}
-
 func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		uitemplates.SetupStep2Page("", "", err.Error()).Render(r.Context(), w)
@@ -78,7 +62,7 @@ func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.staff.Create(m); err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
-			webtemplates.FirstStaffPage(label, role, err.Error()).Render(r.Context(), w)
+			uitemplates.SetupStep2Page(label, role, err.Error()).Render(r.Context(), w)
 			return
 		}
 	}

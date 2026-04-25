@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,7 +14,6 @@ import (
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
-	webtemplates "picomaju/web/templates"
 	uitemplates "picomaju/ui/templates"
 )
 
@@ -53,7 +51,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 // --- Dashboard ---
 
 func (h *uiHandler) dashboardPage(w http.ResponseWriter, r *http.Request) {
-	webtemplates.DashboardPage(h.sidebarData(r, "home")).Render(r.Context(), w)
+	uitemplates.DashboardPage(h.navData(r, "home")).Render(r.Context(), w)
 }
 
 // --- Setup (onboarding) ---
@@ -73,23 +71,6 @@ func (h *uiHandler) setupPage(w http.ResponseWriter, r *http.Request) {
 		hours = cfg.Hours
 	}
 	uitemplates.SetupStep1Page("", suggested, tz, hours, "").Render(r.Context(), w)
-}
-
-func (h *uiHandler) legacySetupPage(w http.ResponseWriter, r *http.Request) {
-	suggested := ""
-	if home, err := os.UserHomeDir(); err == nil {
-		suggested = filepath.Join(home, "picomaju")
-	}
-	cfg, _ := h.settings.Load()
-	tz := "Asia/Jakarta"
-	hours := ""
-	if cfg != nil {
-		if cfg.Timezone != "" {
-			tz = cfg.Timezone
-		}
-		hours = cfg.Hours
-	}
-	webtemplates.SetupPage("", suggested, tz, hours, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
@@ -129,10 +110,6 @@ func (h *uiHandler) integrationsPage(w http.ResponseWriter, r *http.Request) {
 	uitemplates.SetupStep3Page(tool.CatalogByCategory(), "").Render(r.Context(), w)
 }
 
-func (h *uiHandler) legacyIntegrationsPage(w http.ResponseWriter, r *http.Request) {
-	webtemplates.IntegrationsPage(tool.CatalogByCategory(), "").Render(r.Context(), w)
-}
-
 func (h *uiHandler) completeIntegrations(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		uitemplates.SetupStep3Page(tool.CatalogByCategory(), err.Error()).Render(r.Context(), w)
@@ -162,15 +139,15 @@ func (h *uiHandler) completeIntegrations(w http.ResponseWriter, r *http.Request)
 // --- Values UI ---
 
 func (h *uiHandler) valueList(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "values")
+	activeCat := r.URL.Query().Get("cat")
 	vals, _ := h.values.List()
 	if vals == nil {
 		vals = []*value.Value{}
 	}
-	if sb.ActiveCat != "" {
+	if activeCat != "" {
 		var filtered []*value.Value
 		for _, v := range vals {
-			if v.Category == sb.ActiveCat {
+			if v.Category == activeCat {
 				filtered = append(filtered, v)
 			}
 		}
@@ -179,12 +156,11 @@ func (h *uiHandler) valueList(w http.ResponseWriter, r *http.Request) {
 		}
 		vals = filtered
 	}
-	webtemplates.ValueListPage(vals, sb).Render(r.Context(), w)
+	uitemplates.ValueListPage(vals, value.DefaultCategories, h.navData(r, "values"), activeCat).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newValueForm(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "values")
-	webtemplates.ValueFormPage(&value.Value{Version: 1, Priority: 50}, sb, true, "").Render(r.Context(), w)
+	uitemplates.ValueFormPage(&value.Value{Version: 1, Priority: 50}, value.DefaultCategories, h.navData(r, "values"), true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editValueForm(w http.ResponseWriter, r *http.Request) {
@@ -194,19 +170,17 @@ func (h *uiHandler) editValueForm(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	sb := h.sidebarData(r, "values")
-	webtemplates.ValueFormPage(v, sb, false, "").Render(r.Context(), w)
+	uitemplates.ValueFormPage(v, value.DefaultCategories, h.navData(r, "values"), false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createValue(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "values")
 	v, err := valueFromForm(r)
 	if err != nil {
-		webtemplates.ValueFormPage(v, sb, true, err.Error()).Render(r.Context(), w)
+		uitemplates.ValueFormPage(v, value.DefaultCategories, h.navData(r, "values"), true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.values.Create(v); err != nil {
-		webtemplates.ValueFormPage(v, sb, true, err.Error()).Render(r.Context(), w)
+		uitemplates.ValueFormPage(v, value.DefaultCategories, h.navData(r, "values"), true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/values", http.StatusSeeOther)
@@ -214,15 +188,14 @@ func (h *uiHandler) createValue(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) updateValue(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	sb := h.sidebarData(r, "values")
 	v, err := valueFromForm(r)
 	if err != nil {
-		webtemplates.ValueFormPage(v, sb, false, err.Error()).Render(r.Context(), w)
+		uitemplates.ValueFormPage(v, value.DefaultCategories, h.navData(r, "values"), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	v.ID = id
 	if err := h.values.Update(v); err != nil {
-		webtemplates.ValueFormPage(v, sb, false, err.Error()).Render(r.Context(), w)
+		uitemplates.ValueFormPage(v, value.DefaultCategories, h.navData(r, "values"), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/values", http.StatusSeeOther)
@@ -241,23 +214,21 @@ func (h *uiHandler) validateSSE(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res := value.Validate(v)
-	SSEMergeFragment(r.Context(), w, webtemplates.ValidationFragment(res))
+	SSEMergeFragment(r.Context(), w, uitemplates.ValidationFragment(res))
 }
 
 // --- Tools UI ---
 
 func (h *uiHandler) toolList(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "tools")
 	tools, _ := h.tools.List()
 	if tools == nil {
 		tools = []tool.Tool{}
 	}
-	webtemplates.ToolListPage(tools, sb).Render(r.Context(), w)
+	uitemplates.ToolListPage(tools, h.navData(r, "tools")).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newToolForm(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "tools")
-	webtemplates.NewToolPage(tool.CatalogByCategory(), sb, "").Render(r.Context(), w)
+	uitemplates.NewToolPage(tool.CatalogByCategory(), h.navData(r, "tools"), "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editToolForm(w http.ResponseWriter, r *http.Request) {
@@ -267,21 +238,19 @@ func (h *uiHandler) editToolForm(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	sb := h.sidebarData(r, "tools")
-	webtemplates.ToolFormPage(t, lookupIntegration(t.Type), sb, "").Render(r.Context(), w)
+	uitemplates.ToolFormPage(t, lookupIntegration(t.Type), h.navData(r, "tools"), "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createTool(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "tools")
 	if err := r.ParseForm(); err != nil {
-		webtemplates.NewToolPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
+		uitemplates.NewToolPage(tool.CatalogByCategory(), h.navData(r, "tools"), err.Error()).Render(r.Context(), w)
 		return
 	}
 	integID := strings.TrimSpace(r.FormValue("integration_id"))
 	catalogIndex := tool.CatalogByID()
 	integ, ok := catalogIndex[integID]
 	if !ok {
-		webtemplates.NewToolPage(tool.CatalogByCategory(), sb, "Please select a tool.").Render(r.Context(), w)
+		uitemplates.NewToolPage(tool.CatalogByCategory(), h.navData(r, "tools"), "Please select a tool.").Render(r.Context(), w)
 		return
 	}
 	t := &tool.Tool{
@@ -290,7 +259,7 @@ func (h *uiHandler) createTool(w http.ResponseWriter, r *http.Request) {
 		Type:  integ.Type,
 	}
 	if err := h.tools.Create(t); err != nil {
-		webtemplates.NewToolPage(tool.CatalogByCategory(), sb, err.Error()).Render(r.Context(), w)
+		uitemplates.NewToolPage(tool.CatalogByCategory(), h.navData(r, "tools"), err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tools/"+t.ID+"/edit", http.StatusSeeOther)
@@ -298,7 +267,6 @@ func (h *uiHandler) createTool(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) updateTool(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	sb := h.sidebarData(r, "tools")
 
 	existing, err := h.tools.Get(id)
 	if err != nil {
@@ -307,7 +275,7 @@ func (h *uiHandler) updateTool(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		webtemplates.ToolFormPage(existing, lookupIntegration(existing.Type), sb, err.Error()).Render(r.Context(), w)
+		uitemplates.ToolFormPage(existing, lookupIntegration(existing.Type), h.navData(r, "tools"), err.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -332,7 +300,7 @@ func (h *uiHandler) updateTool(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.tools.Update(t); err != nil {
-		webtemplates.ToolFormPage(t, integ, sb, err.Error()).Render(r.Context(), w)
+		uitemplates.ToolFormPage(t, integ, h.navData(r, "tools"), err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tools", http.StatusSeeOther)
@@ -346,18 +314,16 @@ func (h *uiHandler) deleteTool(w http.ResponseWriter, r *http.Request) {
 // --- Tasks UI ---
 
 func (h *uiHandler) taskList(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "tasks")
 	tasks, _ := h.tasks.List()
 	if tasks == nil {
 		tasks = []task.Task{}
 	}
-	webtemplates.TaskListPage(tasks, sb).Render(r.Context(), w)
+	uitemplates.TaskListPage(tasks, h.navData(r, "tasks")).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newTaskForm(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	webtemplates.TaskFormPage(&task.Task{}, tools, sb, true, "").Render(r.Context(), w)
+	uitemplates.TaskFormPage(&task.Task{}, tools, h.navData(r, "tasks"), true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editTaskForm(w http.ResponseWriter, r *http.Request) {
@@ -367,21 +333,19 @@ func (h *uiHandler) editTaskForm(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
-	webtemplates.TaskFormPage(tk, tools, sb, false, "").Render(r.Context(), w)
+	uitemplates.TaskFormPage(tk, tools, h.navData(r, "tasks"), false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createTask(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
 	tk, err := taskFromForm(r)
 	if err != nil {
-		webtemplates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
+		uitemplates.TaskFormPage(tk, tools, h.navData(r, "tasks"), true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.tasks.Create(tk); err != nil {
-		webtemplates.TaskFormPage(tk, tools, sb, true, err.Error()).Render(r.Context(), w)
+		uitemplates.TaskFormPage(tk, tools, h.navData(r, "tasks"), true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
@@ -389,16 +353,15 @@ func (h *uiHandler) createTask(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) updateTask(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	sb := h.sidebarData(r, "tasks")
 	tools, _ := h.tools.List()
 	tk, err := taskFromForm(r)
 	if err != nil {
-		webtemplates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
+		uitemplates.TaskFormPage(tk, tools, h.navData(r, "tasks"), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	tk.ID = id
 	if err := h.tasks.Update(tk); err != nil {
-		webtemplates.TaskFormPage(tk, tools, sb, false, err.Error()).Render(r.Context(), w)
+		uitemplates.TaskFormPage(tk, tools, h.navData(r, "tasks"), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
@@ -412,19 +375,17 @@ func (h *uiHandler) deleteTask(w http.ResponseWriter, r *http.Request) {
 // --- Staff UI ---
 
 func (h *uiHandler) staffList(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "staff")
 	members, _ := h.staff.List()
 	if members == nil {
 		members = []staff.Staff{}
 	}
-	webtemplates.StaffListPage(members, sb).Render(r.Context(), w)
+	uitemplates.StaffListPage(members, h.navData(r, "staff")).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "staff")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	webtemplates.StaffFormPage(&staff.Staff{}, tasks, vals, sb, true, "").Render(r.Context(), w)
+	uitemplates.StaffFormPage(&staff.Staff{}, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), true, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -434,23 +395,21 @@ func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	sb := h.sidebarData(r, "staff")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	webtemplates.StaffFormPage(m, tasks, vals, sb, false, "").Render(r.Context(), w)
+	uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), false, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
-	sb := h.sidebarData(r, "staff")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		webtemplates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
+		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.staff.Create(m); err != nil {
-		webtemplates.StaffFormPage(m, tasks, vals, sb, true, err.Error()).Render(r.Context(), w)
+		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), true, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff", http.StatusSeeOther)
@@ -458,17 +417,16 @@ func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) updateStaff(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	sb := h.sidebarData(r, "staff")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		webtemplates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
+		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	m.ID = id
 	if err := h.staff.Update(m); err != nil {
-		webtemplates.StaffFormPage(m, tasks, vals, sb, false, err.Error()).Render(r.Context(), w)
+		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff", http.StatusSeeOther)
@@ -490,7 +448,7 @@ func (h *uiHandler) settingsPage(w http.ResponseWriter, r *http.Request) {
 	h.mu.RLock()
 	activeDir := h.dataDir
 	h.mu.RUnlock()
-	webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), saved, "").Render(r.Context(), w)
+	uitemplates.SettingsPage(cfg, activeDir, h.navData(r, ""), saved, "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
@@ -503,7 +461,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		if cfg == nil {
 			cfg = &settings.Settings{}
 		}
-		webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, err.Error()).Render(r.Context(), w)
+		uitemplates.SettingsPage(cfg, activeDir, h.navData(r, ""), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	newDataDir := strings.TrimSpace(r.FormValue("data_dir"))
@@ -513,7 +471,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if newDataDir != "" && newDataDir != activeDir {
 		if err := h.initStores(newDataDir); err != nil {
-			webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, "Cannot use that directory: "+err.Error()).Render(r.Context(), w)
+			uitemplates.SettingsPage(cfg, activeDir, h.navData(r, ""), false, "Cannot use that directory: "+err.Error()).Render(r.Context(), w)
 			return
 		}
 	}
@@ -521,7 +479,7 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		h.mu.RLock()
 		activeDir = h.dataDir
 		h.mu.RUnlock()
-		webtemplates.SettingsPage(cfg, activeDir, h.sidebarData(r, ""), false, err.Error()).Render(r.Context(), w)
+		uitemplates.SettingsPage(cfg, activeDir, h.navData(r, ""), false, err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/settings?saved=1", http.StatusSeeOther)
@@ -529,53 +487,15 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 
 // --- Helpers ---
 
-func (h *uiHandler) sidebarData(r *http.Request, section string) webtemplates.SidebarData {
-	h.mu.RLock()
-	valStore, taskStore, toolStore, staffStore := h.values, h.tasks, h.tools, h.staff
-	h.mu.RUnlock()
-
-	var vals []*value.Value
-	counts := make(map[string]int)
-	if valStore != nil {
-		vals, _ = valStore.List()
-		for _, v := range vals {
-			counts[v.Category]++
-		}
-	}
-
-	var tasks []task.Task
-	if taskStore != nil {
-		tasks, _ = taskStore.List()
-	}
-	slices.SortFunc(tasks, func(a, b task.Task) int { return strings.Compare(a.Label, b.Label) })
-
-	var tools []tool.Tool
-	if toolStore != nil {
-		tools, _ = toolStore.List()
-	}
-	slices.SortFunc(tools, func(a, b tool.Tool) int { return strings.Compare(a.Label, b.Label) })
-
-	var members []staff.Staff
-	if staffStore != nil {
-		members, _ = staffStore.List()
-	}
-	slices.SortFunc(members, func(a, b staff.Staff) int { return strings.Compare(a.Label, b.Label) })
-
+func (h *uiHandler) navData(r *http.Request, section string) uitemplates.NavData {
 	cfg, _ := h.settings.Load()
 	name := ""
 	if cfg != nil {
 		name = cfg.BusinessName
 	}
-
-	return webtemplates.SidebarData{
-		Categories:    value.DefaultCategories,
-		Staff:         members,
-		Tasks:         tasks,
-		Tools:         tools,
-		ValueCounts:   counts,
-		ActiveCat:     r.URL.Query().Get("cat"),
-		ActiveSection: section,
+	return uitemplates.NavData{
 		BusinessName:  name,
+		ActiveSection: section,
 	}
 }
 
