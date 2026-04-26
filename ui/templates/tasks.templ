@@ -1,6 +1,7 @@
 package templates
 
 import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/ui/components/alert"
@@ -9,9 +10,34 @@ import (
 	"picomaju/ui/components/label"
 )
 
-templ TaskListPage(tasks []task.Task, nd NavData) {
-	@AppLayout("Tasks", nd, emptySidebarNav()) {
-		@pageHeader("Tasks") {
+templ taskSidebarNav(activeCat string) {
+	<nav class="flex flex-col gap-2 py-2 flex-1">
+		@SidebarItem("/tasks", "All", "", activeCat) {
+			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tasks?tool_cat=messaging", "Messaging", "messaging", activeCat) {
+			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tasks?tool_cat=commerce", "Commerce", "commerce", activeCat) {
+			@icons.Package(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tasks?tool_cat=payments", "Payments", "payments", activeCat) {
+			@icons.Wallet(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tasks?tool_cat=utilities", "Utilities", "utilities", activeCat) {
+			@icons.Settings(templ.Attributes{"class": "size-4"})
+		}
+	</nav>
+}
+
+templ TaskListPage(tasks []task.Task, tools []tool.Tool, nd NavData, activeCat string) {
+	@AppLayout("Tasks", nd, taskSidebarNav(activeCat)) {
+		@pageHeader(func() string {
+			if l := catLabel(activeCat); l != "" {
+				return l
+			}
+			return "Tasks"
+		}()) {
 			@button.Button(button.Props{Href: "/tasks/new", Size: button.SizeSm}) {
 				New Task
 			}

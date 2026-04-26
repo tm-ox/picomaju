@@ -120,6 +120,22 @@ func staffToolCount(m *staff.Staff, tasks []task.Task) int {
 	return len(seen)
 }
 
+// catLabel returns the display label for a tool catalog category, or "" if unknown.
+func catLabel(cat string) string {
+	switch cat {
+	case "messaging":
+		return "Messaging"
+	case "commerce":
+		return "Commerce"
+	case "payments":
+		return "Payments"
+	case "utilities":
+		return "Utilities"
+	default:
+		return ""
+	}
+}
+
 func staffIconOptions() []string {
 	return []string{
 		"user", "user-round", "bot", "headphones", "phone", "mail",

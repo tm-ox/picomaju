@@ -214,11 +214,25 @@ func (h *uiHandler) validateSSE(w http.ResponseWriter, r *http.Request) {
 // --- Tools UI ---
 
 func (h *uiHandler) toolList(w http.ResponseWriter, r *http.Request) {
+	activeCat := r.URL.Query().Get("cat")
 	tools, _ := h.tools.List()
 	if tools == nil {
 		tools = []tool.Tool{}
 	}
-	uitemplates.ToolListPage(tools, h.navData(r, "tools")).Render(r.Context(), w)
+	if activeCat != "" {
+		catIndex := tool.CatalogByType()
+		var filtered []tool.Tool
+		for _, t := range tools {
+			if integ, ok := catIndex[t.Type]; ok && integ.Category == activeCat {
+				filtered = append(filtered, t)
+			}
+		}
+		if filtered == nil {
+			filtered = []tool.Tool{}
+		}
+		tools = filtered
+	}
+	uitemplates.ToolListPage(tools, h.navData(r, "tools"), activeCat).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newToolForm(w http.ResponseWriter, r *http.Request) {
@@ -308,11 +322,38 @@ func (h *uiHandler) deleteTool(w http.ResponseWriter, r *http.Request) {
 // --- Tasks UI ---
 
 func (h *uiHandler) taskList(w http.ResponseWriter, r *http.Request) {
+	toolCat := r.URL.Query().Get("tool_cat")
 	tasks, _ := h.tasks.List()
+	tools, _ := h.tools.List()
 	if tasks == nil {
 		tasks = []task.Task{}
 	}
-	uitemplates.TaskListPage(tasks, h.navData(r, "tasks")).Render(r.Context(), w)
+	if tools == nil {
+		tools = []tool.Tool{}
+	}
+	if toolCat != "" {
+		catIndex := tool.CatalogByType()
+		catToolIDs := map[string]bool{}
+		for _, t := range tools {
+			if integ, ok := catIndex[t.Type]; ok && integ.Category == toolCat {
+				catToolIDs[t.ID] = true
+			}
+		}
+		var filtered []task.Task
+		for _, t := range tasks {
+			for _, id := range t.Tools {
+				if catToolIDs[id] {
+					filtered = append(filtered, t)
+					break
+				}
+			}
+		}
+		if filtered == nil {
+			filtered = []task.Task{}
+		}
+		tasks = filtered
+	}
+	uitemplates.TaskListPage(tasks, tools, h.navData(r, "tasks"), toolCat).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newTaskForm(w http.ResponseWriter, r *http.Request) {

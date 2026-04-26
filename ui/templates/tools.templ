@@ -1,6 +1,7 @@
 package templates
 
 import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/tool"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
@@ -8,9 +9,34 @@ import (
 	"picomaju/ui/components/label"
 )
 
-templ ToolListPage(tools []tool.Tool, nd NavData) {
-	@AppLayout("Tools", nd, emptySidebarNav()) {
-		@pageHeader("Tools") {
+templ toolSidebarNav(activeCat string) {
+	<nav class="flex flex-col gap-2 py-2 flex-1">
+		@SidebarItem("/tools", "All", "", activeCat) {
+			@icons.Wrench(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tools?cat=messaging", "Messaging", "messaging", activeCat) {
+			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tools?cat=commerce", "Commerce", "commerce", activeCat) {
+			@icons.Package(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tools?cat=payments", "Payments", "payments", activeCat) {
+			@icons.Wallet(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/tools?cat=utilities", "Utilities", "utilities", activeCat) {
+			@icons.Settings(templ.Attributes{"class": "size-4"})
+		}
+	</nav>
+}
+
+templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
+	@AppLayout("Tools", nd, toolSidebarNav(activeCat)) {
+		@pageHeader(func() string {
+			if l := catLabel(activeCat); l != "" {
+				return l
+			}
+			return "Tools"
+		}()) {
 			@button.Button(button.Props{Href: "/tools/new", Size: button.SizeSm}) {
 				Add Tool
 			}

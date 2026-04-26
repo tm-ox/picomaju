@@ -2,6 +2,7 @@ package templates
 
 import (
 	"fmt"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/value"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
@@ -9,8 +10,36 @@ import (
 	"picomaju/ui/components/label"
 )
 
+templ valueSidebarNav(cats []value.Category, activeCat string) {
+	<nav class="flex flex-col gap-2 py-2 flex-1">
+		@SidebarItem("/values", "All", "", activeCat) {
+			@icons.Star(templ.Attributes{"class": "size-4"})
+		}
+		for _, c := range cats {
+			@SidebarItem("/values?cat="+c.ID, c.Label, c.ID, activeCat) {
+				@valueCatIcon(c.ID)
+			}
+		}
+	</nav>
+}
+
+templ valueCatIcon(id string) {
+	switch id {
+		case "core_values":
+			@icons.Star(templ.Attributes{"class": "size-4"})
+		case "communication":
+			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
+		case "skills":
+			@icons.Zap(templ.Attributes{"class": "size-4"})
+		case "escalation":
+			@icons.Activity(templ.Attributes{"class": "size-4"})
+		default:
+			@icons.Settings(templ.Attributes{"class": "size-4"})
+	}
+}
+
 templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, activeCat string) {
-	@AppLayout("Values", nd, emptySidebarNav()) {
+	@AppLayout("Values", nd, valueSidebarNav(cats, activeCat)) {
 		@pageHeader(func() string {
 			if activeCat != "" {
 				return categoryLabel(cats, activeCat)

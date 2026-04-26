@@ -3,113 +3,35 @@
 ## Packages
 
 ```
-settings/
-  store.go        — Settings type (business_name, business_details, data_dir,
-                    languages[], timezone, hours) + file-backed store
-value/
-  model.go        — Value, DirectiveEntry, ValidationResult, ValidationError types
-  store.go        — file-based CRUD (.md + YAML frontmatter)
-  validator.go    — required field check, priority clamp [0–100]
-  category.go     — Category type + DefaultCategories (built-in, no separate store)
-tool/
-  store.go        — Tool type (id, label, type, config) + CRUD on tools.json
-  catalog.go      — Integration catalog: 8 entries, CatalogByCategory/ID/Type
-task/
-  store.go        — Task type (id, label, description, tools[]) + CRUD on tasks.json
-staff/
-  store.go        — Staff type (id, label, description, active, icon, tasks[], value_categories[], values[]) + CRUD on staff.json
-api/
-  router.go       — all routes wired here; setup gate middleware (allows /welcome + setup paths + /static/*)
-  ui.go           — HTML + SSE handlers; uiHandler with mutex-guarded store init; navData() helper
-  ui_onboarding.go — completeWelcome; firstStaffPage/completeFirstStaff; slugify helper
-  sse.go          — SSEMergeFragment() for datastar
-  helpers.go      — jsonOK / jsonErr
+settings/store.go   — Settings{business_name, business_details, data_dir, languages[], timezone, hours}; file-backed JSON
+value/model.go      — Value, DirectiveEntry, ValidationResult, ValidationError
+value/store.go      — CRUD on <data_dir>/values/<id>.md (YAML frontmatter + body)
+value/validator.go  — required field check; priority clamp [0–100]
+value/category.go   — Category + DefaultCategories (built-in, no disk store)
+tool/store.go       — Tool{id, label, type, config map[string]any}; CRUD on tools.json
+tool/catalog.go     — Integration catalog: 8 entries; CatalogByCategory/ID/Type helpers
+task/store.go       — Task{id, label, description, tools[]}; CRUD on tasks.json
+staff/store.go      — Staff{id, label, description, active, icon, tasks[], value_categories[], values[]}; CRUD on staff.json
+api/router.go       — all routes; setup gate middleware
+api/ui.go           — HTML + SSE handlers; uiHandler{mutex-guarded stores}; navData() helper
+api/ui_onboarding.go — completeWelcome; firstStaffPage/completeFirstStaff; slugify
+api/sse.go          — SSEMergeFragment() for datastar
+api/helpers.go      — jsonOK / jsonErr
 ```
 
 ## Data model
 
-### Settings (`os.UserConfigDir()/picomaju/settings.json`)
+**Settings** — `~/.config/picomaju/settings.json`. `languages`, `timezone`, `hours` are omitempty.
 
-```json
-{
-  "business_name": "Acme Co.",
-  "business_details": "...",
-  "data_dir": "/home/tm/picomaju",
-  "languages": ["id", "en"],
-  "timezone": "Asia/Jakarta",
-  "hours": "Mon–Fri, 09:00–18:00"
-}
-```
+**Value** — `<data_dir>/values/<id>.md`. Required: `id`, `title`, `version`, `priority` (0–100), `category`. Body is raw markdown after frontmatter.
 
-`languages`, `timezone`, `hours` are `omitempty` — existing settings files without them load cleanly.
-Settings file location is platform-aware (`os.UserConfigDir()/picomaju/settings.json`). On Linux: `~/.config/picomaju/settings.json`.
+**Tool** — `<data_dir>/tools.json`. `type` matches a catalog entry. `config` holds credentials keyed by `ConfigField.Key`.
 
-### Value (`<data_dir>/values/<id>.md`)
+**Task** — `<data_dir>/tasks.json`. `tools` is a list of tool IDs.
 
-Markdown file with YAML frontmatter. Org-level directives — tone, goals, policies.
-
-```yaml
----
-id: tone_of_voice
-title: Tone of Voice
-version: 1
-priority: 80
-category: core_values
----
-
-Always respond in a warm, professional tone...
-```
-
-Required fields: `id`, `title`, `version`, `priority` (0–100), `category`.
-
-### Tool (`<data_dir>/tools.json`)
-
-Catalog-based integrations. `type` matches a catalog entry (e.g. `whatsapp`, `telegram`, `shopee`). Config holds credentials keyed by `ConfigField.Key`.
-
-```json
-{ "tools": [
-  { "id": "whatsapp", "label": "WhatsApp Business", "type": "whatsapp",
-    "config": { "phone_number_id": "...", "access_token": "..." } }
-]}
-```
-
-### Task (`<data_dir>/tasks.json`)
-
-```json
-{ "tasks": [
-  {
-    "id": "manage_social_media",
-    "label": "Manage Social Media",
-    "description": "Post updates and respond to comments",
-    "tools": ["tiktok_shop"]
-  }
-]}
-```
-
-### Staff (`<data_dir>/staff.json`)
-
-Agent profile. Composed of Tasks + Values. The compile target.
-
-```json
-{ "staff": [
-  {
-    "id": "support_agent",
-    "label": "Support Agent",
-    "description": "Handles customer support and inquiries",
-    "active": true,
-    "icon": "headphones",
-    "tasks": ["manage_social_media"],
-    "value_categories": ["core_values", "communication"],
-    "values": ["escalation_override"]
-  }
-]}
-```
-
-`description` and `icon` are display metadata (omitempty). `active` defaults to false. `icon` is a Lucide icon name (28 options) or empty for initials fallback. `value_categories` → bulk inclusion of all Values in those categories. `values` → individual Value IDs added on top.
+**Staff** — `<data_dir>/staff.json`. `value_categories` → all values in those categories; `values` → individual value IDs on top. `icon` is a Lucide icon name (28 options) or `""` for initials fallback.
 
 ## Value categories
-
-Built-in constants in `value/category.go` — no separate file on disk.
 
 | ID | Label |
 |----|-------|
@@ -120,8 +42,6 @@ Built-in constants in `value/category.go` — no separate file on disk.
 | `custom` | Custom |
 
 ## Integration catalog
-
-8 entries in `tool/catalog.go`:
 
 | ID | Label | Category |
 |----|-------|----------|
@@ -134,55 +54,36 @@ Built-in constants in `value/category.go` — no separate file on disk.
 | `midtrans` | Midtrans | payments |
 | `google_calendar` | Google Calendar | utilities |
 
-## Compiler
+## Routes
 
-**Deferred.** Output will be multiple files per Staff member: `AGENTS.md`, `SOUL.md`, tool injection into picoclaw `config.json`. Pipeline logic exists as a stub (`value.DirectiveEntry`) but serialization is not implemented.
+Mutations: form POST + redirect. SSE validate uses datastar. Setup gate exempts `/welcome`, `/setup*`, `/static/*`.
 
-## UI routes
-
-Mutations use standard HTML form POST + redirect (no JS required for CRUD). Validate uses datastar SSE.
-
-The setup gate middleware allows `/welcome`, `/setup`, `/setup/first-staff`, `/setup/integrations`, and `/static/*` without redirect. All other routes redirect to `/welcome` when no data directory is configured.
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | staff list (home screen) |
-| GET | `/welcome` | welcome screen — language picker |
-| POST | `/welcome` | save language → redirect `/setup` |
-| GET | `/setup` | onboarding step 1 — business name + data dir + timezone + hours |
-| POST | `/setup` | save step 1 → redirect `/setup/first-staff` |
-| GET | `/setup/first-staff` | onboarding step 2 — first staff profile |
-| POST | `/setup/first-staff` | create staff → redirect `/setup/integrations` |
-| GET | `/setup/integrations` | onboarding step 3 — tool picker |
-| POST | `/setup/integrations` | create selected tools → redirect `/values` |
-| GET | `/values` | Value list (filterable by `?cat=<id>`) |
-| GET | `/values/new` | Value form (new) |
-| POST | `/values` | create Value → redirect `/values` |
-| GET | `/values/:id/edit` | Value form (edit) |
-| POST | `/values/:id` | update Value → redirect `/values` |
-| POST | `/values/:id/delete` | delete Value → redirect `/values` |
-| POST | `/values/:id/validate-stream` | SSE: `ValidationFragment` |
-| GET | `/tools` | Tool list |
-| GET | `/tools/new` | Add Tool — catalog radio card picker |
-| POST | `/tools` | create Tool from `integration_id` → redirect to edit |
-| GET | `/tools/:id/edit` | Edit Tool (credential fields) |
-| POST | `/tools/:id` | update Tool → redirect `/tools` |
-| POST | `/tools/:id/delete` | delete Tool → redirect `/tools` |
-| GET | `/tasks` | Task list |
-| GET | `/tasks/new` | Task form (new) |
-| POST | `/tasks` | create Task → redirect `/tasks` |
-| GET | `/tasks/:id/edit` | Task form (edit) |
-| POST | `/tasks/:id` | update Task → redirect `/tasks` |
-| POST | `/tasks/:id/delete` | delete Task → redirect `/tasks` |
-| GET | `/staff` | redirect → `/` |
-| GET | `/staff/new` | Staff form (new) — id, label, description, icon |
-| POST | `/staff` | create Staff → redirect `/staff/:id` |
-| GET | `/staff/:id` | Staff detail page (`?s=overview\|profile\|values\|tools\|tasks`) |
-| GET | `/staff/:id/edit` | redirect → `/staff/:id` |
-| POST | `/staff/:id/profile` | update label, description, icon, active → redirect `/staff/:id?s=profile` |
-| POST | `/staff/:id/tasks` | update task assignments → redirect `/staff/:id?s=tasks` |
-| POST | `/staff/:id/values` | update value/category assignments → redirect `/staff/:id?s=values` |
-| POST | `/staff/:id/delete` | delete Staff → redirect `/` |
-| GET | `/settings` | settings page |
-| POST | `/settings` | save settings → redirect `/settings?saved=1` |
+| Method | Path | Handler |
+|--------|------|---------|
+| GET | `/` | staff dashboard |
+| GET/POST | `/welcome` | language picker → `/setup` |
+| GET/POST | `/setup` | step 1: business name, data dir, tz, hours |
+| GET/POST | `/setup/first-staff` | step 2: first staff profile |
+| GET/POST | `/setup/integrations` | step 3: tool picker → `/values` |
+| GET | `/values[?cat=]` | value list, filtered by category |
+| GET/POST | `/values/new` `/values` | create value |
+| GET/POST | `/values/:id/edit` `/values/:id` | edit value |
+| POST | `/values/:id/delete` | delete |
+| POST | `/values/:id/validate-stream` | SSE ValidationFragment |
+| GET | `/tools[?cat=]` | tool list, filtered by catalog category |
+| GET/POST | `/tools/new` `/tools` | catalog picker → create → redirect edit |
+| GET/POST | `/tools/:id/edit` `/tools/:id` | edit credentials |
+| POST | `/tools/:id/delete` | delete |
+| GET | `/tasks[?tool_cat=]` | task list, filtered by tool catalog category |
+| GET/POST | `/tasks/new` `/tasks` | create task |
+| GET/POST | `/tasks/:id/edit` `/tasks/:id` | edit task |
+| POST | `/tasks/:id/delete` | delete |
+| GET | `/staff/new` | new staff form |
+| POST | `/staff` | create → `/staff/:id` |
+| GET | `/staff/:id[?s=overview\|profile\|values\|tools\|tasks]` | detail page |
+| POST | `/staff/:id/profile` | update label/description/icon/active |
+| POST | `/staff/:id/tasks` | update task assignments |
+| POST | `/staff/:id/values` | update value/category assignments |
+| POST | `/staff/:id/delete` | delete → `/` |
+| GET/POST | `/settings` | settings page |
 | GET | `/static/*` | embedded static assets |

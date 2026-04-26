@@ -80,7 +80,7 @@ templ AppLayout(title string, nd NavData, nav templ.Component) {
 							@icons.PanelLeft(templ.Attributes{"class": "size-4"})
 						</button>
 					</div>
-					<nav class="flex items-center gap-0.5" aria-label="Primary">
+					<nav class="hidden sm:flex items-center gap-0.5" aria-label="Primary">
 						@appNavLink("/", "Staff", nd.ActiveSection == "staff")
 						@appNavLink("/values", "Values", nd.ActiveSection == "values")
 						@appNavLink("/tools", "Tools", nd.ActiveSection == "tools")
@@ -93,8 +93,8 @@ templ AppLayout(title string, nd NavData, nav templ.Component) {
 						{ children... }
 					</div>
 				</div>
+				@AppBottomTabBar(nd)
 			</div>
-			@AppFAB(nd)
 			<script>
 				(function () {
 					var KEY = "sidebar";
