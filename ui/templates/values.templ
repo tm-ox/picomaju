@@ -46,8 +46,8 @@ templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, ac
 			}
 			return "Values"
 		}()) {
-			@button.Button(button.Props{Href: "/values/new", Size: button.SizeSm}) {
-				New Value
+			@button.Button(button.Props{Href: "/values/new", Size: button.SizeIcon}) {
+				@icons.Plus(templ.Attributes{"class": "size-4"})
 			}
 		}
 		if len(values) == 0 {
@@ -57,6 +57,23 @@ templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, ac
 				"/values/new",
 				"Create your first value",
 			)
+		} else if activeCat == "" {
+			for _, g := range groupValuesByCat(cats, values) {
+				@listSection(g.Cat.Label) {
+					for _, v := range g.Values {
+						@rowItem() {
+							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+								<span class="text-sm font-brand font-semibold text-foreground truncate">{ v.Title }</span>
+								<span class="text-xs text-muted-foreground font-mono">{ v.ID }</span>
+							</div>
+							<div class="hidden sm:flex items-center gap-2 shrink-0">
+								<span class="text-xs text-muted-foreground font-mono">p{ fmt.Sprintf("%d", v.Priority) }</span>
+							</div>
+							@rowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
+						}
+					}
+				}
+			}
 		} else {
 			@rowList() {
 				for _, v := range values {

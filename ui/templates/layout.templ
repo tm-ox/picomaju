@@ -2,172 +2,218 @@ package templates
 
 import icons "github.com/bryanvaz/go-templ-lucide-icons"
 
-// AppLayout is the full authenticated shell: collapsible sidebar + in-content nav + scrollable content.
-// nav is rendered between the sidebar header and the settings/theme footer.
+// ── Shared sub-components ─────────────────────────────────────────────────────
+
+templ appHead(title string) {
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+		<title>{ title } — Picomaju</title>
+		<link rel="stylesheet" href="/ui/assets/css/output.css"/>
+		<script type="module" src="/static/datastar.js"></script>
+		<script>
+			(function () {
+				var t =
+					localStorage.getItem("theme") ||
+					(matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+				if (t === "dark") document.documentElement.classList.add("dark");
+			})();
+		</script>
+	</head>
+}
+
+templ appStyles() {
+	<style>
+		#sidebar { transition: width 200ms ease; }
+		#sidebar-main { transition: transform 200ms ease; }
+		#sidebar [data-sidebar-label] { white-space: nowrap; }
+	</style>
+}
+
+templ appSidebarAside(nd NavData, nav templ.Component) {
+	<aside
+		id="sidebar"
+		class="bg-sidebar text-sidebar-foreground flex flex-col shrink-0 overflow-y-auto overflow-x-hidden border-r border-sidebar-border"
+	>
+		<div class="border-b border-sidebar-border shrink-0 h-12 flex items-center">
+			<div class="flex items-center w-full mx-2 px-1">
+				<span data-sidebar-label class="size-8 shrink-0 flex items-center justify-center">
+					<div class="size-7 rounded-md bg-primary text-primary-foreground font-brand font-bold text-[0.625rem] flex items-center justify-center tracking-wide select-none">
+						{ navInitials(nd.BusinessName) }
+					</div>
+				</span>
+				<span data-sidebar-label class="text-sm font-brand font-semibold text-sidebar-foreground/90 truncate flex-1 min-w-0 pl-2">
+					if nd.BusinessName != "" {
+						{ nd.BusinessName }
+					} else {
+						PicoMaju
+					}
+				</span>
+				<button
+					onclick="toggleSidebar()"
+					class="hidden sm:flex size-8 shrink-0 ml-auto items-center justify-center rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
+					aria-label="Toggle sidebar"
+				>
+					@icons.PanelLeft(templ.Attributes{"class": "size-4"})
+				</button>
+			</div>
+		</div>
+		@nav
+		<div class="mt-auto border-t border-sidebar-border shrink-0 py-2">
+			@SidebarItem("/settings", "Settings", "settings", nd.ActiveSection) {
+				@icons.Settings(templ.Attributes{"class": "size-4"})
+			}
+			@sidebarThemeToggle()
+		</div>
+	</aside>
+}
+
+templ appTopBar(nd NavData) {
+	<header class="shrink-0 h-12 flex items-center border-b border-border px-4">
+		<div class="flex-1 flex">
+			<button
+				class="flex sm:hidden size-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+				onclick="toggleSidebar()"
+				aria-label="Open sidebar"
+			>
+				@icons.PanelLeft(templ.Attributes{"class": "size-4"})
+			</button>
+		</div>
+		<nav class="hidden sm:flex items-center gap-0.5" aria-label="Primary">
+			@appNavLink("/", "Staff", nd.ActiveSection == "staff")
+			@appNavLink("/values", "Values", nd.ActiveSection == "values")
+			@appNavLink("/tools", "Tools", nd.ActiveSection == "tools")
+			@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks")
+		</nav>
+		<div class="flex-1"></div>
+	</header>
+}
+
+templ appSidebarScript() {
+	<script>
+		(function () {
+			var KEY = "sidebar";
+			var W = "14rem";
+			var ICON_W = "3.5rem";
+
+			function isMobile() {
+				return window.innerWidth < 640;
+			}
+
+			function apply(open) {
+				var sb = document.getElementById("sidebar");
+				var main = document.getElementById("sidebar-main");
+				var bd = document.getElementById("sidebar-backdrop");
+				var labels = sb.querySelectorAll("[data-sidebar-label]");
+
+				if (isMobile()) {
+					if (open) {
+						sb.style.width = W;
+						sb.style.position = "absolute";
+						sb.style.zIndex = "50";
+						sb.style.height = "100%";
+						main.style.transform = "translateX(" + W + ")";
+						bd.classList.remove("hidden");
+						labels.forEach(function (el) { el.style.display = ""; });
+					} else {
+						sb.style.width = "0";
+						sb.style.position = "";
+						sb.style.zIndex = "";
+						sb.style.height = "";
+						main.style.transform = "";
+						bd.classList.add("hidden");
+						labels.forEach(function (el) { el.style.display = "none"; });
+					}
+				} else {
+					sb.style.position = "";
+					sb.style.zIndex = "";
+					sb.style.height = "";
+					main.style.transform = "";
+					bd.classList.add("hidden");
+					sb.style.width = open ? W : ICON_W;
+					labels.forEach(function (el) { el.style.display = open ? "" : "none"; });
+				}
+
+				localStorage.setItem(KEY, open ? "open" : "closed");
+			}
+
+			window.toggleSidebar = function () {
+				var saved = localStorage.getItem(KEY);
+				var current = saved !== null ? saved === "open" : !isMobile();
+				apply(!current);
+			};
+
+			var saved = localStorage.getItem(KEY);
+			apply(saved !== null ? saved === "open" : !isMobile());
+
+			window.addEventListener("resize", function () {
+				var saved = localStorage.getItem(KEY);
+				apply(saved !== null ? saved === "open" : !isMobile());
+			});
+		})();
+	</script>
+}
+
+templ appContentFooter() {
+	<footer class="mt-auto pt-8 pb-2 flex items-center justify-center gap-2 text-[0.625rem] text-muted-foreground/40 select-none">
+		<span>Powered by</span>
+		<img src="/static/logo-symbol.svg" class="h-3.5 w-auto opacity-40" alt=""/>
+		<span class="font-brand font-semibold">PicoMaju</span>
+	</footer>
+}
+
+// ── AppLayout — standard scrollable content shell ─────────────────────────────
+
 templ AppLayout(title string, nd NavData, nav templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-			<title>{ title } — Picomaju</title>
-			<link rel="stylesheet" href="/ui/assets/css/output.css"/>
-			<script type="module" src="/static/datastar.js"></script>
-			<script>
-				(function () {
-					var t =
-						localStorage.getItem("theme") ||
-						(matchMedia("(prefers-color-scheme:dark)").matches
-							? "dark"
-							: "light");
-					if (t === "dark") document.documentElement.classList.add("dark");
-				})();
-			</script>
-		</head>
+		@appHead(title)
 		<body class="flex h-dvh overflow-hidden bg-background">
-			<style>
-				#sidebar {
-					transition: width 200ms ease;
-				}
-				#sidebar-main {
-					transition: transform 200ms ease;
-				}
-			</style>
-			<aside
-				id="sidebar"
-				class="bg-sidebar text-sidebar-foreground flex flex-col shrink-0 overflow-y-auto overflow-x-hidden border-r border-sidebar-border"
-			>
-				<div class="border-b border-sidebar-border shrink-0 h-12 flex items-center">
-					<div class="flex items-center w-full mx-2 px-1">
-						<span data-sidebar-label class="size-8 shrink-0 flex items-center justify-center">
-							<div class="size-7 rounded-md bg-primary text-primary-foreground font-brand font-bold text-[0.625rem] flex items-center justify-center tracking-wide select-none">
-								{ navInitials(nd.BusinessName) }
-							</div>
-						</span>
-						<span data-sidebar-label class="text-sm font-brand font-semibold text-sidebar-foreground/90 truncate flex-1 min-w-0 pl-2">
-							if nd.BusinessName != "" {
-								{ nd.BusinessName }
-							} else {
-								PicoMaju
-							}
-						</span>
-						<button
-							onclick="toggleSidebar()"
-							class="hidden sm:flex size-8 shrink-0 ml-auto items-center justify-center rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
-							aria-label="Toggle sidebar"
-						>
-							@icons.PanelLeft(templ.Attributes{"class": "size-4"})
-						</button>
-					</div>
-				</div>
-				@nav
-				<div class="mt-auto border-t border-sidebar-border shrink-0 py-2">
-					@SidebarItem("/settings", "Settings", "settings", nd.ActiveSection) {
-						@icons.Settings(templ.Attributes{"class": "size-4"})
-					}
-					@sidebarThemeToggle()
-				</div>
-			</aside>
+			@appStyles()
+			@appSidebarAside(nd, nav)
 			<div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-black/30 hidden" onclick="toggleSidebar()"></div>
 			<div id="sidebar-main" class="flex-1 min-w-0 flex flex-col overflow-hidden">
-				<header class="shrink-0 h-12 flex items-center border-b border-border px-4">
-					<div class="flex-1 flex">
-						<button
-							class="flex sm:hidden size-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-							onclick="toggleSidebar()"
-							aria-label="Open sidebar"
-						>
-							@icons.PanelLeft(templ.Attributes{"class": "size-4"})
-						</button>
-					</div>
-					<nav class="hidden sm:flex items-center gap-0.5" aria-label="Primary">
-						@appNavLink("/", "Staff", nd.ActiveSection == "staff")
-						@appNavLink("/values", "Values", nd.ActiveSection == "values")
-						@appNavLink("/tools", "Tools", nd.ActiveSection == "tools")
-						@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks")
-					</nav>
-					<div class="flex-1"></div>
-				</header>
+				@appTopBar(nd)
 				<div class="flex-1 overflow-y-auto">
-					<div class="max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
+					<div class="max-w-2xl mx-auto w-full px-6 py-6 flex flex-col gap-6 min-h-full">
+						{ children... }
+						@appContentFooter()
+					</div>
+				</div>
+				@AppBottomTabBar(nd)
+			</div>
+			@appSidebarScript()
+		</body>
+	</html>
+}
+
+// ── ChatAppLayout — full-height chat shell with pinned input ──────────────────
+// Children must be: header (shrink-0), messages (flex-1 overflow-y-auto), input (shrink-0).
+
+templ ChatAppLayout(title string, nd NavData, nav templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		@appHead(title)
+		<body class="flex h-dvh overflow-hidden bg-background">
+			@appStyles()
+			@appSidebarAside(nd, nav)
+			<div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-black/30 hidden" onclick="toggleSidebar()"></div>
+			<div id="sidebar-main" class="flex-1 min-w-0 flex flex-col overflow-hidden">
+				@appTopBar(nd)
+				<div class="flex-1 overflow-hidden flex flex-col min-h-0">
+					<div class="max-w-2xl mx-auto w-full flex-1 flex flex-col min-h-0 overflow-hidden">
 						{ children... }
 					</div>
 				</div>
 				@AppBottomTabBar(nd)
 			</div>
-			<script>
-				(function () {
-					var KEY = "sidebar";
-					var W = "14rem";
-					var ICON_W = "3.5rem";
-
-					function isMobile() {
-						return window.innerWidth < 640;
-					}
-
-					function apply(open) {
-						var sb = document.getElementById("sidebar");
-						var main = document.getElementById("sidebar-main");
-						var bd = document.getElementById("sidebar-backdrop");
-						var labels = sb.querySelectorAll("[data-sidebar-label]");
-
-						if (isMobile()) {
-							if (open) {
-								sb.style.width = W;
-								sb.style.position = "absolute";
-								sb.style.zIndex = "50";
-								sb.style.height = "100%";
-								main.style.transform = "translateX(" + W + ")";
-								bd.classList.remove("hidden");
-								labels.forEach(function (el) {
-									el.style.display = "";
-								});
-							} else {
-								sb.style.width = "0";
-								sb.style.position = "";
-								sb.style.zIndex = "";
-								sb.style.height = "";
-								main.style.transform = "";
-								bd.classList.add("hidden");
-								labels.forEach(function (el) {
-									el.style.display = "none";
-								});
-							}
-						} else {
-							sb.style.position = "";
-							sb.style.zIndex = "";
-							sb.style.height = "";
-							main.style.transform = "";
-							bd.classList.add("hidden");
-							sb.style.width = open ? W : ICON_W;
-							labels.forEach(function (el) {
-								el.style.display = open ? "" : "none";
-							});
-						}
-
-						localStorage.setItem(KEY, open ? "open" : "closed");
-					}
-
-					window.toggleSidebar = function () {
-						var saved = localStorage.getItem(KEY);
-						var current = saved !== null ? saved === "open" : !isMobile();
-						apply(!current);
-					};
-
-					var saved = localStorage.getItem(KEY);
-					apply(saved !== null ? saved === "open" : !isMobile());
-
-					window.addEventListener("resize", function () {
-						var saved = localStorage.getItem(KEY);
-						apply(saved !== null ? saved === "open" : !isMobile());
-					});
-				})();
-			</script>
+			@appSidebarScript()
 		</body>
 	</html>
 }
 
-// sidebarThemeToggle is a button styled as a SidebarItem that toggles light/dark mode.
+// ── sidebarThemeToggle ────────────────────────────────────────────────────────
+
 templ sidebarThemeToggle() {
 	<button
 		class="flex items-center gap-2 w-full mx-2 px-1 py-0.5 rounded-md text-sm transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
@@ -187,7 +233,8 @@ templ sidebarThemeToggle() {
 	</button>
 }
 
-// Layout is the unauthenticated page shell.
+// ── Layout — unauthenticated shell ────────────────────────────────────────────
+
 templ Layout(title string) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -200,9 +247,7 @@ templ Layout(title string) {
 				(function () {
 					var t =
 						localStorage.getItem("theme") ||
-						(matchMedia("(prefers-color-scheme:dark)").matches
-							? "dark"
-							: "light");
+						(matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
 					if (t === "dark") document.documentElement.classList.add("dark");
 				})();
 			</script>

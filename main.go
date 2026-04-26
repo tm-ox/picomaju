@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"picomaju/internal/api"
+	"picomaju/internal/chat"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -17,7 +18,7 @@ import (
 	"picomaju/ui/templates"
 )
 
-//go:embed web/static
+//go:embed ui/static
 var staticFiles embed.FS
 
 func main() {
@@ -40,19 +41,21 @@ func main() {
 	var taskStore *task.Store
 	var toolStore *tool.Store
 	var staffStore *staff.Store
+	var chatStore *chat.Store
 	if dataDir != "" {
 		valStore = value.NewStore(filepath.Join(dataDir, "values"))
 		taskStore = task.NewStore(filepath.Join(dataDir, "tasks.json"))
 		toolStore = tool.NewStore(filepath.Join(dataDir, "tools.json"))
 		staffStore = staff.NewStore(filepath.Join(dataDir, "staff.json"))
+		chatStore = chat.NewStore(filepath.Join(dataDir, "chats.json"))
 	}
 
 	var static http.FileSystem
 	if os.Getenv("DEV") != "" {
-		static = http.Dir("web/static")
+		static = http.Dir("ui/static")
 		log.Println("dev mode: serving static files from disk")
 	} else {
-		sub, err := fs.Sub(staticFiles, "web/static")
+		sub, err := fs.Sub(staticFiles, "ui/static")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -60,7 +63,7 @@ func main() {
 	}
 
 	addr := env("ADDR", ":18800")
-	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, settingsStore, dataDir, static)
+	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, chatStore, settingsStore, dataDir, static)
 
 	// ui/assets served from disk during active development
 	r.Handle("GET /ui/assets/*", http.StripPrefix("/ui/assets/", http.FileServer(http.Dir("ui/assets"))))

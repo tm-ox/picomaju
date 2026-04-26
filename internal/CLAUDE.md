@@ -12,6 +12,7 @@ tool/store.go       — Tool{id, label, type, config map[string]any}; CRUD on to
 tool/catalog.go     — Integration catalog: 8 entries; CatalogByCategory/ID/Type helpers
 task/store.go       — Task{id, label, description, tools[]}; CRUD on tasks.json
 staff/store.go      — Staff{id, label, description, active, icon, tasks[], value_categories[], values[]}; CRUD on staff.json
+chat/store.go       — Chat{id, staff_id, title, created_at, messages[]}, Message{role, content, ts}; CRUD on chats.json; ListByStaff(staffID)
 api/router.go       — all routes; setup gate middleware
 api/ui.go           — HTML + SSE handlers; uiHandler{mutex-guarded stores}; navData() helper
 api/ui_onboarding.go — completeWelcome; firstStaffPage/completeFirstStaff; slugify
@@ -30,6 +31,8 @@ api/helpers.go      — jsonOK / jsonErr
 **Task** — `<data_dir>/tasks.json`. `tools` is a list of tool IDs.
 
 **Staff** — `<data_dir>/staff.json`. `value_categories` → all values in those categories; `values` → individual value IDs on top. `icon` is a Lucide icon name (28 options) or `""` for initials fallback.
+
+**Chat** — `<data_dir>/chats.json`. `staff_id` links to staff. `title` auto-set from first message (truncated to 40 chars). `messages[]{role, content, ts}` — `role` is `"user"` or `"assistant"`. ID is hex-encoded `time.Now().UnixNano()`.
 
 ## Value categories
 
@@ -85,5 +88,10 @@ Mutations: form POST + redirect. SSE validate uses datastar. Setup gate exempts 
 | POST | `/staff/:id/tasks` | update task assignments |
 | POST | `/staff/:id/values` | update value/category assignments |
 | POST | `/staff/:id/delete` | delete → `/` |
+| POST | `/staff/:id/chats` | create chat → `/staff/:id/chats/:chatId` |
+| GET | `/staff/:id/chats/:chatId` | chat page |
+| POST | `/staff/:id/chats/:chatId/messages` | append user message; auto-renames from first message |
+| POST | `/staff/:id/chats/:chatId/rename` | rename chat |
+| POST | `/staff/:id/chats/:chatId/delete` | delete chat → `/staff/:id` |
 | GET/POST | `/settings` | settings page |
-| GET | `/static/*` | embedded static assets |
+| GET | `/static/*` | embedded static assets (`ui/static/`) |

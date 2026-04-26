@@ -37,8 +37,8 @@ templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
 			}
 			return "Tools"
 		}()) {
-			@button.Button(button.Props{Href: "/tools/new", Size: button.SizeSm}) {
-				Add Tool
+			@button.Button(button.Props{Href: "/tools/new", Size: button.SizeIcon}) {
+				@icons.Plus(templ.Attributes{"class": "size-4"})
 			}
 		}
 		if len(tools) == 0 {
@@ -48,6 +48,20 @@ templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
 				"/tools/new",
 				"Add your first tool",
 			)
+		} else if activeCat == "" {
+			for _, g := range groupToolsByCat(tools) {
+				@listSection(g.Label) {
+					for _, t := range g.Tools {
+						@rowItem() {
+							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+								<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
+								<span class="text-xs text-muted-foreground font-mono">{ t.ID }</span>
+							</div>
+							@rowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
+						}
+					}
+				}
+			}
 		} else {
 			@rowList() {
 				for _, t := range tools {

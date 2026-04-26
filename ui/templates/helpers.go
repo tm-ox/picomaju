@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
+	"picomaju/internal/tool"
 	"picomaju/internal/value"
 	"strings"
 	"unicode"
@@ -134,6 +135,48 @@ func catLabel(cat string) string {
 	default:
 		return ""
 	}
+}
+
+type valCatGroup struct {
+	Cat    value.Category
+	Values []*value.Value
+}
+
+func groupValuesByCat(cats []value.Category, vals []*value.Value) []valCatGroup {
+	index := make(map[string][]*value.Value)
+	for _, v := range vals {
+		index[v.Category] = append(index[v.Category], v)
+	}
+	var groups []valCatGroup
+	for _, c := range cats {
+		if items := index[c.ID]; len(items) > 0 {
+			groups = append(groups, valCatGroup{Cat: c, Values: items})
+		}
+	}
+	return groups
+}
+
+type toolCatGroup struct {
+	Label string
+	Tools []tool.Tool
+}
+
+func groupToolsByCat(tools []tool.Tool) []toolCatGroup {
+	catIndex := tool.CatalogByType()
+	order := []string{"messaging", "commerce", "payments", "utilities"}
+	index := make(map[string][]tool.Tool)
+	for _, t := range tools {
+		if integ, ok := catIndex[t.Type]; ok {
+			index[integ.Category] = append(index[integ.Category], t)
+		}
+	}
+	var groups []toolCatGroup
+	for _, cat := range order {
+		if items := index[cat]; len(items) > 0 {
+			groups = append(groups, toolCatGroup{Label: catLabel(cat), Tools: items})
+		}
+	}
+	return groups
 }
 
 func staffIconOptions() []string {

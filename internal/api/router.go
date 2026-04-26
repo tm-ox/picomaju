@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"picomaju/internal/chat"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -13,7 +14,7 @@ import (
 	"picomaju/internal/value"
 )
 
-func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
+func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -23,6 +24,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		tasks:    taskStore,
 		tools:    toolStore,
 		staff:    staffStore,
+		chats:    chatStore,
 		settings: settingsStore,
 		dataDir:  dataDir,
 	}
@@ -100,6 +102,13 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Post("/staff/{id}/tasks", ui.updateStaffTasks)
 	r.Post("/staff/{id}/values", ui.updateStaffValues)
 	r.Post("/staff/{id}/delete", ui.deleteStaff)
+
+	// Chats
+	r.Post("/staff/{id}/chats", ui.createChat)
+	r.Get("/staff/{id}/chats/{chatId}", ui.chatPage)
+	r.Post("/staff/{id}/chats/{chatId}/messages", ui.createMessage)
+	r.Post("/staff/{id}/chats/{chatId}/rename", ui.renameChat)
+	r.Post("/staff/{id}/chats/{chatId}/delete", ui.deleteChat)
 
 	// Settings
 	r.Get("/settings", ui.settingsPage)

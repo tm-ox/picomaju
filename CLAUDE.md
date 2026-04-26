@@ -12,7 +12,7 @@ templ generate && go build   # after manual .templ edits
 tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 ```
 
-`datastar.js` must be placed in `web/static/` manually — embedded into binary at build time.
+`datastar.js` must be placed in `ui/static/` manually — embedded into binary at build time.
 
 ## Env vars
 
@@ -21,7 +21,7 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 | `PICOMAJU_CONFIG` | `~/.config/picomaju/settings.json` | config file path |
 | `DATA_DIR` | — | skip onboarding; use this data dir |
 | `ADDR` | `:18800` | listen address |
-| `DEV` | — | serve `web/static/` from disk |
+| `DEV` | — | serve `ui/static/` from disk |
 
 ## Sub-docs
 

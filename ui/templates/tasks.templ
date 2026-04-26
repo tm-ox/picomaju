@@ -38,8 +38,8 @@ templ TaskListPage(tasks []task.Task, tools []tool.Tool, nd NavData, activeCat s
 			}
 			return "Tasks"
 		}()) {
-			@button.Button(button.Props{Href: "/tasks/new", Size: button.SizeSm}) {
-				New Task
+			@button.Button(button.Props{Href: "/tasks/new", Size: button.SizeIcon}) {
+				@icons.Plus(templ.Attributes{"class": "size-4"})
 			}
 		}
 		if len(tasks) == 0 {

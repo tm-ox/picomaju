@@ -2,6 +2,7 @@ package templates
 
 import (
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"picomaju/internal/chat"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
@@ -16,8 +17,8 @@ import (
 templ StaffListPage(members []staff.Staff, nd NavData) {
 	@AppLayout("Staff", nd, staffListSidebarNav(members)) {
 		@pageHeader("Staff") {
-			@button.Button(button.Props{Href: "/staff/new", Size: button.SizeSm}) {
-				New Staff
+			@button.Button(button.Props{Href: "/staff/new", Size: button.SizeIcon}) {
+				@icons.Plus(templ.Attributes{"class": "size-4"})
 			}
 		}
 		if len(members) == 0 {
@@ -37,9 +38,11 @@ templ staffListSidebarNav(members []staff.Staff) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
 		for _, m := range members {
 			@SidebarItem("/staff/"+m.ID, m.Label, m.ID, "") {
-				<div class="size-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-[0.625rem]">
-					@staffIcon(m.Icon, m.Label)
-				</div>
+				if m.Icon == "" {
+					@icons.UserRound(templ.Attributes{"class": "size-4"})
+				} else {
+					@staffIcon(m.Icon, "")
+				}
 			}
 		}
 	</nav>
@@ -50,7 +53,7 @@ templ staffDashboard(members []staff.Staff) {
 		for _, m := range members {
 			<a href={ templ.SafeURL("/staff/" + m.ID) } class="bg-card rounded-lg border border-border p-4 flex flex-col gap-3 hover:border-primary/50 transition-colors">
 				<div class="flex items-center gap-3">
-					<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+					<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
 						@staffIcon(m.Icon, m.Label)
 					</div>
 					<div class="flex-1 min-w-0">
@@ -77,10 +80,10 @@ templ staffDashboard(members []staff.Staff) {
 }
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
-templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd NavData, section string, formErr string) {
-	@AppLayout(m.Label, nd, staffSidebarNav(m, section)) {
+templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd NavData, section string, formErr string, chats []chat.Chat) {
+	@AppLayout(m.Label, nd, staffSidebarNav(m, section, chats)) {
 		<div class="flex items-center gap-3">
-			<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+			<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
 				@staffIcon(m.Icon, m.Label)
 			</div>
 			<h3 class="font-brand font-bold text-foreground">{ m.Label }</h3>
@@ -107,7 +110,7 @@ templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, valu
 	}
 }
 
-templ staffSidebarNav(m *staff.Staff, section string) {
+templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
 		@SidebarItem("/staff/"+m.ID+"?s=overview", "Overview", "overview", section) {
 			@icons.LayoutDashboard(templ.Attributes{"class": "size-4"})
@@ -123,6 +126,23 @@ templ staffSidebarNav(m *staff.Staff, section string) {
 		}
 		@SidebarItem("/staff/"+m.ID+"?s=tasks", "Tasks", "tasks", section) {
 			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
+		}
+		<div class="mx-2 my-1 border-t border-sidebar-border"></div>
+		<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/chats") } class="px-2">
+			<button
+				type="submit"
+				class="w-full flex items-center gap-2 px-1 py-0.5 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+			>
+				<span class="size-8 shrink-0 flex items-center justify-center">
+					@icons.MessageSquarePlus(templ.Attributes{"class": "size-4"})
+				</span>
+				<span data-sidebar-label>New Chat</span>
+			</button>
+		</form>
+		for _, c := range chats {
+			@SidebarItem("/staff/"+m.ID+"/chats/"+c.ID, c.Title, c.ID, section) {
+				@icons.MessageSquare(templ.Attributes{"class": "size-4"})
+			}
 		}
 	</nav>
 	<div class="py-2 border-t border-sidebar-border shrink-0">
@@ -392,7 +412,7 @@ templ staffIconPicker(selected, lbl string) {
 			class="flex items-center gap-2 px-2 py-2 rounded-lg border border-border hover:border-muted-foreground bg-background transition-colors"
 			onclick="this.closest('[data-icon-picker]').querySelector('[data-icon-panel]').classList.toggle('hidden')"
 		>
-			<div class="size-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm shrink-0">
+			<div class="size-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm shrink-0">
 				<span data-icon-preview="" class={ templ.KV("hidden", selected != "") }>{ staffInitials(lbl) }</span>
 				for _, opt := range staffIconOptions() {
 					<span data-icon-preview={ opt } class={ templ.KV("hidden", selected != opt) }>
@@ -410,7 +430,7 @@ templ staffIconPicker(selected, lbl string) {
 				<label
 					title="Initials"
 					class={
-						"size-9 rounded-full flex items-center justify-center cursor-pointer transition-all font-brand font-semibold text-sm ring-offset-background",
+						"size-9 rounded-lg flex items-center justify-center cursor-pointer transition-all font-brand font-semibold text-sm ring-offset-background",
 						templ.KV("bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2", selected == ""),
 						templ.KV("bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground", selected != ""),
 					}
@@ -422,7 +442,7 @@ templ staffIconPicker(selected, lbl string) {
 					<label
 						title={ opt }
 						class={
-							"size-9 rounded-full flex items-center justify-center cursor-pointer transition-all ring-offset-background",
+							"size-9 rounded-lg flex items-center justify-center cursor-pointer transition-all ring-offset-background",
 							templ.KV("bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2", selected == opt),
 							templ.KV("bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground", selected != opt),
 						}

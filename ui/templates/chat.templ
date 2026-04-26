@@ -1,0 +1,119 @@
+package templates
+
+import (
+	"time"
+
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"picomaju/internal/chat"
+	"picomaju/internal/staff"
+)
+
+// StaffChatPage uses ChatAppLayout so the input is always pinned to the bottom.
+// Children order: header (shrink-0) → messages (flex-1 overflow-y-auto) → input (shrink-0).
+templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd NavData) {
+	@ChatAppLayout("Chat — "+m.Label, nd, staffSidebarNav(m, c.ID, chats)) {
+		<div class="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
+			<div class="flex items-center gap-2 min-w-0 flex-1">
+				<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+					@staffIcon(m.Icon, m.Label)
+				</div>
+				<form
+					method="post"
+					action={ templ.SafeURL("/staff/" + m.ID + "/chats/" + c.ID + "/rename") }
+					class="flex items-center gap-1 min-w-0 flex-1 group"
+				>
+					<input
+						type="text"
+						name="title"
+						value={ c.Title }
+						class="text-sm font-brand font-semibold text-foreground bg-transparent border-b border-transparent focus:border-border outline-none w-full truncate"
+						onblur="if(this.value.trim()&&this.value!==this.defaultValue){this.form.requestSubmit();}"
+					/>
+					<button
+						type="submit"
+						class="opacity-0 group-focus-within:opacity-100 size-5 shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+						aria-label="Save name"
+					>
+						@icons.Check(templ.Attributes{"class": "size-3"})
+					</button>
+				</form>
+			</div>
+			<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/chats/" + c.ID + "/delete") }>
+				<button
+					type="submit"
+					class="inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+					aria-label="Delete chat"
+					onclick="return confirm('Delete this chat?')"
+				>
+					@icons.Trash2(templ.Attributes{"class": "size-3.5"})
+				</button>
+			</form>
+		</div>
+		<div class="flex-1 overflow-y-auto px-4 py-4">
+			if len(c.Messages) == 0 {
+				<div class="h-full flex flex-col items-center justify-center text-center gap-3">
+					<div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
+						@icons.MessageSquare(templ.Attributes{"class": "size-5 text-primary"})
+					</div>
+					<div class="flex flex-col gap-1">
+						<span class="text-sm font-brand font-semibold text-foreground">Start the conversation</span>
+						<span class="text-xs text-muted-foreground">Send a message to { m.Label }</span>
+					</div>
+				</div>
+			} else {
+				<div class="flex flex-col gap-2">
+					for _, msg := range c.Messages {
+						@chatBubble(msg)
+					}
+				</div>
+			}
+		</div>
+		<div class="shrink-0 px-4 pb-6 pt-2 bg-background">
+			<form
+				method="post"
+				action={ templ.SafeURL("/staff/" + m.ID + "/chats/" + c.ID + "/messages") }
+				class="bg-card rounded-lg border border-border p-3 flex gap-2 items-start"
+			>
+				<textarea
+					name="content"
+					rows="2"
+					placeholder={ "Message " + m.Label + "…" }
+					class="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none leading-relaxed"
+					onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
+				></textarea>
+				<button
+					type="submit"
+					class="mt-0.5 size-8 shrink-0 rounded-md bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors cursor-pointer"
+					aria-label="Send"
+				>
+					@icons.ArrowUp(templ.Attributes{"class": "size-4"})
+				</button>
+			</form>
+		</div>
+	}
+}
+
+templ chatBubble(msg chat.Message) {
+	if msg.Role == "user" {
+		<div class="flex justify-end">
+			<div class="max-w-[80%] bg-blue-600 text-blue-50 rounded-2xl rounded-br-sm px-4 py-2.5">
+				<p class="text-sm whitespace-pre-wrap">{ msg.Content }</p>
+				<p class="text-[0.625rem] text-blue-200 mt-1 text-right">{ chatTimestamp(msg.Timestamp) }</p>
+			</div>
+		</div>
+	} else {
+		<div class="flex justify-start gap-2">
+			<div class="size-7 shrink-0 rounded-lg bg-primary/15 flex items-center justify-center mt-1">
+				@icons.Bot(templ.Attributes{"class": "size-3.5 text-primary"})
+			</div>
+			<div class="max-w-[80%] bg-primary/10 border border-primary/20 rounded-2xl rounded-bl-sm px-4 py-2.5">
+				<p class="text-sm whitespace-pre-wrap text-foreground">{ msg.Content }</p>
+				<p class="text-[0.625rem] text-primary/60 mt-1">{ chatTimestamp(msg.Timestamp) }</p>
+			</div>
+		</div>
+	}
+}
+
+func chatTimestamp(ts int64) string {
+	return time.Unix(ts, 0).Format("15:04")
+}

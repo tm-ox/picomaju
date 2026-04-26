@@ -10,11 +10,12 @@ Icons: `github.com/bryanvaz/go-templ-lucide-icons` — import alias `icons`, usa
 
 | File | Key exports |
 |---|---|
-| `layout.templ` | `AppLayout`, `ThemeToggle` |
+| `layout.templ` | `AppLayout`, `ChatAppLayout`, `ThemeToggle`, private sub-components |
 | `nav.templ` | `NavData`, `appNavLink`, `AppBottomTabBar`, `navInitials` |
-| `shared.templ` | `SidebarItem`, `emptySidebarNav`, `pageHeader`, `emptyState`, `rowList`, `rowItem`, `badge`, `rowActions`, `field` |
-| `helpers.go` | `catLabel`, `countWord`, `categoryLabel`, `configValue`, `staffInitials`, `staffToolCount`, `staffIconOptions`, `includesStr` |
+| `shared.templ` | `SidebarItem`, `emptySidebarNav`, `pageHeader`, `emptyState`, `listSection`, `rowList`, `rowItem`, `badge`, `rowActions`, `field` |
+| `helpers.go` | `catLabel`, `countWord`, `categoryLabel`, `configValue`, `staffInitials`, `staffToolCount`, `staffIconOptions`, `includesStr`, `groupValuesByCat`, `groupToolsByCat` |
 | `staff.templ` | `StaffListPage`, `StaffFormPage`, `StaffDetailPage`, sidebar navs, icon picker |
+| `chat.templ` | `StaffChatPage`, `chatBubble` |
 | `values.templ` | `valueSidebarNav`, `ValueListPage`, `ValueFormPage`, `ValidationFragment` |
 | `tools.templ` | `toolSidebarNav`, `ToolListPage`, `NewToolPage`, `ToolFormPage` |
 | `tasks.templ` | `taskSidebarNav`, `TaskListPage`, `TaskFormPage` |
@@ -22,9 +23,23 @@ Icons: `github.com/bryanvaz/go-templ-lucide-icons` — import alias `icons`, usa
 | `setup.templ` | `SetupStep1/2/3Page` |
 | `welcome.templ` | `WelcomePage` |
 
-## AppLayout shell
+## Layout shells
+
+### AppLayout — standard pages
 
 `AppLayout(title string, nd NavData, nav templ.Component)`
+
+Content area: `max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6 min-h-full` inside `flex-1 overflow-y-auto`. Includes `appContentFooter()` ("Powered by [logo] PicoMaju") at the bottom via `mt-auto`.
+
+### ChatAppLayout — chat pages
+
+`ChatAppLayout(title string, nd NavData, nav templ.Component)`
+
+Content area: `max-w-2xl mx-auto flex-1 flex flex-col min-h-0 overflow-hidden` inside `flex-1 overflow-hidden flex flex-col`. Children must own their own padding and scroll: header (`shrink-0`), messages (`flex-1 overflow-y-auto`), input (`shrink-0`). No footer. Tab bar (`AppBottomTabBar`) is a sibling of the content area, naturally above it on mobile.
+
+### Shared sub-components (private)
+
+`layout.templ` extracts `appHead`, `appStyles`, `appSidebarAside`, `appTopBar`, `appSidebarScript`, `appContentFooter` — both layouts compose from these.
 
 **Sidebar** (`bg-sidebar`, `h-dvh`, dark):
 - Header: `size-7` business avatar + name (`data-sidebar-label`) + desktop toggle (`hidden sm:flex`)
@@ -32,8 +47,6 @@ Icons: `github.com/bryanvaz/go-templ-lucide-icons` — import alias `icons`, usa
 - Footer: Settings + theme toggle (both as `SidebarItem`)
 
 **In-content header** (`h-12 border-b`): mobile hamburger (`flex sm:hidden`) left; `hidden sm:flex` nav links (Staff / Values / Tools / Tasks) center.
-
-**Content area**: `max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6` — set in AppLayout, not per page.
 
 **Bottom tab bar** (`AppBottomTabBar`, `sm:hidden`): `shrink-0` flex child inside `#sidebar-main` (not fixed) — slides with content when sidebar opens on mobile. Outer: `px-4 pb-4 pt-2`. Card: `bg-card rounded-xl border border-border shadow-sm`. 4 tabs: Staff / Values / Tools / Tasks — icon + label, active `text-foreground font-medium`.
 
@@ -48,7 +61,7 @@ No FAB — page header buttons handle create actions on all screen sizes.
 | Desktop collapsed | `3.5rem` | static, icon-only |
 | Desktop expanded | `14rem` | static, with labels |
 
-`localStorage` key `"sidebar"`. Default: open desktop / closed mobile. `data-sidebar-label` on elements hidden when collapsed.
+`localStorage` key `"sidebar"`. Default: open desktop / closed mobile. `data-sidebar-label` on elements hidden when collapsed. `white-space: nowrap` on all `[data-sidebar-label]` prevents text wrapping during transition.
 
 `SidebarItem(href, lbl, key, active string)` — `mx-2 px-1 py-0.5`, icon in `size-8` container. Active: `bg-sidebar-accent text-sidebar-foreground`. Inactive: `text-sidebar-foreground/60`.
 
@@ -56,29 +69,41 @@ No FAB — page header buttons handle create actions on all screen sizes.
 
 ## Sidebar nav components
 
-| Page | Component | Filter mechanism |
+| Page | Component | Filter/content |
 |---|---|---|
-| Staff home | `staffListSidebarNav(members)` | staff member links with `size-7` avatar |
-| Staff detail | `staffSidebarNav(m, section)` | Overview / Profile / Values / Tools / Tasks + back |
+| Staff home | `staffListSidebarNav(members)` | staff member links, icon at `size-4` (UserRound fallback) |
+| Staff detail | `staffSidebarNav(m, section, chats []chat.Chat)` | Overview / Profile / Values / Tools / Tasks + divider + New Chat button + chat list + back |
 | Values | `valueSidebarNav(cats, activeCat)` | All + 5 categories via `?cat=<id>` |
 | Tools | `toolSidebarNav(activeCat)` | All + messaging/commerce/payments/utilities via `?cat=` |
 | Tasks | `taskSidebarNav(activeCat)` | All + same 4 catalog categories via `?tool_cat=` |
+
+**New Chat button** in `staffSidebarNav`: `<form class="px-2">` + `<button class="w-full ... bg-primary text-primary-foreground">` — matches `SidebarItem` lateral padding (`px-2` on form ≡ `mx-2` on link).
 
 `catLabel(cat string) string` → display label for catalog category IDs; `""` for unknown (caller provides section default).
 
 Backend handlers filter before passing filtered slice + `activeCat` to template. Tasks filter: keep tasks with ≥1 tool in requested category (via `CatalogByType()[tool.Type].Category`).
 
+## Grouped "All" views (Values + Tools)
+
+When `activeCat == ""`, Values and Tools list pages render items in `listSection` groups by category instead of a flat `rowList`. Filtered views remain flat.
+
+- `groupValuesByCat(cats, vals)` → `[]valCatGroup{Cat, Values}` — ordered by `DefaultCategories`, empty cats omitted
+- `groupToolsByCat(tools)` → `[]toolCatGroup{Label, Tools}` — ordered messaging/commerce/payments/utilities, empty cats omitted
+- `listSection(label string)` in `shared.templ` — renders `<h5>` category heading + `rowList` wrapper
+
 ## Staff pages
 
 **Home `/`**: `StaffListPage` renders `staffDashboard` — 2-col card grid, each card links to `/staff/:id`.
 
-**Detail `/staff/:id`**: `StaffDetailPage(m, tasks, tools, values, cats, nd, section, formErr)`. Sections: overview / profile / values / tools / tasks. Overview stat cards ordered Status → Values → Tools → Tasks; each is `staffStatCardLink` linking to `?s=profile/values/tools/tasks`.
+**Detail `/staff/:id`**: `StaffDetailPage(m, tasks, tools, values, cats, nd, section, formErr, chats)`. Sections: overview / profile / values / tools / tasks. Overview stat cards ordered Status → Values → Tools → Tasks; each is `staffStatCardLink` linking to `?s=profile/values/tools/tasks`.
+
+**Chat `/staff/:id/chats/:chatId`**: `StaffChatPage(m, c, chats, nd)` using `ChatAppLayout`. Three `shrink-0`/`flex-1`/`shrink-0` children: header with inline rename form + delete button, messages scroll area, input panel. Send button uses `ArrowUp` icon. Rename: text input styled as plain text, checkmark button on `group-focus-within:opacity-100`, auto-submits on blur if changed.
 
 ## UI conventions
 
 - Checkboxes `sr-only`; wrapping `<label>` is visual toggle via `has-[:checked]:border-primary has-[:checked]:bg-primary/5`
 - `bg-popover` = `--background` (not `--card`) in both modes
-- Staff avatars: `size-9 rounded-full bg-primary text-primary-foreground`
+- Staff avatars / icon containers: `size-9 rounded-lg bg-primary text-primary-foreground` (not `rounded-full`)
 - Typography base styles in `@layer base` in `input.css`; `p` is large (marketing scale) — use `<div class="text-muted-foreground">` for dense UI
 
 ## Key brand tokens (full set in `ui/assets/css/input.css`)

@@ -1,14 +1,17 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"picomaju/internal/chat"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -23,6 +26,7 @@ type uiHandler struct {
 	tasks    *task.Store
 	tools    *tool.Store
 	staff    *staff.Store
+	chats    *chat.Store
 	settings *settings.Store
 	dataDir  string
 }
@@ -43,6 +47,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 	h.tasks = task.NewStore(filepath.Join(dataDir, "tasks.json"))
 	h.tools = tool.NewStore(filepath.Join(dataDir, "tools.json"))
 	h.staff = staff.NewStore(filepath.Join(dataDir, "staff.json"))
+	h.chats = chat.NewStore(filepath.Join(dataDir, "chats.json"))
 	h.dataDir = dataDir
 	h.mu.Unlock()
 	return nil
@@ -432,7 +437,11 @@ func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
 	tools, _ := h.tools.List()
-	uitemplates.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr).Render(r.Context(), w)
+	chats, _ := h.chats.ListByStaff(id)
+	if chats == nil {
+		chats = []chat.Chat{}
+	}
+	uitemplates.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -527,6 +536,105 @@ func (h *uiHandler) updateStaffValues(w http.ResponseWriter, r *http.Request) {
 func (h *uiHandler) deleteStaff(w http.ResponseWriter, r *http.Request) {
 	h.staff.Delete(chi.URLParam(r, "id"))
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// --- Chat UI ---
+
+func (h *uiHandler) createChat(w http.ResponseWriter, r *http.Request) {
+	staffID := chi.URLParam(r, "id")
+	if _, err := h.staff.Get(staffID); err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	c := &chat.Chat{
+		ID:      fmt.Sprintf("%x", time.Now().UnixNano()),
+		StaffID: staffID,
+		Title:   "New Chat",
+	}
+	if err := h.chats.Create(c); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/staff/"+staffID+"/chats/"+c.ID, http.StatusSeeOther)
+}
+
+func (h *uiHandler) chatPage(w http.ResponseWriter, r *http.Request) {
+	staffID := chi.URLParam(r, "id")
+	chatID := chi.URLParam(r, "chatId")
+	m, err := h.staff.Get(staffID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	c, err := h.chats.Get(chatID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	chats, _ := h.chats.ListByStaff(staffID)
+	if chats == nil {
+		chats = []chat.Chat{}
+	}
+	uitemplates.StaffChatPage(m, c, chats, h.navData(r, "staff")).Render(r.Context(), w)
+}
+
+func (h *uiHandler) createMessage(w http.ResponseWriter, r *http.Request) {
+	staffID := chi.URLParam(r, "id")
+	chatID := chi.URLParam(r, "chatId")
+	c, err := h.chats.Get(chatID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
+		return
+	}
+	content := strings.TrimSpace(r.FormValue("content"))
+	if content == "" {
+		http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
+		return
+	}
+	c.Messages = append(c.Messages, chat.Message{
+		Role:      "user",
+		Content:   content,
+		Timestamp: time.Now().Unix(),
+	})
+	if c.Title == "New Chat" && len(c.Messages) == 1 {
+		if len(content) > 40 {
+			c.Title = content[:40] + "…"
+		} else {
+			c.Title = content
+		}
+	}
+	h.chats.Update(c) //nolint:errcheck
+	http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
+}
+
+func (h *uiHandler) renameChat(w http.ResponseWriter, r *http.Request) {
+	staffID := chi.URLParam(r, "id")
+	chatID := chi.URLParam(r, "chatId")
+	c, err := h.chats.Get(chatID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
+		return
+	}
+	if title := strings.TrimSpace(r.FormValue("title")); title != "" {
+		c.Title = title
+		h.chats.Update(c) //nolint:errcheck
+	}
+	http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
+}
+
+func (h *uiHandler) deleteChat(w http.ResponseWriter, r *http.Request) {
+	staffID := chi.URLParam(r, "id")
+	chatID := chi.URLParam(r, "chatId")
+	h.chats.Delete(chatID) //nolint:errcheck
+	http.Redirect(w, r, "/staff/"+staffID, http.StatusSeeOther)
 }
 
 // --- Settings UI ---

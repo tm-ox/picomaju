@@ -48,6 +48,16 @@ templ emptyState(title, desc, href, label string) {
 	</div>
 }
 
+// listSection renders a category label above a rowList for grouped "All" views.
+templ listSection(label string) {
+	<div class="flex flex-col gap-2">
+		<h5 class="text-xs font-mono uppercase tracking-widest text-muted-foreground px-1">{ label }</h5>
+		@rowList() {
+			{ children... }
+		}
+	</div>
+}
+
 // rowList wraps a set of list rows in a bordered card container.
 templ rowList() {
 	<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">

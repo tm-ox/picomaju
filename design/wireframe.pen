@@ -10,7 +10,7 @@
       "clip": true,
       "width": 1920,
       "height": 1080,
-      "fill": "#ffffffff",
+      "fill": "#d9d9d9",
       "children": [
         {
           "type": "frame",
@@ -26,6 +26,11 @@
             "fill": "#000000ff"
           },
           "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            16
+          ],
           "children": [
             {
               "type": "frame",
@@ -39,90 +44,120 @@
                 "thickness": 1
               },
               "gap": 12,
-              "padding": 8,
               "justifyContent": "space_between",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "frame",
-                  "id": "lWks0",
-                  "name": "PM-Logo-Type.svg",
-                  "reusable": true,
-                  "width": 156,
-                  "height": 24,
-                  "layout": "none",
+                  "type": "group",
+                  "id": "2BKFA",
+                  "name": "brand",
+                  "layout": "horizontal",
+                  "gap": 8,
                   "children": [
                     {
-                      "type": "group",
-                      "id": "Mhvoi",
+                      "id": "oxXlE",
+                      "type": "ref",
+                      "ref": "eOqac",
                       "x": 0,
                       "y": 0,
-                      "children": [
-                        {
-                          "type": "path",
-                          "id": "BjA0x",
+                      "descendants": {
+                        "XeqQF": {
+                          "flipX": false,
+                          "flipY": false,
+                          "width": 28,
+                          "height": 20,
                           "x": 0,
-                          "y": 0,
-                          "geometry": "M6.5 0l52 0 0 19.416-52 0 0-12.944-6.5 0 0-6.472 6.5 0z m13 12.944l26 0 0-6.472-26 0 0 6.472z m-13 25.886l0-12.943 26 0 0 19.416-13-12.944 0 6.472-13-0.001z m0 0l-6.5 0 0 6.472 19.5 0 0-6.472m13 6.472l13-12.944 0 12.944 19.5 0 0-6.472-6.5 0 0-12.943-26 0",
-                          "fill": "#bf092f",
-                          "width": 32.694672217495636,
-                          "height": 23.078592153526337
-                        },
-                        {
-                          "type": "path",
-                          "id": "Sm9VY",
-                          "x": 41.56864723876525,
-                          "y": 1.0016541503316958,
-                          "geometry": "M0 36.791l6.806 0 0-13.99 6.823 0c5.216 0 7.601-0.398 9.638-1.642 2.98-1.892 4.818-5.576 4.818-9.808 0-4.232-1.788-7.717-4.968-9.658-2.086-1.245-4.57-1.693-9.389-1.693l-13.728 0 0 36.791z m6.806-20.511l0-9.758 6.922 0c2.236 0 3.28 0.1 4.32199 0.348 1.987 0.548 3.18 2.29 3.18001 4.58 0 1.793-0.795 3.187-2.23501 3.984-1.044 0.547-2.882 0.846-5.564 0.846l-6.62499 0z m26.004 20.51l6.608 0 0-27.58-6.608 0 0 27.58z m0-30.568l6.608 0 0-6.222-6.608 0 0 6.222z m32.57 21.508c-1.64 2.54-3.52699 3.635-6.25999 3.635-4.57001 0-7.998-3.585-7.998-8.414 0-4.88 3.229-8.314 7.85-8.314 2.98 0 5.067 1.244 6.40801 3.784l7.452 0c-0.944-2.789-1.84-4.232-3.72701-5.975-2.68201-2.489-6.30901-3.883-10.134-3.883-8.147 0-14.506 6.323-14.506 14.438 0 8.015 6.558 14.437 14.704 14.437 6.459 0 11.377-3.534 13.66299-9.708l-7.452 0z m25.646-19.167c-7.99899 0-14.556 6.522-14.556 14.438 0 7.965 6.55701 14.437 14.606 14.437 7.998 0 14.65401-6.472 14.65401-14.238 0-8.215-6.408-14.637-14.70399-14.637m0.05 6.074c4.42101 0 7.998 3.734 7.998 8.364 0 4.63-3.577 8.364-7.949 8.364-4.47 0-7.998-3.734-7.99801-8.464 0-4.53 3.577-8.264 7.94901-8.264m20.069 22.154l6.806 0 0-27.58 9.588 27.58 5.56399 0 9.588-27.58 0 27.58 6.806 0 0-36.791-9.34 0-9.78599 27.88-9.88602-27.88-9.34 0 0.00002 36.791z m72.388-27.58l-6.06 0 0 3.683c-2.28601-3.036-5.018-4.331-8.99299-4.331-8.14701 0-14.01 6.124-14.01 14.537 0 8.314 5.81301 14.338 13.86099 14.338 3.875 0 6.508-1.195 9.141-4.23099l0 3.58399 6.061 0 0-27.58z m-14.35699 5.426c4.72 0 8.09698 3.535 8.09698 8.563 0 1.991-0.79401 4.281-1.987 5.675-1.34 1.643-3.477 2.49-6.00999 2.49-4.82001 0-8.148-3.286-8.148-8.115 0-5.029 3.329-8.613 8.04801-8.613m21.915-5.427l0 25.59c0.04902 3.734-0.29901 4.38-2.733 4.779l0 6.422c6.06101-0.1 9.539-4.182 9.34-11.052l0-25.739-6.607 0z m0-2.987l6.607 0 0-6.223-6.607 0 0 6.223z m37.90897 2.987l-6.60599 0 0 12.994c0 3.684-0.25 5.427-1.044 6.622-0.944 1.643-2.78202 2.539-5.017 2.539-1.69 0-2.98099-0.548-3.875-1.743-0.944-1.195-1.34201-3.186-1.34201-6.92l0-13.492-6.607 0 0 14.786c0 4.68 0.547 7.12 2.08701 9.36 1.83801 2.639 4.76901 4.082 8.39599 4.082 3.32801 0 5.36499-0.846 7.89899-3.285l0 2.638 6.10999 0-0.00098-27.581z",
-                          "fill": "#132440",
-                          "width": 114.43135276123473,
-                          "height": 23.078592153526337
+                          "y": 0
                         }
-                      ]
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "GAkdM",
+                      "fill": "#000000",
+                      "content": "PicoMaju",
+                      "textAlignVertical": "middle",
+                      "fontFamily": "URW Gothic",
+                      "fontSize": 20,
+                      "fontWeight": "normal",
+                      "letterSpacing": 0.5
                     }
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "3Zpz4",
-                  "name": "panel-left",
-                  "width": 24,
-                  "height": 28,
-                  "layout": "none",
-                  "children": [
-                    {
-                      "type": "rectangle",
-                      "cornerRadius": 2,
-                      "id": "LrZMy",
-                      "x": 3,
-                      "y": 3,
-                      "width": 18,
-                      "height": 18,
-                      "stroke": {
-                        "align": "center",
-                        "thickness": 2,
-                        "join": "round",
-                        "cap": "round",
-                        "fill": "#000000"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "id": "sYWqX",
-                      "x": 9,
-                      "y": 3,
-                      "geometry": "M0 0l0 18",
-                      "width": 0,
-                      "height": 18,
-                      "stroke": {
-                        "align": "center",
-                        "thickness": 2,
-                        "join": "round",
-                        "cap": "round",
-                        "fill": "#000000"
-                      }
-                    }
-                  ]
+                  "id": "lt1fB",
+                  "type": "ref",
+                  "ref": "sW69K",
+                  "x": 264,
+                  "y": 0
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "S4Gf0",
+              "name": "sidebar-item-active",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "#d9d9d9ff",
+              "stroke": {
+                "align": "inside",
+                "thickness": 1
+              },
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "fwg9p",
+                  "type": "ref",
+                  "ref": "UgWvb",
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "type": "text",
+                  "id": "P7rdi",
+                  "fill": "#000000",
+                  "content": "Staff",
+                  "textAlignVertical": "middle",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "500",
+                  "letterSpacing": 0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ZdUAm",
+              "name": "sidebar-header",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "#d9d9d9ff",
+              "stroke": {
+                "align": "inside",
+                "thickness": 1
+              },
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "ZslCw",
+                  "type": "ref",
+                  "ref": "UgWvb",
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "type": "text",
+                  "id": "iD6PZ",
+                  "fill": "#000000",
+                  "content": "Staff",
+                  "textAlignVertical": "middle",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "500",
+                  "letterSpacing": 0.5
                 }
               ]
             }
@@ -133,9 +168,97 @@
           "id": "gHfIb",
           "name": "body",
           "layout": "vertical",
+          "padding": [
+            24,
+            40
+          ],
           "width": "fill_container",
           "height": "fill_container",
           "children": [
+            {
+              "type": "group",
+              "id": "MJEua",
+              "name": "header",
+              "layout": "horizontal",
+              "gap": 24,
+              "width": "fill_container",
+              "children": [
+                {
+                  "type": "group",
+                  "id": "DC8P7",
+                  "name": "nav",
+                  "layout": "horizontal",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "3ffLl",
+                      "name": "nav-item",
+                      "height": 135.63336435948662,
+                      "fill": "#d9d9d9ff",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1
+                      },
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "id": "S4ppT",
+                          "type": "ref",
+                          "ref": "UgWvb",
+                          "x": 0,
+                          "y": 55.81668217974331
+                        },
+                        {
+                          "type": "text",
+                          "id": "HjWP8",
+                          "fill": "#000000",
+                          "content": "Staff",
+                          "textAlignVertical": "middle",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "500",
+                          "letterSpacing": 0.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZviX5",
+                      "name": "nav-item",
+                      "height": 135.63336435948662,
+                      "fill": "#d9d9d9ff",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1
+                      },
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "id": "B4kTj",
+                          "type": "ref",
+                          "ref": "UgWvb",
+                          "x": 0,
+                          "y": 55.81668217974331
+                        },
+                        {
+                          "type": "text",
+                          "id": "jz8qB",
+                          "fill": "#000000",
+                          "content": "Staff",
+                          "textAlignVertical": "middle",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "500",
+                          "letterSpacing": 0.5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
             {
               "type": "frame",
               "id": "3aX8L",
@@ -148,7 +271,7 @@
                 "thickness": 1,
                 "fill": "#000000ff"
               },
-              "layout": "none"
+              "layout": "vertical"
             }
           ]
         }
@@ -159,52 +282,178 @@
       "id": "4SHgh",
       "x": -399,
       "y": -16,
-      "name": "Frame 1",
+      "name": "components",
       "clip": true,
       "height": 361,
       "fill": "#FFFFFF",
       "layout": "vertical",
+      "gap": 24,
+      "padding": 24,
       "children": [
         {
           "type": "frame",
-          "id": "sW69K",
-          "name": "panel-left",
+          "id": "lWks0",
+          "name": "PM-Logo-Type.svg",
           "reusable": true,
-          "width": 24,
+          "width": 156,
           "height": 24,
           "layout": "none",
           "children": [
             {
-              "type": "rectangle",
-              "cornerRadius": 2,
-              "id": "cET7k",
-              "x": 3,
-              "y": 3,
-              "width": 18,
-              "height": 18,
-              "stroke": {
-                "align": "center",
-                "thickness": 2,
-                "join": "round",
-                "cap": "round",
-                "fill": "#000000"
-              }
-            },
+              "type": "group",
+              "id": "Mhvoi",
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "type": "path",
+                  "id": "BjA0x",
+                  "x": 0,
+                  "y": 0,
+                  "geometry": "M6.5 0l52 0 0 19.416-52 0 0-12.944-6.5 0 0-6.472 6.5 0z m13 12.944l26 0 0-6.472-26 0 0 6.472z m-13 25.886l0-12.943 26 0 0 19.416-13-12.944 0 6.472-13-0.001z m0 0l-6.5 0 0 6.472 19.5 0 0-6.472m13 6.472l13-12.944 0 12.944 19.5 0 0-6.472-6.5 0 0-12.943-26 0",
+                  "fill": "#bf092f",
+                  "width": 32.694672217495636,
+                  "height": 23.078592153526337
+                },
+                {
+                  "type": "path",
+                  "id": "Sm9VY",
+                  "x": 41.56864723876525,
+                  "y": 1.0016541503316958,
+                  "geometry": "M0 36.791l6.806 0 0-13.99 6.823 0c5.216 0 7.601-0.398 9.638-1.642 2.98-1.892 4.818-5.576 4.818-9.808 0-4.232-1.788-7.717-4.968-9.658-2.086-1.245-4.57-1.693-9.389-1.693l-13.728 0 0 36.791z m6.806-20.511l0-9.758 6.922 0c2.236 0 3.28 0.1 4.32199 0.348 1.987 0.548 3.18 2.29 3.18001 4.58 0 1.793-0.795 3.187-2.23501 3.984-1.044 0.547-2.882 0.846-5.564 0.846l-6.62499 0z m26.004 20.51l6.608 0 0-27.58-6.608 0 0 27.58z m0-30.568l6.608 0 0-6.222-6.608 0 0 6.222z m32.57 21.508c-1.64 2.54-3.52699 3.635-6.25999 3.635-4.57001 0-7.998-3.585-7.998-8.414 0-4.88 3.229-8.314 7.85-8.314 2.98 0 5.067 1.244 6.40801 3.784l7.452 0c-0.944-2.789-1.84-4.232-3.72701-5.975-2.68201-2.489-6.30901-3.883-10.134-3.883-8.147 0-14.506 6.323-14.506 14.438 0 8.015 6.558 14.437 14.704 14.437 6.459 0 11.377-3.534 13.66299-9.708l-7.452 0z m25.646-19.167c-7.99899 0-14.556 6.522-14.556 14.438 0 7.965 6.55701 14.437 14.606 14.437 7.998 0 14.65401-6.472 14.65401-14.238 0-8.215-6.408-14.637-14.70399-14.637m0.05 6.074c4.42101 0 7.998 3.734 7.998 8.364 0 4.63-3.577 8.364-7.949 8.364-4.47 0-7.998-3.734-7.99801-8.464 0-4.53 3.577-8.264 7.94901-8.264m20.069 22.154l6.806 0 0-27.58 9.588 27.58 5.56399 0 9.588-27.58 0 27.58 6.806 0 0-36.791-9.34 0-9.78599 27.88-9.88602-27.88-9.34 0 0.00002 36.791z m72.388-27.58l-6.06 0 0 3.683c-2.28601-3.036-5.018-4.331-8.99299-4.331-8.14701 0-14.01 6.124-14.01 14.537 0 8.314 5.81301 14.338 13.86099 14.338 3.875 0 6.508-1.195 9.141-4.23099l0 3.58399 6.061 0 0-27.58z m-14.35699 5.426c4.72 0 8.09698 3.535 8.09698 8.563 0 1.991-0.79401 4.281-1.987 5.675-1.34 1.643-3.477 2.49-6.00999 2.49-4.82001 0-8.148-3.286-8.148-8.115 0-5.029 3.329-8.613 8.04801-8.613m21.915-5.427l0 25.59c0.04902 3.734-0.29901 4.38-2.733 4.779l0 6.422c6.06101-0.1 9.539-4.182 9.34-11.052l0-25.739-6.607 0z m0-2.987l6.607 0 0-6.223-6.607 0 0 6.223z m37.90897 2.987l-6.60599 0 0 12.994c0 3.684-0.25 5.427-1.044 6.622-0.944 1.643-2.78202 2.539-5.017 2.539-1.69 0-2.98099-0.548-3.875-1.743-0.944-1.195-1.34201-3.186-1.34201-6.92l0-13.492-6.607 0 0 14.786c0 4.68 0.547 7.12 2.08701 9.36 1.83801 2.639 4.76901 4.082 8.39599 4.082 3.32801 0 5.36499-0.846 7.89899-3.285l0 2.638 6.10999 0-0.00098-27.581z",
+                  "fill": "#132440",
+                  "width": 114.43135276123473,
+                  "height": 23.078592153526337
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "eOqac",
+          "name": "PM-Logo-Symbol.svg",
+          "reusable": true,
+          "layout": "vertical",
+          "children": [
             {
               "type": "path",
-              "id": "fUXsH",
-              "x": 9,
-              "y": 3,
-              "geometry": "M0 0l0 18",
-              "width": 0,
-              "height": 18,
-              "stroke": {
-                "align": "center",
-                "thickness": 2,
-                "join": "round",
-                "cap": "round",
-                "fill": "#000000"
-              }
+              "id": "XeqQF",
+              "geometry": "M6.5 0l52 0 0 19.416-52 0 0-12.944-6.5 0 0-6.472 6.5 0z m13 12.944l26 0 0-6.472-26 0 0 6.472z m-13 25.886l0-12.943 26 0 0 19.416-13-12.944 0 6.472-13-0.001z m0 0l-6.5 0 0 6.472 19.5 0 0-6.472m13 6.472l13-12.944 0 12.944 19.5 0 0-6.472-6.5 0 0-12.943-26 0",
+              "fill": "#bf092f",
+              "width": 24,
+              "height": 17
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "id": "F6LA6",
+          "name": "icons",
+          "layout": "vertical",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "sW69K",
+              "name": "panel-left",
+              "reusable": true,
+              "width": 24,
+              "height": 24,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "cET7k",
+                  "x": 3,
+                  "y": 3,
+                  "width": 18,
+                  "height": 18,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 2,
+                    "join": "round",
+                    "cap": "round",
+                    "fill": "#000000"
+                  }
+                },
+                {
+                  "type": "path",
+                  "id": "fUXsH",
+                  "x": 9,
+                  "y": 3,
+                  "geometry": "M0 0l0 18",
+                  "width": 0,
+                  "height": 18,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 2,
+                    "join": "round",
+                    "cap": "round",
+                    "fill": "#000000"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UgWvb",
+              "name": "bot",
+              "reusable": true,
+              "width": 24,
+              "height": 24,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "scDgj",
+                  "x": 8,
+                  "y": 4,
+                  "geometry": "M4 4l0-4-4 0",
+                  "width": 4,
+                  "height": 4,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 2,
+                    "join": "round",
+                    "cap": "round",
+                    "fill": "#000000"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "fiJGO",
+                  "x": 4,
+                  "y": 8,
+                  "width": 16,
+                  "height": 12,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 2,
+                    "join": "round",
+                    "cap": "round",
+                    "fill": "#000000"
+                  }
+                },
+                {
+                  "type": "path",
+                  "id": "MVh9D",
+                  "x": 2,
+                  "y": 13,
+                  "geometry": "M0 1l2 0m16 0l2 0m-7-1l0 2m-6-2l0 2",
+                  "width": 20,
+                  "height": 2,
+                  "stroke": {
+                    "align": "center",
+                    "thickness": 2,
+                    "join": "round",
+                    "cap": "round",
+                    "fill": "#000000"
+                  }
+                }
+              ]
             }
           ]
         }
@@ -212,6 +461,21 @@
     }
   ],
   "fonts": [
+    {
+      "name": "JetBrains Mono",
+      "url": "JetBrainsMono-VariableFont_wght.ttf",
+      "weight": [
+        100,
+        800
+      ],
+      "axes": [
+        {
+          "tag": "wght",
+          "start": 100,
+          "end": 800
+        }
+      ]
+    },
     {
       "name": "URW Gothic",
       "url": "URWGothic-Demi.ttf",
