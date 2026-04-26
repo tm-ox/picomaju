@@ -15,7 +15,9 @@ import (
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
-	"picomaju/ui/templates"
+	setuptpl "picomaju/ui/templates/setup"
+	"picomaju/ui/templates/shell"
+	workshoptpl "picomaju/ui/templates/workshop"
 )
 
 //go:embed ui/static
@@ -70,17 +72,17 @@ func main() {
 
 	// new frontend routes
 	r.Get("/welcome", func(w http.ResponseWriter, req *http.Request) {
-		templates.WelcomePage("", "").Render(req.Context(), w)
+		setuptpl.WelcomePage("", "").Render(req.Context(), w)
 	})
 	r.Get("/ui/workshop", func(w http.ResponseWriter, req *http.Request) {
-		templates.WorkshopPage().Render(req.Context(), w)
+		workshoptpl.WorkshopPage().Render(req.Context(), w)
 	})
 	r.Get("/ui/home", func(w http.ResponseWriter, req *http.Request) {
-		nd := templates.NavData{ActiveSection: "home"}
+		nd := shell.NavData{ActiveSection: "home"}
 		if cfg != nil {
 			nd.BusinessName = cfg.BusinessName
 		}
-		templates.DashboardPage(nd).Render(req.Context(), w)
+		setuptpl.DashboardPage(nd).Render(req.Context(), w)
 	})
 
 	log.Printf("picomaju listening on %s (config: %s)", addr, configFile)

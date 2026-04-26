@@ -1,17 +1,15 @@
-package templates
+package stafftpl
 
 import (
-	"time"
-
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/chat"
 	"picomaju/internal/staff"
+	"picomaju/ui/templates/shell"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"time"
 )
 
-// StaffChatPage uses ChatAppLayout so the input is always pinned to the bottom.
-// Children order: header (shrink-0) → messages (flex-1 overflow-y-auto) → input (shrink-0).
-templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd NavData) {
-	@ChatAppLayout("Chat — "+m.Label, nd, staffSidebarNav(m, c.ID, chats)) {
+templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData) {
+	@shell.ChatAppLayout("Chat — "+m.Label, nd, staffSidebarNav(m, c.ID, chats)) {
 		<div class="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
 			<div class="flex items-center gap-2 min-w-0 flex-1">
 				<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">

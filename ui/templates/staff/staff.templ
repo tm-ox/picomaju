@@ -1,7 +1,6 @@
-package templates
+package stafftpl
 
 import (
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/chat"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -11,18 +10,20 @@ import (
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/templates/shell"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
 
 // ─── Staff list (home page at /) ─────────────────────────────────────────────
-templ StaffListPage(members []staff.Staff, nd NavData) {
-	@AppLayout("Staff", nd, staffListSidebarNav(members)) {
-		@pageHeader("Staff") {
+templ StaffListPage(members []staff.Staff, nd shell.NavData) {
+	@shell.AppLayout("Staff", nd, staffListSidebarNav(members)) {
+		@shell.PageHeader("Staff") {
 			@button.Button(button.Props{Href: "/staff/new", Size: button.SizeIcon}) {
 				@icons.Plus(templ.Attributes{"class": "size-4"})
 			}
 		}
 		if len(members) == 0 {
-			@emptyState(
+			@shell.EmptyState(
 				"No staff profiles",
 				"A staff profile is an agent that represents a person or role — like a receptionist or billing clerk.",
 				"/staff/new",
@@ -37,7 +38,7 @@ templ StaffListPage(members []staff.Staff, nd NavData) {
 templ staffListSidebarNav(members []staff.Staff) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
 		for _, m := range members {
-			@SidebarItem("/staff/"+m.ID, m.Label, m.ID, "") {
+			@shell.SidebarItem("/staff/"+m.ID, m.Label, m.ID, "") {
 				if m.Icon == "" {
 					@icons.UserRound(templ.Attributes{"class": "size-4"})
 				} else {
@@ -71,8 +72,8 @@ templ staffDashboard(members []staff.Staff) {
 					</div>
 				</div>
 				<div class="flex gap-4 text-xs font-mono text-muted-foreground">
-					<span>{ countWord(len(m.Tasks), "task", "tasks") }</span>
-					<span>{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
+					<span>{ shell.CountWord(len(m.Tasks), "task", "tasks") }</span>
+					<span>{ shell.CountWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
 				</div>
 			</a>
 		}
@@ -80,8 +81,8 @@ templ staffDashboard(members []staff.Staff) {
 }
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
-templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd NavData, section string, formErr string, chats []chat.Chat) {
-	@AppLayout(m.Label, nd, staffSidebarNav(m, section, chats)) {
+templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat) {
+	@shell.AppLayout(m.Label, nd, staffSidebarNav(m, section, chats)) {
 		<div class="flex items-center gap-3">
 			<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
 				@staffIcon(m.Icon, m.Label)
@@ -112,19 +113,19 @@ templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, valu
 
 templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
-		@SidebarItem("/staff/"+m.ID+"?s=overview", "Overview", "overview", section) {
+		@shell.SidebarItem("/staff/"+m.ID+"?s=overview", "Overview", "overview", section) {
 			@icons.LayoutDashboard(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/staff/"+m.ID+"?s=profile", "Profile", "profile", section) {
+		@shell.SidebarItem("/staff/"+m.ID+"?s=profile", "Profile", "profile", section) {
 			@icons.UserRound(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/staff/"+m.ID+"?s=values", "Values", "values", section) {
+		@shell.SidebarItem("/staff/"+m.ID+"?s=values", "Values", "values", section) {
 			@icons.Star(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/staff/"+m.ID+"?s=tools", "Tools", "tools", section) {
+		@shell.SidebarItem("/staff/"+m.ID+"?s=tools", "Tools", "tools", section) {
 			@icons.Wrench(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/staff/"+m.ID+"?s=tasks", "Tasks", "tasks", section) {
+		@shell.SidebarItem("/staff/"+m.ID+"?s=tasks", "Tasks", "tasks", section) {
 			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
 		}
 		<div class="mx-2 my-1 border-t border-sidebar-border"></div>
@@ -140,13 +141,13 @@ templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
 			</button>
 		</form>
 		for _, c := range chats {
-			@SidebarItem("/staff/"+m.ID+"/chats/"+c.ID, c.Title, c.ID, section) {
+			@shell.SidebarItem("/staff/"+m.ID+"/chats/"+c.ID, c.Title, c.ID, section) {
 				@icons.MessageSquare(templ.Attributes{"class": "size-4"})
 			}
 		}
 	</nav>
 	<div class="py-2 border-t border-sidebar-border shrink-0">
-		@SidebarItem("/", "All Staff", "", section) {
+		@shell.SidebarItem("/", "All Staff", "", section) {
 			@icons.ArrowLeft(templ.Attributes{"class": "size-4"})
 		}
 	</div>
@@ -155,22 +156,20 @@ templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
 // ─── Overview section ─────────────────────────────────────────────────────────
 templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
 	<h2 class="text-base font-brand font-semibold text-foreground">Overview</h2>
-	<!-- Stats row -->
 	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 		@staffStatCardLink("Status", staffActiveLabel(m.Active), "/staff/"+m.ID+"?s=profile") {
 			@icons.Activity(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@staffStatCardLink("Values", countWord(len(m.ValueCategories)+len(m.Values), "ref", "refs"), "/staff/"+m.ID+"?s=values") {
+		@staffStatCardLink("Values", shell.CountWord(len(m.ValueCategories)+len(m.Values), "ref", "refs"), "/staff/"+m.ID+"?s=values") {
 			@icons.Star(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@staffStatCardLink("Tools", countWord(staffToolCount(m, tasks), "linked", "linked"), "/staff/"+m.ID+"?s=tools") {
+		@staffStatCardLink("Tools", shell.CountWord(staffToolCount(m, tasks), "linked", "linked"), "/staff/"+m.ID+"?s=tools") {
 			@icons.Wrench(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@staffStatCardLink("Tasks", countWord(len(m.Tasks), "assigned", "assigned"), "/staff/"+m.ID+"?s=tasks") {
+		@staffStatCardLink("Tasks", shell.CountWord(len(m.Tasks), "assigned", "assigned"), "/staff/"+m.ID+"?s=tasks") {
 			@icons.ClipboardList(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
 	</div>
-	<!-- Directives placeholder -->
 	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
 		<div class="flex items-center justify-between">
 			<h5 class="text-sm font-brand font-semibold text-foreground">Directives</h5>
@@ -178,7 +177,6 @@ templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool)
 		</div>
 		<p class="text-sm text-muted-foreground">Compiled agent directives (AGENTS.md, SOUL.md) will appear here once the compiler is active.</p>
 	</div>
-	<!-- Activity placeholder -->
 	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
 		<div class="flex items-center justify-between">
 			<h5 class="text-sm font-brand font-semibold text-foreground">Activity & Reports</h5>
@@ -212,18 +210,18 @@ templ staffStatCardLink(label, value, href string) {
 templ staffProfileSection(m *staff.Staff) {
 	<h2 class="text-base font-brand font-semibold text-foreground">Profile</h2>
 	<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/profile") } class="flex flex-col gap-5">
-		<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+		@shell.FormCard() {
 			<div class="flex flex-col gap-1.5">
 				<span class="text-xs font-mono text-muted-foreground">ID</span>
 				<span class="text-sm font-mono text-foreground">{ m.ID }</span>
 			</div>
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "staff-label"}) {
 					Label
 				}
 				@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "staff-description"}) {
 					Description
 				}
@@ -242,7 +240,7 @@ templ staffProfileSection(m *staff.Staff) {
 					<span class="text-sm text-foreground">Enable this staff member</span>
 				</label>
 			</div>
-		</div>
+		}
 		<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
 			<div class="flex flex-col gap-0.5">
 				<span class="text-sm font-medium text-foreground">Icon</span>
@@ -258,34 +256,82 @@ templ staffProfileSection(m *staff.Staff) {
 
 // ─── Values section ───────────────────────────────────────────────────────────
 templ staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Category) {
-	<h2 class="text-base font-brand font-semibold text-foreground">Values</h2>
-	<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/values") } class="flex flex-col gap-5">
+	@shell.PageHeader("Values") {
+		@button.Button(button.Props{Type: button.TypeButton, Size: button.SizeIcon, Attributes: templ.Attributes{"onclick": "document.getElementById('staff-values-dialog').showModal()"}}) {
+			@icons.Plus(templ.Attributes{"class": "size-4"})
+		}
+	}
+	if len(m.ValueCategories) == 0 && len(m.Values) == 0 {
 		if len(cats) == 0 {
 			<p class="text-sm text-muted-foreground">No values created yet. <a href="/values/new" class="text-primary underline underline-offset-2">Add a value</a> first.</p>
 		} else {
-			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-				<p class="text-sm text-muted-foreground">Select a category to include all its values, or pick individual values below.</p>
-				for _, cat := range cats {
-					<div class="flex flex-col gap-2">
-						<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/50 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-							<input
-								type="checkbox"
-								name="value_categories"
-								value={ cat.ID }
-								checked?={ includesStr(m.ValueCategories, cat.ID) }
-								class="sr-only"
-							/>
-							<span class="text-sm font-brand font-semibold text-foreground">{ cat.Label }</span>
-						</label>
-						@staffValuePicker(cat.ID, values, m.Values)
-					</div>
+			<p class="text-sm text-muted-foreground">No values assigned. Tap + to add.</p>
+		}
+	} else {
+		@shell.RowList() {
+			for _, cat := range cats {
+				if shell.IncludesStr(m.ValueCategories, cat.ID) {
+					@shell.RowItem() {
+						<span class="size-8 shrink-0 flex items-center justify-center text-muted-foreground">
+							@shell.ValueCatIcon(cat.ID)
+						</span>
+						<span class="flex-1 min-w-0 text-sm font-brand font-semibold text-foreground truncate">{ cat.Label }</span>
+						@shell.Badge("all")
+						<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/value-cats/" + cat.ID + "/remove") }>
+							<button type="submit" class="inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer" aria-label={ "Remove " + cat.Label }>
+								@icons.X(templ.Attributes{"class": "size-3.5"})
+							</button>
+						</form>
+					}
 				}
-			</div>
-			@button.Button(button.Props{Type: button.TypeSubmit}) {
-				Save
+			}
+			for _, v := range values {
+				if shell.IncludesStr(m.Values, v.ID) {
+					@shell.RowItem() {
+						<span class="size-8 shrink-0 flex items-center justify-center text-muted-foreground">
+							@icons.FileText(templ.Attributes{"class": "size-4"})
+						</span>
+						<span class="flex-1 min-w-0 text-sm font-brand font-semibold text-foreground truncate">{ v.Title }</span>
+						@shell.Badge(shell.CategoryLabel(cats, v.Category))
+						<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/values/" + v.ID + "/remove") }>
+							<button type="submit" class="inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer" aria-label={ "Remove " + v.Title }>
+								@icons.X(templ.Attributes{"class": "size-3.5"})
+							</button>
+						</form>
+					}
+				}
 			}
 		}
-	</form>
+	}
+	<dialog id="staff-values-dialog" class="w-full max-w-sm rounded-xl m-auto">
+		<div class="bg-card rounded-xl border border-border flex flex-col" style="max-height: 80dvh">
+			<div class="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+				<span class="text-sm font-brand font-semibold text-foreground">Values</span>
+				<button type="button" onclick="document.getElementById('staff-values-dialog').close()" class="inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer" aria-label="Close">
+					@icons.X(templ.Attributes{"class": "size-4"})
+				</button>
+			</div>
+			<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/values") } class="flex flex-col min-h-0">
+				<div class="overflow-y-auto flex-1 flex flex-col gap-4 px-4 py-4">
+					for _, cat := range cats {
+						<div class="flex flex-col gap-2">
+							<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/30 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+								<input type="checkbox" name="value_categories" value={ cat.ID } checked?={ shell.IncludesStr(m.ValueCategories, cat.ID) } class="sr-only"/>
+								<span class="text-sm font-brand font-semibold text-foreground">{ cat.Label }</span>
+								@shell.Badge("all")
+							</label>
+							@staffValuePicker(cat.ID, values, m.Values)
+						</div>
+					}
+				</div>
+				<div class="shrink-0 px-4 py-3 border-t border-border">
+					@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+						Save
+					}
+				</div>
+			</form>
+		</div>
+	</dialog>
 }
 
 // ─── Tools section ────────────────────────────────────────────────────────────
@@ -300,9 +346,9 @@ templ staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
 	} else {
 		<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
 			for _, t := range tasks {
-				if includesStr(m.Tasks, t.ID) {
+				if shell.IncludesStr(m.Tasks, t.ID) {
 					for _, tl := range tools {
-						if includesStr(t.Tools, tl.ID) {
+						if shell.IncludesStr(t.Tools, tl.ID) {
 							<div class="flex items-center gap-3 px-4 py-3">
 								<div class="size-8 shrink-0 rounded-md bg-muted flex items-center justify-center">
 									@icons.Wrench(templ.Attributes{"class": "size-3.5 text-muted-foreground"})
@@ -311,7 +357,7 @@ templ staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
 									<span class="text-sm font-brand font-semibold text-foreground">{ tl.Label }</span>
 									<span class="text-xs text-muted-foreground font-mono">via { t.Label }</span>
 								</div>
-								@badge(tl.Type)
+								@shell.Badge(tl.Type)
 							</div>
 						}
 					}
@@ -323,41 +369,79 @@ templ staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
 
 // ─── Tasks section ────────────────────────────────────────────────────────────
 templ staffTasksSection(m *staff.Staff, tasks []task.Task) {
-	<h2 class="text-base font-brand font-semibold text-foreground">Tasks</h2>
-	<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/tasks") } class="flex flex-col gap-5">
+	@shell.PageHeader("Tasks") {
+		@button.Button(button.Props{Type: button.TypeButton, Size: button.SizeIcon, Attributes: templ.Attributes{"onclick": "document.getElementById('staff-tasks-dialog').showModal()"}}) {
+			@icons.Plus(templ.Attributes{"class": "size-4"})
+		}
+	}
+	if len(m.Tasks) == 0 {
 		if len(tasks) == 0 {
 			<p class="text-sm text-muted-foreground">No tasks created yet. <a href="/tasks/new" class="text-primary underline underline-offset-2">Add a task</a> first.</p>
 		} else {
-			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-3">
-				for _, t := range tasks {
-					<label class="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-						<input
-							type="checkbox"
-							name="tasks"
-							value={ t.ID }
-							checked?={ includesStr(m.Tasks, t.ID) }
-							class="sr-only"
-						/>
-						<div class="flex flex-col gap-0.5 min-w-0">
-							<span class="text-sm font-brand font-semibold text-foreground">{ t.Label }</span>
+			<p class="text-sm text-muted-foreground">No tasks assigned. Tap + to add.</p>
+		}
+	} else {
+		@shell.RowList() {
+			for _, t := range tasks {
+				if shell.IncludesStr(m.Tasks, t.ID) {
+					@shell.RowItem() {
+						<span class="size-8 shrink-0 flex items-center justify-center text-muted-foreground">
+							@icons.ClipboardList(templ.Attributes{"class": "size-4"})
+						</span>
+						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+							<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
 							if t.Description != "" {
-								<span class="text-xs text-muted-foreground">{ t.Description }</span>
+								<span class="text-xs text-muted-foreground truncate">{ t.Description }</span>
 							}
 						</div>
-					</label>
+						<span class="hidden sm:block text-xs text-muted-foreground font-mono shrink-0">{ shell.CountWord(len(t.Tools), "tool", "tools") }</span>
+						<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/tasks/" + t.ID + "/remove") }>
+							<button type="submit" class="inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer" aria-label={ "Remove " + t.Label }>
+								@icons.X(templ.Attributes{"class": "size-3.5"})
+							</button>
+						</form>
+					}
 				}
-			</div>
-			@button.Button(button.Props{Type: button.TypeSubmit}) {
-				Save
 			}
 		}
-	</form>
+	}
+	<dialog id="staff-tasks-dialog" class="w-full max-w-sm rounded-xl m-auto">
+		<div class="bg-card rounded-xl border border-border flex flex-col" style="max-height: 80dvh">
+			<div class="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+				<span class="text-sm font-brand font-semibold text-foreground">Tasks</span>
+				<button type="button" onclick="document.getElementById('staff-tasks-dialog').close()" class="inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer" aria-label="Close">
+					@icons.X(templ.Attributes{"class": "size-4"})
+				</button>
+			</div>
+			<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/tasks") } class="flex flex-col min-h-0">
+				<div class="overflow-y-auto flex-1 flex flex-col gap-2 px-4 py-4">
+					for _, t := range tasks {
+						<label class="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+							<input type="checkbox" name="tasks" value={ t.ID } checked?={ shell.IncludesStr(m.Tasks, t.ID) } class="sr-only"/>
+							<div class="flex flex-col gap-0.5 min-w-0 flex-1">
+								<span class="text-sm font-brand font-semibold text-foreground">{ t.Label }</span>
+								if t.Description != "" {
+									<span class="text-xs text-muted-foreground">{ t.Description }</span>
+								}
+							</div>
+							<span class="text-xs text-muted-foreground font-mono shrink-0 mt-0.5">{ shell.CountWord(len(t.Tools), "tool", "tools") }</span>
+						</label>
+					}
+				</div>
+				<div class="shrink-0 px-4 py-3 border-t border-border">
+					@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+						Save
+					}
+				</div>
+			</form>
+		</div>
+	</dialog>
 }
 
 // ─── New staff form (/staff/new) ──────────────────────────────────────────────
-templ StaffFormPage(m *staff.Staff, nd NavData, formErr string) {
-	@AppLayout("New Staff", nd, emptySidebarNav()) {
-		@pageHeader("New Staff") {
+templ StaffFormPage(m *staff.Staff, nd shell.NavData, formErr string) {
+	@shell.AppLayout("New Staff", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader("New Staff") {
 			@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
 			}
@@ -370,26 +454,26 @@ templ StaffFormPage(m *staff.Staff, nd NavData, formErr string) {
 			}
 		}
 		<form method="post" action="/staff" class="flex flex-col gap-5">
-			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-				@field() {
+			@shell.FormCard() {
+				@shell.Field() {
 					@label.Label(label.Props{For: "id"}) {
 						ID
 					}
 					@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Placeholder: "support_agent", Required: true})
 				}
-				@field() {
+				@shell.Field() {
 					@label.Label(label.Props{For: "staff-label"}) {
 						Label
 					}
 					@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
 				}
-				@field() {
+				@shell.Field() {
 					@label.Label(label.Props{For: "staff-description"}) {
 						Description
 					}
 					@input.Input(input.Props{ID: "staff-description", Name: "description", Value: m.Description, Placeholder: "Handles customer support and inquiries"})
 				}
-			</div>
+			}
 			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
 				<div class="flex flex-col gap-0.5">
 					<span class="text-sm font-medium text-foreground">Icon</span>
@@ -404,7 +488,7 @@ templ StaffFormPage(m *staff.Staff, nd NavData, formErr string) {
 	}
 }
 
-// ─── Icon picker popup ────────────────────────────────────────────────────────
+// ─── Icon picker ──────────────────────────────────────────────────────────────
 templ staffIconPicker(selected, lbl string) {
 	<div data-icon-picker class="relative w-fit">
 		<button
@@ -457,29 +541,21 @@ templ staffIconPicker(selected, lbl string) {
 	<script>
 		(function () {
 			var pickers = document.querySelectorAll("[data-icon-picker]");
-
-			document.addEventListener(
-				"click",
-				function (e) {
-					pickers.forEach(function (picker) {
-						if (!picker.contains(e.target)) {
-							var panel = picker.querySelector("[data-icon-panel]");
-							if (panel) panel.classList.add("hidden");
-						}
-					});
-				},
-				true,
-			);
-
+			document.addEventListener("click", function (e) {
+				pickers.forEach(function (picker) {
+					if (!picker.contains(e.target)) {
+						var panel = picker.querySelector("[data-icon-panel]");
+						if (panel) panel.classList.add("hidden");
+					}
+				});
+			}, true);
 			pickers.forEach(function (picker) {
 				picker.querySelectorAll('input[name="icon"]').forEach(function (radio) {
 					radio.addEventListener("change", function () {
 						var val = this.value;
-						picker
-							.querySelectorAll("[data-icon-preview]")
-							.forEach(function (el) {
-								el.classList.toggle("hidden", el.dataset.iconPreview !== val);
-							});
+						picker.querySelectorAll("[data-icon-preview]").forEach(function (el) {
+							el.classList.toggle("hidden", el.dataset.iconPreview !== val);
+						});
 						var panel = picker.querySelector("[data-icon-panel]");
 						if (panel) panel.classList.add("hidden");
 					});
@@ -489,7 +565,6 @@ templ staffIconPicker(selected, lbl string) {
 	</script>
 }
 
-// ─── Icon components ──────────────────────────────────────────────────────────
 templ staffIcon(iconName, lbl string) {
 	switch iconName {
 		case "user":
@@ -562,7 +637,7 @@ templ staffValuePicker(catID string, values []*value.Value, selected []string) {
 						type="checkbox"
 						name="values"
 						value={ v.ID }
-						checked?={ includesStr(selected, v.ID) }
+						checked?={ shell.IncludesStr(selected, v.ID) }
 						class="sr-only"
 					/>
 					{ v.Title }

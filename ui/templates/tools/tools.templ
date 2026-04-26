@@ -1,38 +1,39 @@
-package templates
+package toolstpl
 
 import (
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/tool"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/templates/shell"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
 
 templ toolSidebarNav(activeCat string) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
-		@SidebarItem("/tools", "All", "", activeCat) {
+		@shell.SidebarItem("/tools", "All", "", activeCat) {
 			@icons.Wrench(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tools?cat=messaging", "Messaging", "messaging", activeCat) {
+		@shell.SidebarItem("/tools?cat=messaging", "Messaging", "messaging", activeCat) {
 			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tools?cat=commerce", "Commerce", "commerce", activeCat) {
+		@shell.SidebarItem("/tools?cat=commerce", "Commerce", "commerce", activeCat) {
 			@icons.Package(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tools?cat=payments", "Payments", "payments", activeCat) {
+		@shell.SidebarItem("/tools?cat=payments", "Payments", "payments", activeCat) {
 			@icons.Wallet(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tools?cat=utilities", "Utilities", "utilities", activeCat) {
+		@shell.SidebarItem("/tools?cat=utilities", "Utilities", "utilities", activeCat) {
 			@icons.Settings(templ.Attributes{"class": "size-4"})
 		}
 	</nav>
 }
 
-templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
-	@AppLayout("Tools", nd, toolSidebarNav(activeCat)) {
-		@pageHeader(func() string {
-			if l := catLabel(activeCat); l != "" {
+templ ToolListPage(tools []tool.Tool, nd shell.NavData, activeCat string) {
+	@shell.AppLayout("Tools", nd, toolSidebarNav(activeCat)) {
+		@shell.PageHeader(func() string {
+			if l := shell.CatLabel(activeCat); l != "" {
 				return l
 			}
 			return "Tools"
@@ -42,7 +43,7 @@ templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
 			}
 		}
 		if len(tools) == 0 {
-			@emptyState(
+			@shell.EmptyState(
 				"No tools added",
 				"Connect the integrations your business uses so staff can read and write to them.",
 				"/tools/new",
@@ -50,30 +51,30 @@ templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
 			)
 		} else if activeCat == "" {
 			for _, g := range groupToolsByCat(tools) {
-				@listSection(g.Label) {
+				@shell.ListSection(g.Label) {
 					for _, t := range g.Tools {
-						@rowItem() {
+						@shell.RowItem() {
 							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
 								<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
 								<span class="text-xs text-muted-foreground font-mono">{ t.ID }</span>
 							</div>
-							@rowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
+							@shell.RowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
 						}
 					}
 				}
 			}
 		} else {
-			@rowList() {
+			@shell.RowList() {
 				for _, t := range tools {
-					@rowItem() {
+					@shell.RowItem() {
 						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
 							<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
 							<span class="text-xs text-muted-foreground font-mono">{ t.ID }</span>
 						</div>
 						<div class="hidden sm:block shrink-0">
-							@badge(t.Type)
+							@shell.Badge(t.Type)
 						</div>
-						@rowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
+						@shell.RowActions("/tools/"+t.ID+"/edit", "/tools/"+t.ID+"/delete", "tool")
 					}
 				}
 			}
@@ -81,9 +82,9 @@ templ ToolListPage(tools []tool.Tool, nd NavData, activeCat string) {
 	}
 }
 
-templ NewToolPage(groups []tool.IntegrationGroup, nd NavData, formErr string) {
-	@AppLayout("Add Tool", nd, emptySidebarNav()) {
-		@pageHeader("Add Tool") {
+templ NewToolPage(groups []tool.IntegrationGroup, nd shell.NavData, formErr string) {
+	@shell.AppLayout("Add Tool", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader("Add Tool") {
 			@button.Button(button.Props{Href: "/tools", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
 			}
@@ -119,9 +120,9 @@ templ NewToolPage(groups []tool.IntegrationGroup, nd NavData, formErr string) {
 	}
 }
 
-templ ToolFormPage(t *tool.Tool, integ *tool.Integration, nd NavData, formErr string) {
-	@AppLayout("Edit Tool", nd, emptySidebarNav()) {
-		@pageHeader(t.Label) {
+templ ToolFormPage(t *tool.Tool, integ *tool.Integration, nd shell.NavData, formErr string) {
+	@shell.AppLayout("Edit Tool", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader(t.Label) {
 			@button.Button(button.Props{Href: "/tools", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
 			}
@@ -134,29 +135,29 @@ templ ToolFormPage(t *tool.Tool, integ *tool.Integration, nd NavData, formErr st
 			}
 		}
 		<form method="post" action={ templ.SafeURL("/tools/" + t.ID) } class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "tool-id"}) {
 					ID
 				}
 				@input.Input(input.Props{ID: "tool-id", Value: t.ID, Disabled: true})
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "label"}) {
 					Label
 				}
 				@input.Input(input.Props{ID: "label", Name: "label", Value: t.Label, Required: true})
 			}
-			@field() {
+			@shell.Field() {
 				<div class="flex flex-col gap-1">
 					<span class="text-sm font-medium text-foreground">Type</span>
-					@badge(t.Type)
+					@shell.Badge(t.Type)
 				</div>
 			}
 			if integ != nil && len(integ.Fields) > 0 {
 				<div class="flex flex-col gap-4 pt-2 border-t border-border">
 					<h5>Credentials</h5>
 					for _, f := range integ.Fields {
-						@field() {
+						@shell.Field() {
 							@label.Label(label.Props{For: "cfg_" + f.Key}) {
 								{ f.Label }
 							}

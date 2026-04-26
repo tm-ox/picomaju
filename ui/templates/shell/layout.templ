@@ -1,4 +1,4 @@
-package templates
+package shell
 
 import icons "github.com/bryanvaz/go-templ-lucide-icons"
 
@@ -27,6 +27,8 @@ templ appStyles() {
 		#sidebar { transition: width 200ms ease; }
 		#sidebar-main { transition: transform 200ms ease; }
 		#sidebar [data-sidebar-label] { white-space: nowrap; }
+		dialog { border: none; padding: 0; background: transparent; max-width: 100%; }
+		dialog::backdrop { background: rgba(0,0,0,0.4); }
 	</style>
 }
 
@@ -68,6 +70,20 @@ templ appSidebarAside(nd NavData, nav templ.Component) {
 	</aside>
 }
 
+templ appNavLink(href, label string, active bool) {
+	<a
+		href={ templ.SafeURL(href) }
+		class={
+			"flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-ui transition-colors",
+			templ.KV("text-foreground bg-muted font-medium", active),
+			templ.KV("text-muted-foreground hover:text-foreground hover:bg-muted", !active),
+		}
+	>
+		{ children... }
+		{ label }
+	</a>
+}
+
 templ appTopBar(nd NavData) {
 	<header class="shrink-0 h-12 flex items-center border-b border-border px-4">
 		<div class="flex-1 flex">
@@ -80,10 +96,18 @@ templ appTopBar(nd NavData) {
 			</button>
 		</div>
 		<nav class="hidden sm:flex items-center gap-0.5" aria-label="Primary">
-			@appNavLink("/", "Staff", nd.ActiveSection == "staff")
-			@appNavLink("/values", "Values", nd.ActiveSection == "values")
-			@appNavLink("/tools", "Tools", nd.ActiveSection == "tools")
-			@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks")
+			@appNavLink("/", "Staff", nd.ActiveSection == "staff") {
+				@icons.UserRound(templ.Attributes{"class": "size-3.5"})
+			}
+			@appNavLink("/values", "Values", nd.ActiveSection == "values") {
+				@icons.Star(templ.Attributes{"class": "size-3.5"})
+			}
+			@appNavLink("/tools", "Tools", nd.ActiveSection == "tools") {
+				@icons.Wrench(templ.Attributes{"class": "size-3.5"})
+			}
+			@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks") {
+				@icons.ClipboardList(templ.Attributes{"class": "size-3.5"})
+			}
 		</nav>
 		<div class="flex-1"></div>
 	</header>
@@ -155,11 +179,28 @@ templ appSidebarScript() {
 }
 
 templ appContentFooter() {
-	<footer class="mt-auto pt-8 pb-2 flex items-center justify-center gap-2 text-[0.625rem] text-muted-foreground/40 select-none">
-		<span>Powered by</span>
-		<img src="/static/logo-symbol.svg" class="h-3.5 w-auto opacity-40" alt=""/>
-		<span class="font-brand font-semibold">PicoMaju</span>
+	<footer class="shrink-0 w-full py-2 text-center leading-none text-[0.625rem] text-muted-foreground/40 select-none">
+		<span>Powered by </span><img src="/static/logo-symbol.svg" class="h-[0.625rem] w-auto opacity-40 inline-block align-middle mx-1" alt=""/><span class="font-brand font-semibold"> PicoMaju</span>
 	</footer>
+}
+
+templ sidebarThemeToggle() {
+	<button
+		class="flex items-center gap-2 w-full mx-2 px-1 py-0.5 rounded-md text-sm transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
+		aria-label="Toggle theme"
+		onclick="var d=document.documentElement,dark=d.classList.toggle('dark');localStorage.setItem('theme',dark?'dark':'light');"
+	>
+		<span class="size-8 shrink-0 flex items-center justify-center">
+			<svg class="block dark:hidden size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+			</svg>
+			<svg class="hidden dark:block size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<circle cx="12" cy="12" r="4"></circle>
+				<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+			</svg>
+		</span>
+		<span data-sidebar-label>Theme</span>
+	</button>
 }
 
 // ── AppLayout — standard scrollable content shell ─────────────────────────────
@@ -175,12 +216,12 @@ templ AppLayout(title string, nd NavData, nav templ.Component) {
 			<div id="sidebar-main" class="flex-1 min-w-0 flex flex-col overflow-hidden">
 				@appTopBar(nd)
 				<div class="flex-1 overflow-y-auto">
-					<div class="max-w-2xl mx-auto w-full px-6 py-6 flex flex-col gap-6 min-h-full">
+					<div class="max-w-2xl mx-auto w-full px-6 py-6 flex flex-col gap-6">
 						{ children... }
-						@appContentFooter()
 					</div>
 				</div>
 				@AppBottomTabBar(nd)
+				@appContentFooter()
 			</div>
 			@appSidebarScript()
 		</body>
@@ -188,7 +229,6 @@ templ AppLayout(title string, nd NavData, nav templ.Component) {
 }
 
 // ── ChatAppLayout — full-height chat shell with pinned input ──────────────────
-// Children must be: header (shrink-0), messages (flex-1 overflow-y-auto), input (shrink-0).
 
 templ ChatAppLayout(title string, nd NavData, nav templ.Component) {
 	<!DOCTYPE html>
@@ -210,27 +250,6 @@ templ ChatAppLayout(title string, nd NavData, nav templ.Component) {
 			@appSidebarScript()
 		</body>
 	</html>
-}
-
-// ── sidebarThemeToggle ────────────────────────────────────────────────────────
-
-templ sidebarThemeToggle() {
-	<button
-		class="flex items-center gap-2 w-full mx-2 px-1 py-0.5 rounded-md text-sm transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
-		aria-label="Toggle theme"
-		onclick="var d=document.documentElement,dark=d.classList.toggle('dark');localStorage.setItem('theme',dark?'dark':'light');"
-	>
-		<span class="size-8 shrink-0 flex items-center justify-center">
-			<svg class="block dark:hidden size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-			</svg>
-			<svg class="hidden dark:block size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<circle cx="12" cy="12" r="4"></circle>
-				<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-			</svg>
-		</span>
-		<span data-sidebar-label>Theme</span>
-	</button>
 }
 
 // ── Layout — unauthenticated shell ────────────────────────────────────────────

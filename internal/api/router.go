@@ -100,7 +100,10 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Post("/staff", ui.createStaff)
 	r.Post("/staff/{id}/profile", ui.updateStaffProfile)
 	r.Post("/staff/{id}/tasks", ui.updateStaffTasks)
+	r.Post("/staff/{id}/tasks/{taskId}/remove", ui.removeStaffTask)
 	r.Post("/staff/{id}/values", ui.updateStaffValues)
+	r.Post("/staff/{id}/value-cats/{catId}/remove", ui.removeStaffValueCat)
+	r.Post("/staff/{id}/values/{valueId}/remove", ui.removeStaffValue)
 	r.Post("/staff/{id}/delete", ui.deleteStaff)
 
 	// Chats

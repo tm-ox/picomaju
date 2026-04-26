@@ -8,12 +8,12 @@ import (
 
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
-	uitemplates "picomaju/ui/templates"
+	setuptpl "picomaju/ui/templates/setup"
 )
 
 func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		uitemplates.WelcomePage("", err.Error()).Render(r.Context(), w)
+		setuptpl.WelcomePage("", err.Error()).Render(r.Context(), w)
 		return
 	}
 	lang := strings.TrimSpace(r.FormValue("language"))
@@ -27,7 +27,7 @@ func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 	}
 	cfg.Languages = []string{lang}
 	if err := h.settings.Save(cfg); err != nil {
-		uitemplates.WelcomePage(lang, "Could not save: "+err.Error()).Render(r.Context(), w)
+		setuptpl.WelcomePage(lang, "Could not save: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -37,18 +37,18 @@ func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 // ─── Step 2 — First staff profile ──────────────────────────────────────────
 
 func (h *uiHandler) firstStaffPage(w http.ResponseWriter, r *http.Request) {
-	uitemplates.SetupStep2Page("", "", "").Render(r.Context(), w)
+	setuptpl.SetupStep2Page("", "", "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		uitemplates.SetupStep2Page("", "", err.Error()).Render(r.Context(), w)
+		setuptpl.SetupStep2Page("", "", err.Error()).Render(r.Context(), w)
 		return
 	}
 	label := strings.TrimSpace(r.FormValue("label"))
 	role := strings.TrimSpace(r.FormValue("role"))
 	if label == "" {
-		uitemplates.SetupStep2Page(label, role, "Please provide a profile name.").Render(r.Context(), w)
+		setuptpl.SetupStep2Page(label, role, "Please provide a profile name.").Render(r.Context(), w)
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.staff.Create(m); err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
-			uitemplates.SetupStep2Page(label, role, err.Error()).Render(r.Context(), w)
+			setuptpl.SetupStep2Page(label, role, err.Error()).Render(r.Context(), w)
 			return
 		}
 	}

@@ -6,40 +6,38 @@ Components added via `templui add <name>`. Installed: button, alert, label, card
 
 Icons: `github.com/bryanvaz/go-templ-lucide-icons` — import alias `icons`, usage `icons.Name(templ.Attributes{"class": "size-4"})`.
 
-## Template map
+## Template packages
 
-| File | Key exports |
-|---|---|
-| `layout.templ` | `AppLayout`, `ChatAppLayout`, `ThemeToggle`, private sub-components |
-| `nav.templ` | `NavData`, `appNavLink`, `AppBottomTabBar`, `navInitials` |
-| `shared.templ` | `SidebarItem`, `emptySidebarNav`, `pageHeader`, `emptyState`, `listSection`, `rowList`, `rowItem`, `badge`, `rowActions`, `field` |
-| `helpers.go` | `catLabel`, `countWord`, `categoryLabel`, `configValue`, `staffInitials`, `staffToolCount`, `staffIconOptions`, `includesStr`, `groupValuesByCat`, `groupToolsByCat` |
-| `staff.templ` | `StaffListPage`, `StaffFormPage`, `StaffDetailPage`, sidebar navs, icon picker |
-| `chat.templ` | `StaffChatPage`, `chatBubble` |
-| `values.templ` | `valueSidebarNav`, `ValueListPage`, `ValueFormPage`, `ValidationFragment` |
-| `tools.templ` | `toolSidebarNav`, `ToolListPage`, `NewToolPage`, `ToolFormPage` |
-| `tasks.templ` | `taskSidebarNav`, `TaskListPage`, `TaskFormPage` |
-| `settings.templ` | `SettingsPage` |
-| `setup.templ` | `SetupStep1/2/3Page` |
-| `welcome.templ` | `WelcomePage` |
+Templates are organised into sub-packages under `ui/templates/`. Each directory is one Go package. Cross-package imports use `shell.*` for shared components.
+
+| Package | Go alias | Key exports |
+|---|---|---|
+| `shell/` | `shell` | `AppLayout`, `ChatAppLayout`, `Layout`, `ThemeToggle`, `NavData`, `AppBottomTabBar`, `SidebarItem`, `PageHeader`, `EmptyState`, `ListSection`, `RowList`, `RowItem`, `Badge`, `RowActions`, `FormCard`, `Field`, `ValueCatIcon`, `EmptySidebarNav`; helpers: `IncludesStr`, `FormTitle`, `FormAction`, `CountWord`, `CategoryLabel`, `CatLabel` |
+| `staff/` | `stafftpl` | `StaffListPage`, `StaffFormPage`, `StaffDetailPage`, `StaffChatPage`; private: sidebar navs, icon picker, helpers |
+| `values/` | `valuestpl` | `ValueListPage`, `ValueFormPage`, `ValidationFragment`; private: sidebar nav, `groupValuesByCat` |
+| `tools/` | `toolstpl` | `ToolListPage`, `NewToolPage`, `ToolFormPage`; private: sidebar nav, `groupToolsByCat`, `configValue` |
+| `tasks/` | `taskstpl` | `TaskListPage`, `TaskFormPage`; private: sidebar nav |
+| `settings/` | `settingstpl` | `SettingsPage` |
+| `setup/` | `setuptpl` | `WelcomePage`, `DashboardPage`, `SetupStep1Page`, `SetupStep2Page`, `SetupStep3Page` |
+| `workshop/` | `workshoptpl` | `WorkshopPage` |
 
 ## Layout shells
 
 ### AppLayout — standard pages
 
-`AppLayout(title string, nd NavData, nav templ.Component)`
+`shell.AppLayout(title string, nd shell.NavData, nav templ.Component)`
 
 Content area: `max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6 min-h-full` inside `flex-1 overflow-y-auto`. Includes `appContentFooter()` ("Powered by [logo] PicoMaju") at the bottom via `mt-auto`.
 
 ### ChatAppLayout — chat pages
 
-`ChatAppLayout(title string, nd NavData, nav templ.Component)`
+`shell.ChatAppLayout(title string, nd shell.NavData, nav templ.Component)`
 
 Content area: `max-w-2xl mx-auto flex-1 flex flex-col min-h-0 overflow-hidden` inside `flex-1 overflow-hidden flex flex-col`. Children must own their own padding and scroll: header (`shrink-0`), messages (`flex-1 overflow-y-auto`), input (`shrink-0`). No footer. Tab bar (`AppBottomTabBar`) is a sibling of the content area, naturally above it on mobile.
 
 ### Shared sub-components (private)
 
-`layout.templ` extracts `appHead`, `appStyles`, `appSidebarAside`, `appTopBar`, `appSidebarScript`, `appContentFooter` — both layouts compose from these.
+`shell/layout.templ` extracts `appHead`, `appStyles`, `appSidebarAside`, `appTopBar`, `appSidebarScript`, `appContentFooter` — both layouts compose from these.
 
 **Sidebar** (`bg-sidebar`, `h-dvh`, dark):
 - Header: `size-7` business avatar + name (`data-sidebar-label`) + desktop toggle (`hidden sm:flex`)

@@ -1,48 +1,34 @@
-package templates
+package valuestpl
 
 import (
 	"fmt"
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/value"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/templates/shell"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
 
 templ valueSidebarNav(cats []value.Category, activeCat string) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
-		@SidebarItem("/values", "All", "", activeCat) {
+		@shell.SidebarItem("/values", "All", "", activeCat) {
 			@icons.Star(templ.Attributes{"class": "size-4"})
 		}
 		for _, c := range cats {
-			@SidebarItem("/values?cat="+c.ID, c.Label, c.ID, activeCat) {
-				@valueCatIcon(c.ID)
+			@shell.SidebarItem("/values?cat="+c.ID, c.Label, c.ID, activeCat) {
+				@shell.ValueCatIcon(c.ID)
 			}
 		}
 	</nav>
 }
 
-templ valueCatIcon(id string) {
-	switch id {
-		case "core_values":
-			@icons.Star(templ.Attributes{"class": "size-4"})
-		case "communication":
-			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
-		case "skills":
-			@icons.Zap(templ.Attributes{"class": "size-4"})
-		case "escalation":
-			@icons.Activity(templ.Attributes{"class": "size-4"})
-		default:
-			@icons.Settings(templ.Attributes{"class": "size-4"})
-	}
-}
-
-templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, activeCat string) {
-	@AppLayout("Values", nd, valueSidebarNav(cats, activeCat)) {
-		@pageHeader(func() string {
+templ ValueListPage(values []*value.Value, cats []value.Category, nd shell.NavData, activeCat string) {
+	@shell.AppLayout("Values", nd, valueSidebarNav(cats, activeCat)) {
+		@shell.PageHeader(func() string {
 			if activeCat != "" {
-				return categoryLabel(cats, activeCat)
+				return shell.CategoryLabel(cats, activeCat)
 			}
 			return "Values"
 		}()) {
@@ -51,7 +37,7 @@ templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, ac
 			}
 		}
 		if len(values) == 0 {
-			@emptyState(
+			@shell.EmptyState(
 				"No values yet",
 				"Values are rules your AI agents follow — tone, do's, don'ts, escalation triggers.",
 				"/values/new",
@@ -59,9 +45,9 @@ templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, ac
 			)
 		} else if activeCat == "" {
 			for _, g := range groupValuesByCat(cats, values) {
-				@listSection(g.Cat.Label) {
+				@shell.ListSection(g.Cat.Label) {
 					for _, v := range g.Values {
-						@rowItem() {
+						@shell.RowItem() {
 							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
 								<span class="text-sm font-brand font-semibold text-foreground truncate">{ v.Title }</span>
 								<span class="text-xs text-muted-foreground font-mono">{ v.ID }</span>
@@ -69,24 +55,24 @@ templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, ac
 							<div class="hidden sm:flex items-center gap-2 shrink-0">
 								<span class="text-xs text-muted-foreground font-mono">p{ fmt.Sprintf("%d", v.Priority) }</span>
 							</div>
-							@rowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
+							@shell.RowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
 						}
 					}
 				}
 			}
 		} else {
-			@rowList() {
+			@shell.RowList() {
 				for _, v := range values {
-					@rowItem() {
+					@shell.RowItem() {
 						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
 							<span class="text-sm font-brand font-semibold text-foreground truncate">{ v.Title }</span>
 							<span class="text-xs text-muted-foreground font-mono">{ v.ID }</span>
 						</div>
 						<div class="hidden sm:flex items-center gap-2 shrink-0">
-							@badge(categoryLabel(cats, v.Category))
+							@shell.Badge(shell.CategoryLabel(cats, v.Category))
 							<span class="text-xs text-muted-foreground font-mono">p{ fmt.Sprintf("%d", v.Priority) }</span>
 						</div>
-						@rowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
+						@shell.RowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
 					}
 				}
 			}
@@ -94,9 +80,9 @@ templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, ac
 	}
 }
 
-templ ValueFormPage(v *value.Value, cats []value.Category, nd NavData, isNew bool, formErr string) {
-	@AppLayout(formTitle("Value", isNew), nd, emptySidebarNav()) {
-		@pageHeader(formTitle("Value", isNew)) {
+templ ValueFormPage(v *value.Value, cats []value.Category, nd shell.NavData, isNew bool, formErr string) {
+	@shell.AppLayout(shell.FormTitle("Value", isNew), nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader(shell.FormTitle("Value", isNew)) {
 			@button.Button(button.Props{Href: "/values", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
 			}
@@ -108,8 +94,8 @@ templ ValueFormPage(v *value.Value, cats []value.Category, nd NavData, isNew boo
 				}
 			}
 		}
-		<form method="post" action={ templ.SafeURL(formAction("/values", v.ID, isNew)) } class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-			@field() {
+		<form method="post" action={ templ.SafeURL(shell.FormAction("/values", v.ID, isNew)) } class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+			@shell.Field() {
 				@label.Label(label.Props{For: "id"}) {
 					ID
 				}
@@ -119,13 +105,13 @@ templ ValueFormPage(v *value.Value, cats []value.Category, nd NavData, isNew boo
 					@input.Input(input.Props{ID: "id", Name: "id", Value: v.ID, Disabled: true})
 				}
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "title"}) {
 					Title
 				}
 				@input.Input(input.Props{ID: "title", Name: "title", Value: v.Title, Required: true})
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "category"}) {
 					Category
 				}
@@ -136,19 +122,19 @@ templ ValueFormPage(v *value.Value, cats []value.Category, nd NavData, isNew boo
 					}
 				</select>
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "version"}) {
 					Version
 				}
 				@input.Input(input.Props{ID: "version", Name: "version", Value: fmt.Sprintf("%d", v.Version), Type: "number", Required: true, Attributes: templ.Attributes{"min": "1"}})
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "priority"}) {
 					Priority (0–100)
 				}
 				@input.Input(input.Props{ID: "priority", Name: "priority", Value: fmt.Sprintf("%d", v.Priority), Type: "number", Required: true, Attributes: templ.Attributes{"min": "0", "max": "100"}})
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "body"}) {
 					Directive
 				}

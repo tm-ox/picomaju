@@ -1,4 +1,4 @@
-package templates
+package shell
 
 import (
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
@@ -11,21 +11,6 @@ type NavData struct {
 	BusinessName  string
 	ActiveSection string // "staff" | "values" | "tools" | "tasks" | "settings" | ""
 }
-
-// appNavLink renders a single nav link in the in-content header.
-templ appNavLink(href, label string, active bool) {
-	<a
-		href={ templ.SafeURL(href) }
-		class={
-			"px-3 py-1.5 rounded-md text-sm font-ui transition-colors",
-			templ.KV("text-foreground bg-muted font-medium", active),
-			templ.KV("text-muted-foreground hover:text-foreground hover:bg-muted", !active),
-		}
-	>
-		{ label }
-	</a>
-}
-
 
 // AppBottomTabBar renders the mobile primary navigation as a floating card at the bottom of the content column.
 templ AppBottomTabBar(nd NavData) {

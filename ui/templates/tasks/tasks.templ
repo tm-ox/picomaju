@@ -1,39 +1,40 @@
-package templates
+package taskstpl
 
 import (
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/templates/shell"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
 
 templ taskSidebarNav(activeCat string) {
 	<nav class="flex flex-col gap-2 py-2 flex-1">
-		@SidebarItem("/tasks", "All", "", activeCat) {
+		@shell.SidebarItem("/tasks", "All", "", activeCat) {
 			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tasks?tool_cat=messaging", "Messaging", "messaging", activeCat) {
+		@shell.SidebarItem("/tasks?tool_cat=messaging", "Messaging", "messaging", activeCat) {
 			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tasks?tool_cat=commerce", "Commerce", "commerce", activeCat) {
+		@shell.SidebarItem("/tasks?tool_cat=commerce", "Commerce", "commerce", activeCat) {
 			@icons.Package(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tasks?tool_cat=payments", "Payments", "payments", activeCat) {
+		@shell.SidebarItem("/tasks?tool_cat=payments", "Payments", "payments", activeCat) {
 			@icons.Wallet(templ.Attributes{"class": "size-4"})
 		}
-		@SidebarItem("/tasks?tool_cat=utilities", "Utilities", "utilities", activeCat) {
+		@shell.SidebarItem("/tasks?tool_cat=utilities", "Utilities", "utilities", activeCat) {
 			@icons.Settings(templ.Attributes{"class": "size-4"})
 		}
 	</nav>
 }
 
-templ TaskListPage(tasks []task.Task, tools []tool.Tool, nd NavData, activeCat string) {
-	@AppLayout("Tasks", nd, taskSidebarNav(activeCat)) {
-		@pageHeader(func() string {
-			if l := catLabel(activeCat); l != "" {
+templ TaskListPage(tasks []task.Task, nd shell.NavData, activeCat string) {
+	@shell.AppLayout("Tasks", nd, taskSidebarNav(activeCat)) {
+		@shell.PageHeader(func() string {
+			if l := shell.CatLabel(activeCat); l != "" {
 				return l
 			}
 			return "Tasks"
@@ -43,24 +44,24 @@ templ TaskListPage(tasks []task.Task, tools []tool.Tool, nd NavData, activeCat s
 			}
 		}
 		if len(tasks) == 0 {
-			@emptyState(
+			@shell.EmptyState(
 				"No tasks defined",
 				"Tasks are playbooks — a sequence of steps a staff profile can carry out end-to-end.",
 				"/tasks/new",
 				"Create your first task",
 			)
 		} else {
-			@rowList() {
+			@shell.RowList() {
 				for _, t := range tasks {
-					@rowItem() {
+					@shell.RowItem() {
 						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
 							<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
 							if t.Description != "" {
 								<span class="text-xs text-muted-foreground truncate">{ t.Description }</span>
 							}
 						</div>
-						<span class="hidden sm:block text-xs text-muted-foreground font-mono shrink-0">{ countWord(len(t.Tools), "tool", "tools") }</span>
-						@rowActions("/tasks/"+t.ID+"/edit", "/tasks/"+t.ID+"/delete", "task")
+						<span class="hidden sm:block text-xs text-muted-foreground font-mono shrink-0">{ shell.CountWord(len(t.Tools), "tool", "tools") }</span>
+						@shell.RowActions("/tasks/"+t.ID+"/edit", "/tasks/"+t.ID+"/delete", "task")
 					}
 				}
 			}
@@ -68,9 +69,9 @@ templ TaskListPage(tasks []task.Task, tools []tool.Tool, nd NavData, activeCat s
 	}
 }
 
-templ TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, formErr string) {
-	@AppLayout(formTitle("Task", isNew), nd, emptySidebarNav()) {
-		@pageHeader(formTitle("Task", isNew)) {
+templ TaskFormPage(t *task.Task, tools []tool.Tool, nd shell.NavData, isNew bool, formErr string) {
+	@shell.AppLayout(shell.FormTitle("Task", isNew), nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader(shell.FormTitle("Task", isNew)) {
 			@button.Button(button.Props{Href: "/tasks", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
 			}
@@ -82,9 +83,9 @@ templ TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, form
 				}
 			}
 		}
-		<form method="post" action={ templ.SafeURL(formAction("/tasks", t.ID, isNew)) } class="flex flex-col gap-5">
-			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-				@field() {
+		<form method="post" action={ templ.SafeURL(shell.FormAction("/tasks", t.ID, isNew)) } class="flex flex-col gap-5">
+			@shell.FormCard() {
+				@shell.Field() {
 					@label.Label(label.Props{For: "id"}) {
 						ID
 					}
@@ -94,19 +95,19 @@ templ TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, form
 						@input.Input(input.Props{ID: "id", Name: "id", Value: t.ID, Disabled: true})
 					}
 				}
-				@field() {
+				@shell.Field() {
 					@label.Label(label.Props{For: "task-label"}) {
 						Label
 					}
 					@input.Input(input.Props{ID: "task-label", Name: "label", Value: t.Label, Placeholder: "Manage Social Media", Required: true})
 				}
-				@field() {
+				@shell.Field() {
 					@label.Label(label.Props{For: "description"}) {
 						Description
 					}
 					<textarea id="description" name="description" rows="4" placeholder="What this task does…">{ t.Description }</textarea>
 				}
-			</div>
+			}
 			if len(tools) > 0 {
 				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
 					<h5>Tools</h5>
@@ -117,18 +118,22 @@ templ TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, form
 									type="checkbox"
 									name="tools"
 									value={ tl.ID }
-									checked?={ includesStr(t.Tools, tl.ID) }
+									checked?={ shell.IncludesStr(t.Tools, tl.ID) }
 									class="sr-only"
 								/>
 								<span class="flex-1 text-sm font-brand font-semibold text-foreground">{ tl.Label }</span>
-								@badge(tl.Type)
+								@shell.Badge(tl.Type)
 							</label>
 						}
 					</div>
 				</div>
 			}
 			@button.Button(button.Props{Type: button.TypeSubmit}) {
-				Save
+				if isNew {
+					Create
+				} else {
+					Save
+				}
 			}
 		</form>
 	}

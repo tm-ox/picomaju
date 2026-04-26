@@ -1,16 +1,13 @@
-package templates
+package shell
 
-import (
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
-	"picomaju/ui/components/button"
-)
+import icons "github.com/bryanvaz/go-templ-lucide-icons"
+import "picomaju/ui/components/button"
 
-// emptySidebarNav is a zero-content nav component for pages without sidebar navigation.
-templ emptySidebarNav() {
+// EmptySidebarNav is a zero-content nav component for pages without sidebar navigation.
+templ EmptySidebarNav() {
 }
 
 // SidebarItem renders a single sidebar nav link. Pass the icon as children.
-// Icon is wrapped in a size-8 container so it aligns with the toggle button and business avatar.
 templ SidebarItem(href, lbl, key, active string) {
 	<a
 		href={ templ.SafeURL(href) }
@@ -27,16 +24,16 @@ templ SidebarItem(href, lbl, key, active string) {
 	</a>
 }
 
-// pageHeader renders a section heading row with an optional right-slot action.
-templ pageHeader(title string) {
+// PageHeader renders a section heading row with an optional right-slot action.
+templ PageHeader(title string) {
 	<div class="flex items-center justify-between gap-4 pb-4 border-b border-border">
 		<h3 class="font-semibold text-foreground">{ title }</h3>
 		{ children... }
 	</div>
 }
 
-// emptyState renders the zero-items illustration with a primary CTA.
-templ emptyState(title, desc, href, label string) {
+// EmptyState renders the zero-items illustration with a primary CTA.
+templ EmptyState(title, desc, href, label string) {
 	<div class="flex flex-col items-center justify-center text-center py-16 gap-5">
 		<div class="flex flex-col gap-1.5 max-w-xs">
 			<h4>{ title }</h4>
@@ -48,39 +45,39 @@ templ emptyState(title, desc, href, label string) {
 	</div>
 }
 
-// listSection renders a category label above a rowList for grouped "All" views.
-templ listSection(label string) {
+// ListSection renders a category label above a RowList for grouped "All" views.
+templ ListSection(label string) {
 	<div class="flex flex-col gap-2">
 		<h5 class="text-xs font-mono uppercase tracking-widest text-muted-foreground px-1">{ label }</h5>
-		@rowList() {
+		@RowList() {
 			{ children... }
 		}
 	</div>
 }
 
-// rowList wraps a set of list rows in a bordered card container.
-templ rowList() {
+// RowList wraps a set of list rows in a bordered card container.
+templ RowList() {
 	<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
 		{ children... }
 	</div>
 }
 
-// rowItem is a flex row inside a rowList.
-templ rowItem() {
+// RowItem is a flex row inside a RowList.
+templ RowItem() {
 	<div class="flex items-center gap-3 px-4 py-3">
 		{ children... }
 	</div>
 }
 
-// badge renders a muted pill tag for category/type labels.
-templ badge(label string) {
+// Badge renders a muted pill tag for category/type labels.
+templ Badge(label string) {
 	<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-secondary text-secondary-foreground">
 		{ label }
 	</span>
 }
 
-// rowActions renders edit + delete icon buttons for a list row.
-templ rowActions(editHref, deleteHref, confirmNoun string) {
+// RowActions renders edit + delete icon buttons for a list row.
+templ RowActions(editHref, deleteHref, confirmNoun string) {
 	<div class="flex items-center gap-0.5 ml-auto shrink-0">
 		<a
 			href={ templ.SafeURL(editHref) }
@@ -103,16 +100,32 @@ templ rowActions(editHref, deleteHref, confirmNoun string) {
 	</div>
 }
 
-// formCard wraps form content in a surface card.
-templ formCard() {
+// FormCard wraps form content in a surface card.
+templ FormCard() {
 	<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
 		{ children... }
 	</div>
 }
 
-// field wraps a label+input pair with consistent spacing.
-templ field() {
+// Field wraps a label+input pair with consistent spacing.
+templ Field() {
 	<div class="flex flex-col gap-1.5">
 		{ children... }
 	</div>
+}
+
+// ValueCatIcon renders the icon for a value category by ID.
+templ ValueCatIcon(id string) {
+	switch id {
+		case "core_values":
+			@icons.Star(templ.Attributes{"class": "size-4"})
+		case "communication":
+			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
+		case "skills":
+			@icons.Zap(templ.Attributes{"class": "size-4"})
+		case "escalation":
+			@icons.Activity(templ.Attributes{"class": "size-4"})
+		default:
+			@icons.Settings(templ.Attributes{"class": "size-4"})
+	}
 }

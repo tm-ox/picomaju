@@ -1,16 +1,17 @@
-package templates
+package workshoptpl
 
 import (
-	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/card"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/templates/shell"
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
 
 templ WorkshopPage() {
-	@Layout("Workshop") {
+	@shell.Layout("Workshop") {
 		<div class="max-w-2xl mx-auto px-6 py-12 flex flex-col gap-12">
 			<div>
 				<h1>Workshop</h1>
@@ -44,53 +45,37 @@ templ WorkshopPage() {
 						</div>
 					</div>
 					<div class="flex flex-col gap-2">
-						<h4>Light — backgrounds &amp; surfaces</h4>
+						<h4>Tokens — light</h4>
 						<div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
-							@colorSwatchHex("#f4f7fa", "bg")
-							@colorSwatchHex("#ffffff", "surface")
-							@colorSwatchHex("#edf2f6", "surface-subtle")
-							@colorSwatchHex("#dbe4ec", "border")
-							@colorSwatchHex("#eef3f7", "border-faint")
-						</div>
-					</div>
-					<div class="flex flex-col gap-2">
-						<h4>Light — text</h4>
-						<div class="grid grid-cols-4 sm:grid-cols-4 gap-3">
-							@colorSwatchHex("#0f1f38", "text")
-							@colorSwatchHex("#4a6179", "text-secondary")
-							@colorSwatchHex("#7b92a8", "text-muted")
-							@colorSwatchHex("#3b9797", "text-faint")
-						</div>
-					</div>
-					<div class="flex flex-col gap-2">
-						<h4>Dark — backgrounds &amp; surfaces</h4>
-						<div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
-							@colorSwatchHex("#0c1826", "bg")
-							@colorSwatchHex("#142640", "surface")
-							@colorSwatchHex("#1a3251", "surface-subtle")
-							@colorSwatchHex("#1e3a55", "border")
-							@colorSwatchHex("#080f1a", "nav-bg")
-						</div>
-					</div>
-					<div class="flex flex-col gap-2">
-						<h4>Dark — text</h4>
-						<div class="grid grid-cols-4 sm:grid-cols-3 gap-3">
-							@colorSwatchHex("#d8eaf4", "text")
-							@colorSwatchHex("#9abdd0", "text-secondary")
-							@colorSwatchHex("#5a8a9f", "text-muted")
+							<div class="flex flex-col gap-1.5">
+								<div class="h-10 rounded-md border border-border bg-background"></div>
+								<h5>background</h5>
+							</div>
+							<div class="flex flex-col gap-1.5">
+								<div class="h-10 rounded-md border border-border bg-card"></div>
+								<h5>card</h5>
+							</div>
+							<div class="flex flex-col gap-1.5">
+								<div class="h-10 rounded-md border border-border bg-muted"></div>
+								<h5>muted</h5>
+							</div>
+							<div class="flex flex-col gap-1.5">
+								<div class="h-10 rounded-md bg-primary"></div>
+								<h5>primary</h5>
+							</div>
+							<div class="flex flex-col gap-1.5">
+								<div class="h-10 rounded-md bg-destructive"></div>
+								<h5>destructive</h5>
+							</div>
 						</div>
 					</div>
 					<div class="flex flex-col gap-2">
 						<h4>Status</h4>
-						<div class="grid grid-cols-4 sm:grid-cols-4 gap-3">
-							@colorSwatchHex("#fceaee", "accent-soft")
-							@colorSwatchHex("#a50827", "accent-hover")
+						<div class="grid grid-cols-4 gap-3">
 							@colorSwatchHex("#f0faf4", "ok-bg")
 							@colorSwatchHex("#6dbf8e", "ok-border")
 							@colorSwatchHex("#fdf0f2", "error-bg")
 							@colorSwatchHex("#e87a90", "error-border")
-							@colorSwatchHex("#fdf8ec", "warn-bg")
-							@colorSwatchHex("#e0b84a", "warn-border")
 						</div>
 					</div>
 				</div>
@@ -144,7 +129,7 @@ templ WorkshopPage() {
 						Link
 					}
 				</div>
-				<div class="flex flex-wrap gap-3">
+				<div class="flex flex-wrap items-center gap-3">
 					@button.Button(button.Props{Size: button.SizeSm}) {
 						Small
 					}
@@ -153,6 +138,9 @@ templ WorkshopPage() {
 					}
 					@button.Button(button.Props{Size: button.SizeLg}) {
 						Large
+					}
+					@button.Button(button.Props{Size: button.SizeIcon}) {
+						@icons.Plus(templ.Attributes{"class": "size-4"})
 					}
 				</div>
 				<div>
@@ -176,32 +164,24 @@ templ WorkshopPage() {
 						<h5>ShieldCheck</h5>
 					</div>
 					<div class="flex flex-col items-center gap-2">
-						@icons.LayoutDashboard(templ.Attributes{"class": "size-5"})
-						<h5>LayoutDashboard</h5>
-					</div>
-					<div class="flex flex-col items-center gap-2">
-						@icons.Settings(templ.Attributes{"class": "size-5"})
-						<h5>Settings</h5>
-					</div>
-					<div class="flex flex-col items-center gap-2">
-						@icons.Sun(templ.Attributes{"class": "size-5"})
-						<h5>Sun</h5>
-					</div>
-					<div class="flex flex-col items-center gap-2">
-						@icons.Moon(templ.Attributes{"class": "size-5"})
-						<h5>Moon</h5>
-					</div>
-					<div class="flex flex-col items-center gap-2">
 						@icons.Plus(templ.Attributes{"class": "size-5"})
 						<h5>Plus</h5>
 					</div>
 					<div class="flex flex-col items-center gap-2">
-						@icons.ChevronRight(templ.Attributes{"class": "size-5"})
-						<h5>ChevronRight</h5>
-					</div>
-					<div class="flex flex-col items-center gap-2">
 						@icons.Trash2(templ.Attributes{"class": "size-5"})
 						<h5>Trash2</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Pencil(templ.Attributes{"class": "size-5"})
+						<h5>Pencil</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Bot(templ.Attributes{"class": "size-5"})
+						<h5>Bot</h5>
+					</div>
+					<div class="flex flex-col items-center gap-2">
+						@icons.Settings(templ.Attributes{"class": "size-5"})
+						<h5>Settings</h5>
 					</div>
 				</div>
 				<div class="flex items-center gap-3">
@@ -224,13 +204,6 @@ templ WorkshopPage() {
 							Text input
 						}
 						@input.Input(input.Props{ID: "demo-text", Placeholder: "Type something…"})
-					</div>
-					<div class="flex flex-col gap-1.5">
-						@label.Label(label.Props{For: "demo-hint"}) {
-							With hint text
-						}
-						@input.Input(input.Props{ID: "demo-hint", Placeholder: "Mon–Fri, 09:00–18:00"})
-						<div class="text-sm text-muted-foreground">Free text — shown below the field.</div>
 					</div>
 					<div class="flex flex-col gap-1.5">
 						@label.Label(label.Props{For: "demo-disabled"}) {
@@ -297,10 +270,83 @@ templ WorkshopPage() {
 					}
 				</div>
 			}
+			@workshopSection("Shared Components") {
+				<div class="flex flex-col gap-8">
+					<div class="flex flex-col gap-2">
+						<h5>shell.PageHeader</h5>
+						@shell.PageHeader("Section Title") {
+							@button.Button(button.Props{Size: button.SizeIcon}) {
+								@icons.Plus(templ.Attributes{"class": "size-4"})
+							}
+						}
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>shell.Badge</h5>
+						<div class="flex gap-2">
+							@shell.Badge("messaging")
+							@shell.Badge("commerce")
+							@shell.Badge("payments")
+							@shell.Badge("utilities")
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>shell.FormCard + shell.Field</h5>
+						@shell.FormCard() {
+							@shell.Field() {
+								@label.Label(label.Props{For: "demo-fc"}) {
+									Field label
+								}
+								@input.Input(input.Props{ID: "demo-fc", Placeholder: "Value…"})
+							}
+						}
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>shell.RowList + shell.RowItem + shell.RowActions</h5>
+						@shell.RowList() {
+							@shell.RowItem() {
+								<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+									<span class="text-sm font-brand font-semibold text-foreground">Tool name</span>
+									<span class="text-xs text-muted-foreground font-mono">tool_id</span>
+								</div>
+								@shell.Badge("messaging")
+								@shell.RowActions("/edit", "/delete", "tool")
+							}
+						}
+					</div>
+					<div class="flex flex-col gap-2">
+						<h5>shell.EmptyState</h5>
+						@shell.EmptyState(
+							"Nothing here yet",
+							"This is the empty state shown when there are no items to display.",
+							"/",
+							"Create your first item",
+						)
+					</div>
+				</div>
+			}
+			@workshopSection("Chat Bubbles") {
+				<div class="flex flex-col gap-2">
+					<div class="flex justify-end">
+						<div class="max-w-[80%] bg-blue-600 text-blue-50 rounded-2xl rounded-br-sm px-4 py-2.5">
+							<p class="text-sm whitespace-pre-wrap">Hey, can you check the order status for customer #1042?</p>
+							<p class="text-[0.625rem] text-blue-200 mt-1 text-right">14:32</p>
+						</div>
+					</div>
+					<div class="flex justify-start gap-2">
+						<div class="size-7 shrink-0 rounded-lg bg-primary/15 flex items-center justify-center mt-1">
+							@icons.Bot(templ.Attributes{"class": "size-3.5 text-primary"})
+						</div>
+						<div class="max-w-[80%] bg-primary/10 border border-primary/20 rounded-2xl rounded-bl-sm px-4 py-2.5">
+							<p class="text-sm whitespace-pre-wrap text-foreground">Order #1042 is in transit. Expected delivery: Apr 29.</p>
+							<p class="text-[0.625rem] text-primary/60 mt-1">14:32</p>
+						</div>
+					</div>
+				</div>
+			}
 			@workshopSection("Theme") {
 				<div class="flex items-center gap-3">
-					@ThemeToggle()
-					<h5>fixed top-right on all pages · localStorage key: theme</h5>
+					@shell.ThemeToggle()
+					<h5>sidebar footer toggle · localStorage key: theme</h5>
 				</div>
 			}
 			@workshopSection("Label + Select") {
@@ -312,13 +358,6 @@ templ WorkshopPage() {
 						<option>English</option>
 						<option>Bahasa Indonesia</option>
 					</select>
-				</div>
-			}
-			@workshopSection("FAB") {
-				<div class="flex items-center gap-3">
-					<div class="size-[3.25rem] rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(191,9,47,0.5)]">
-						@icons.Plus(templ.Attributes{"class": "size-6"})
-					</div>
 				</div>
 			}
 		</div>

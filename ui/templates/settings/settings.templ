@@ -1,16 +1,17 @@
-package templates
+package settingstpl
 
 import (
-	"picomaju/internal/settings"
+	internalsettings "picomaju/internal/settings"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/templates/shell"
 )
 
-templ SettingsPage(cfg *settings.Settings, activeDataDir string, nd NavData, saved bool, formErr string) {
-	@AppLayout("Settings", nd, emptySidebarNav()) {
-		@pageHeader("Settings")
+templ SettingsPage(cfg *internalsettings.Settings, activeDataDir string, nd shell.NavData, saved bool, formErr string) {
+	@shell.AppLayout("Settings", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader("Settings")
 		if saved {
 			@alert.Alert() {
 				@alert.Description() {
@@ -26,20 +27,20 @@ templ SettingsPage(cfg *settings.Settings, activeDataDir string, nd NavData, sav
 			}
 		}
 		<form method="post" action="/settings" class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "business_name"}) {
 					Business name
 				}
 				@input.Input(input.Props{ID: "business_name", Name: "business_name", Value: cfg.BusinessName, Placeholder: "Acme Co."})
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "business_details"}) {
 					Business details
 				}
 				<textarea id="business_details" name="business_details" rows="4" placeholder="Describe your business, tone, key values…">{ cfg.BusinessDetails }</textarea>
 				<p class="text-sm text-muted-foreground">Used to personalise agent context across all staff profiles.</p>
 			}
-			@field() {
+			@shell.Field() {
 				@label.Label(label.Props{For: "data_dir"}) {
 					Data directory
 				}
