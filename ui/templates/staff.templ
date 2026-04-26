@@ -14,28 +14,26 @@ import (
 
 // ─── Staff list (home page at /) ─────────────────────────────────────────────
 templ StaffListPage(members []staff.Staff, nd NavData) {
-	@AppLayout("Staff", nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader("Staff") {
-				@button.Button(button.Props{Href: "/staff/new", Size: button.SizeSm}) {
-					New Staff
+	@AppLayout("Staff", nd, emptySidebarNav()) {
+		@pageHeader("Staff") {
+			@button.Button(button.Props{Href: "/staff/new", Size: button.SizeSm}) {
+				New Staff
+			}
+		}
+		if len(members) == 0 {
+			@emptyState(
+				"No staff profiles",
+				"A staff profile is an agent that represents a person or role — like a receptionist or billing clerk.",
+				"/staff/new",
+				"Create your first staff",
+			)
+		} else {
+			<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
+				for _, m := range members {
+					@staffRow(m)
 				}
-			}
-			if len(members) == 0 {
-				@emptyState(
-					"No staff profiles",
-					"A staff profile is an agent that represents a person or role — like a receptionist or billing clerk.",
-					"/staff/new",
-					"Create your first staff",
-				)
-			} else {
-				<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
-					for _, m := range members {
-						@staffRow(m)
-					}
-				</div>
-			}
-		</div>
+			</div>
+		}
 	}
 }
 
@@ -67,41 +65,37 @@ templ staffRow(m staff.Staff) {
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
 templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd NavData, section string, formErr string) {
-	@AppLayout(m.Label, nd) {
-		@SidebarLayout("Staff", staffSidebarNav(m, section)) {
-			<div class="flex-1 max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
-				<div class="flex items-center gap-3">
-					<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
-						@staffIcon(m.Icon, m.Label)
-					</div>
-					<h3 class="font-brand font-bold text-foreground">{ m.Label }</h3>
-				</div>
-				if formErr != "" {
-					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
-						@alert.Description() {
-							{ formErr }
-						}
-					}
-				}
-				switch section {
-					case "profile":
-						@staffProfileSection(m)
-					case "values":
-						@staffValuesSection(m, values, cats)
-					case "tools":
-						@staffToolsSection(m, tasks, tools)
-					case "tasks":
-						@staffTasksSection(m, tasks)
-					default:
-						@staffOverviewSection(m, tasks, tools)
-				}
+	@AppLayout(m.Label, nd, staffSidebarNav(m, section)) {
+		<div class="flex items-center gap-3">
+			<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+				@staffIcon(m.Icon, m.Label)
 			</div>
+			<h3 class="font-brand font-bold text-foreground">{ m.Label }</h3>
+		</div>
+		if formErr != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@alert.Description() {
+					{ formErr }
+				}
+			}
+		}
+		switch section {
+			case "profile":
+				@staffProfileSection(m)
+			case "values":
+				@staffValuesSection(m, values, cats)
+			case "tools":
+				@staffToolsSection(m, tasks, tools)
+			case "tasks":
+				@staffTasksSection(m, tasks)
+			default:
+				@staffOverviewSection(m, tasks, tools)
 		}
 	}
 }
 
 templ staffSidebarNav(m *staff.Staff, section string) {
-	<nav class="flex flex-col gap-0.5 py-2 flex-1">
+	<nav class="flex flex-col gap-2 py-2 flex-1">
 		@SidebarItem("/staff/"+m.ID+"?s=overview", "Overview", "overview", section) {
 			@icons.LayoutDashboard(templ.Attributes{"class": "size-4"})
 		}
@@ -118,7 +112,7 @@ templ staffSidebarNav(m *staff.Staff, section string) {
 			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
 		}
 	</nav>
-	<div class="py-2 border-t border-border shrink-0">
+	<div class="py-2 border-t border-sidebar-border shrink-0">
 		@SidebarItem("/", "All Staff", "", section) {
 			@icons.ArrowLeft(templ.Attributes{"class": "size-4"})
 		}
@@ -319,53 +313,51 @@ templ staffTasksSection(m *staff.Staff, tasks []task.Task) {
 
 // ─── New staff form (/staff/new) ──────────────────────────────────────────────
 templ StaffFormPage(m *staff.Staff, nd NavData, formErr string) {
-	@AppLayout("New Staff", nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader("New Staff") {
-				@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeSm}) {
-					Cancel
+	@AppLayout("New Staff", nd, emptySidebarNav()) {
+		@pageHeader("New Staff") {
+			@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeSm}) {
+				Cancel
+			}
+		}
+		if formErr != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@alert.Description() {
+					{ formErr }
 				}
 			}
-			if formErr != "" {
-				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
-					@alert.Description() {
-						{ formErr }
+		}
+		<form method="post" action="/staff" class="flex flex-col gap-5">
+			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+				@field() {
+					@label.Label(label.Props{For: "id"}) {
+						ID
 					}
+					@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Placeholder: "support_agent", Required: true})
 				}
+				@field() {
+					@label.Label(label.Props{For: "staff-label"}) {
+						Label
+					}
+					@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
+				}
+				@field() {
+					@label.Label(label.Props{For: "staff-description"}) {
+						Description
+					}
+					@input.Input(input.Props{ID: "staff-description", Name: "description", Value: m.Description, Placeholder: "Handles customer support and inquiries"})
+				}
+			</div>
+			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
+				<div class="flex flex-col gap-0.5">
+					<span class="text-sm font-medium text-foreground">Icon</span>
+					<p class="text-xs text-muted-foreground">Represents this staff member across the app.</p>
+				</div>
+				@staffIconPicker(m.Icon, m.Label)
+			</div>
+			@button.Button(button.Props{Type: button.TypeSubmit}) {
+				Create
 			}
-			<form method="post" action="/staff" class="flex flex-col gap-5">
-				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-					@field() {
-						@label.Label(label.Props{For: "id"}) {
-							ID
-						}
-						@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Placeholder: "support_agent", Required: true})
-					}
-					@field() {
-						@label.Label(label.Props{For: "staff-label"}) {
-							Label
-						}
-						@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
-					}
-					@field() {
-						@label.Label(label.Props{For: "staff-description"}) {
-							Description
-						}
-						@input.Input(input.Props{ID: "staff-description", Name: "description", Value: m.Description, Placeholder: "Handles customer support and inquiries"})
-					}
-				</div>
-				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
-					<div class="flex flex-col gap-0.5">
-						<span class="text-sm font-medium text-foreground">Icon</span>
-						<p class="text-xs text-muted-foreground">Represents this staff member across the app.</p>
-					</div>
-					@staffIconPicker(m.Icon, m.Label)
-				</div>
-				@button.Button(button.Props{Type: button.TypeSubmit}) {
-					Create
-				}
-			</form>
-		</div>
+		</form>
 	}
 }
 

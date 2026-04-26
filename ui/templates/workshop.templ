@@ -314,76 +314,10 @@ templ WorkshopPage() {
 					</select>
 				</div>
 			}
-			@workshopSection("Nav Shell") {
-				<div class="flex flex-col gap-6">
-					<div class="flex flex-col gap-2">
-						<h5>top nav — home active</h5>
-						<div class="relative overflow-hidden rounded-lg border border-border" style="height: var(--topnav-h)">
-							<div class="absolute inset-0 bg-sidebar text-sidebar-foreground flex items-center px-4 gap-4">
-								<div class="flex items-center gap-2.5 flex-1 min-w-0">
-									<div class="size-[1.875rem] shrink-0 rounded-md bg-primary text-primary-foreground font-brand font-bold text-xs flex items-center justify-center tracking-wide select-none">AC</div>
-									<span class="text-sm font-brand font-semibold text-sidebar-foreground/90 truncate">Acme Co.</span>
-								</div>
-								<nav class="flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
-									<span class="px-3 py-1.5 rounded-md text-sm font-ui text-sidebar-foreground bg-sidebar-accent">Home</span>
-									<span class="px-3 py-1.5 rounded-md text-sm font-ui text-sidebar-foreground/60">Values</span>
-									<span class="px-3 py-1.5 rounded-md text-sm font-ui text-sidebar-foreground/60">Tools</span>
-									<span class="px-3 py-1.5 rounded-md text-sm font-ui text-sidebar-foreground/60">Tasks</span>
-									<span class="px-3 py-1.5 rounded-md text-sm font-ui text-sidebar-foreground/60">Staff</span>
-								</nav>
-								<div class="flex items-center gap-1">
-									@ThemeToggleInline()
-									<div class="inline-flex size-9 items-center justify-center rounded-md text-sidebar-foreground/60">
-										@icons.Settings(templ.Attributes{"class": "size-4"})
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="flex flex-col gap-2">
-						<h5>bottom tab bar — values active</h5>
-						<div class="relative overflow-hidden rounded-lg border border-border bg-sidebar" style="height: var(--tabbar-h)">
-							<div class="absolute inset-0 grid grid-cols-5">
-								<div class="flex flex-col items-center justify-center gap-1 text-sidebar-foreground/50">
-									<div class="size-5">
-										@tabHomeIcon()
-									</div>
-									<span class="text-[0.625rem] font-mono uppercase tracking-wide">Home</span>
-								</div>
-								<div class="flex flex-col items-center justify-center gap-1 text-primary">
-									<div class="size-5">
-										@tabValuesIcon()
-									</div>
-									<span class="text-[0.625rem] font-mono uppercase tracking-wide">Values</span>
-								</div>
-								<div class="flex flex-col items-center justify-center gap-1 text-sidebar-foreground/50">
-									<div class="size-5">
-										@tabToolsIcon()
-									</div>
-									<span class="text-[0.625rem] font-mono uppercase tracking-wide">Tools</span>
-								</div>
-								<div class="flex flex-col items-center justify-center gap-1 text-sidebar-foreground/50">
-									<div class="size-5">
-										@tabTasksIcon()
-									</div>
-									<span class="text-[0.625rem] font-mono uppercase tracking-wide">Tasks</span>
-								</div>
-								<div class="flex flex-col items-center justify-center gap-1 text-sidebar-foreground/50">
-									<div class="size-5">
-										@tabStaffIcon()
-									</div>
-									<span class="text-[0.625rem] font-mono uppercase tracking-wide">Staff</span>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="flex flex-col gap-2">
-						<h5>FAB — mobile only · per-section create action</h5>
-						<div class="flex items-center gap-3">
-							<div class="size-[3.25rem] rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(191,9,47,0.5)]">
-								@icons.Plus(templ.Attributes{"class": "size-6"})
-							</div>
-						</div>
+			@workshopSection("FAB") {
+				<div class="flex items-center gap-3">
+					<div class="size-[3.25rem] rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(191,9,47,0.5)]">
+						@icons.Plus(templ.Attributes{"class": "size-6"})
 					</div>
 				</div>
 			}

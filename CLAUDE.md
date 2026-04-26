@@ -92,13 +92,23 @@ go build ./internal/... ./web/... .
 
 ## Implementation status
 
-**Done:** Full templui + Tailwind CSS v4 frontend. All screens active: welcome, 3-step onboarding, values (SSE validation), tools, tasks, staff, settings. Mobile-first shell: sticky top nav (4 items), bottom tab bar (4 tabs), per-section FAB. Brand tokens in oklch across light/dark. Theme in `localStorage` key `theme`.
+**Done:** Full templui + Tailwind CSS v4 frontend. All screens active: welcome, 3-step onboarding, values (SSE validation), tools, tasks, staff, settings. Brand tokens in oklch across light/dark. Theme in `localStorage` key `theme`.
 
-**Staff is now the home page (`/`).** Staff list shows as a `rowList`-style view with circular primary-colored avatars, active/inactive badges, and descriptions. Clicking a staff row opens the detail page.
+**Staff is the home page (`/`).** Staff list shows as a `rowList`-style view with circular primary-colored avatars, active/inactive badges, and descriptions. Clicking a staff row opens the detail page.
 
-**Staff detail page** uses `SidebarLayout` with 5 sections: Overview → Profile → Values → Tools → Tasks. The sidebar title shows "Staff" (section label). Member name + avatar renders inline at the top of the main content area. Sidebar state persisted in `localStorage` key `sidebar`.
+**Staff detail page** uses `AppLayout` with `staffSidebarNav` — 5 sidebar sections: Overview → Profile → Values → Tools → Tasks + back link. Member name + avatar renders inline at the top of main content.
 
-**Sidebar (`SidebarLayout` / `SidebarItem` in `shared.templ`)** is a reusable shell for any page. Collapsed = icon-only strip (3.5rem) on both mobile and desktop. Expanded = 14rem with labels. Mobile expand: sidebar becomes `position:absolute` overlay, main content slides right via `translateX`; backdrop tap collapses. Desktop expand: sidebar in normal flex flow, main shrinks. Toggle button sits at the right edge of the sidebar header. `SidebarItem` uses `mx-2 px-1 py-1.5` with icon in a `size-8` container — icon center aligns with toggle button center (both at 28px from sidebar edge).
+**Shell (`AppLayout` in `layout.templ`)** is the single authenticated shell for all pages. Full-height dark sidebar (`bg-sidebar`, `h-dvh`) with no fixed top nav or bottom tab bar. Sidebar contains: business avatar/name (top), page-specific nav (middle), Settings + theme toggle (bottom). Main area has a centered `h-12` in-content nav header (4 links: Staff, Values, Tools, Tasks) and a `max-w-2xl` scrollable content area. No `--topnav-h` or `--tabbar-h` CSS vars.
+
+**Sidebar behavior:**
+- Desktop collapsed: `3.5rem` icon-only. Business avatar hides (`data-sidebar-label`), toggle button (`PanelLeft`) stays visible at 28px center. Toggle is `hidden sm:flex` inside sidebar header.
+- Desktop expanded: `14rem` with labels.
+- Mobile collapsed: `width: 0` (fully hidden). `PanelLeft` toggle in content header (`flex sm:hidden`).
+- Mobile expanded: `position: absolute` overlay, main slides right via `translateX`. Backdrop tap to close.
+- `localStorage` key: `"sidebar"`. Default: closed on mobile, open on desktop.
+- `SidebarItem` uses `mx-2 px-1 py-0.5` with icon in `size-8` container. Icon center at 28px from edge (same as toggle). Colors: `text-sidebar-foreground/60` inactive, `bg-sidebar-accent text-sidebar-foreground` active.
+
+**Signature:** `AppLayout(title string, nd NavData, nav templ.Component)`. Pass `emptySidebarNav()` for pages without sidebar nav.
 
 **Done (legacy `/web` frontend, reference only):** Welcome + onboarding, dashboard, all CRUD sections, collapsible sidebar, full CSS token system, DTCG token file at `design/tokens.json`.
 
@@ -108,9 +118,10 @@ go build ./internal/... ./web/... .
 
 - **Checkboxes** are `sr-only` sitewide. The wrapping `<label>` card acts as the visual toggle via `has-[:checked]:border-primary has-[:checked]:bg-primary/5`.
 - **Dropdowns/popovers** use `bg-popover` which equals `--background` (not `--card`) in both light and dark modes.
-- **Active sidebar items** use `bg-muted text-foreground` — same as hover, no primary color.
+- **Active sidebar items** use `bg-sidebar-accent text-sidebar-foreground` (dark sidebar tokens, not muted).
 - **Staff avatars** are `size-9 rounded-full bg-primary text-primary-foreground`.
 - **Icon picker** is a popup dropdown (button trigger + `data-icon-panel` div). 28 Lucide icons + initials fallback. Selected state shown in the trigger circle preview.
+- **Content width** is `max-w-2xl` across all authenticated pages — set in AppLayout, not per-page.
 
 ## New frontend — token notes
 

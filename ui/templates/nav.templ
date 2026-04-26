@@ -9,85 +9,20 @@ import (
 // NavData holds data for the authenticated app shell.
 type NavData struct {
 	BusinessName  string
-	ActiveSection string // "home" | "values" | "tools" | "tasks" | "staff"
+	ActiveSection string // "staff" | "values" | "tools" | "tasks" | "settings" | ""
 }
 
-// AppTopNav renders the sticky dark nav header.
-templ AppTopNav(nd NavData) {
-	<header class="fixed top-0 inset-x-0 z-[100] h-[var(--topnav-h)] bg-sidebar text-sidebar-foreground flex items-center px-4 gap-4">
-		<div class="flex items-center gap-2.5 flex-1 min-w-0">
-			<div class="size-[1.875rem] shrink-0 rounded-md bg-primary text-primary-foreground font-brand font-bold text-xs flex items-center justify-center tracking-wide select-none">
-				{ navInitials(nd.BusinessName) }
-			</div>
-			<span class="hidden sm:block text-sm font-brand font-semibold text-sidebar-foreground/90 truncate">
-				if nd.BusinessName != "" {
-					{ nd.BusinessName }
-				} else {
-					PicoMaju
-				}
-			</span>
-		</div>
-		<nav class="hidden sm:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2" aria-label="Primary">
-			@appNavLink("/", "Staff", nd.ActiveSection == "staff")
-			@appNavLink("/values", "Values", nd.ActiveSection == "values")
-			@appNavLink("/tools", "Tools", nd.ActiveSection == "tools")
-			@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks")
-		</nav>
-		<div class="flex items-center gap-1">
-			@ThemeToggleInline()
-			<a
-				href="/settings"
-				class="inline-flex size-9 items-center justify-center rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-				aria-label="Settings"
-			>
-				@icons.Settings(templ.Attributes{"class": "size-4"})
-			</a>
-		</div>
-	</header>
-}
-
+// appNavLink renders a single nav link in the in-content header.
 templ appNavLink(href, label string, active bool) {
 	<a
 		href={ templ.SafeURL(href) }
 		class={
 			"px-3 py-1.5 rounded-md text-sm font-ui transition-colors",
-			templ.KV("text-sidebar-foreground bg-sidebar-accent", active),
-			templ.KV("text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50", !active),
+			templ.KV("text-foreground bg-muted font-medium", active),
+			templ.KV("text-muted-foreground hover:text-foreground hover:bg-muted", !active),
 		}
 	>
 		{ label }
-	</a>
-}
-
-// AppBottomTabBar renders the mobile fixed bottom tab bar.
-templ AppBottomTabBar(nd NavData) {
-	<nav
-		class="fixed bottom-0 inset-x-0 sm:hidden z-[100] bg-sidebar border-t border-sidebar-border"
-		aria-label="Primary"
-		style="padding-bottom: env(safe-area-inset-bottom)"
-	>
-		<div class="grid grid-cols-4 h-[var(--tabbar-h)]">
-			@appTab("/", tabStaffIcon(), "Staff", nd.ActiveSection == "staff")
-			@appTab("/values", tabValuesIcon(), "Values", nd.ActiveSection == "values")
-			@appTab("/tools", tabToolsIcon(), "Tools", nd.ActiveSection == "tools")
-			@appTab("/tasks", tabTasksIcon(), "Tasks", nd.ActiveSection == "tasks")
-		</div>
-	</nav>
-}
-
-templ appTab(href string, icon templ.Component, label string, active bool) {
-	<a
-		href={ templ.SafeURL(href) }
-		class={
-			"flex flex-col items-center justify-center gap-1 transition-colors",
-			templ.KV("text-primary", active),
-			templ.KV("text-sidebar-foreground/50 hover:text-sidebar-foreground/80", !active),
-		}
-	>
-		<div class="size-5">
-			@icon
-		</div>
-		<span class="text-[0.625rem] font-mono uppercase tracking-wide">{ label }</span>
 	</a>
 }
 
@@ -110,62 +45,10 @@ templ appFABLink(href, label string) {
 		href={ templ.SafeURL(href) }
 		aria-label={ label }
 		class="fixed sm:hidden z-[199] size-[3.25rem] rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(191,9,47,0.5)] transition-transform active:scale-95"
-		style="bottom: calc(var(--tabbar-h) + 1rem); right: 1rem"
+		style="bottom: 1rem; right: 1rem"
 	>
 		@icons.Plus(templ.Attributes{"class": "size-6"})
 	</a>
-}
-
-// ThemeToggleInline is the theme toggle for use inside nav (no fixed positioning).
-templ ThemeToggleInline() {
-	<button
-		class="inline-flex size-9 items-center justify-center rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
-		aria-label="Toggle theme"
-		onclick="var d=document.documentElement,dark=d.classList.toggle('dark');localStorage.setItem('theme',dark?'dark':'light');this.setAttribute('aria-pressed',dark?'true':'false');"
-	>
-		<svg class="block dark:hidden size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-			<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-		</svg>
-		<svg class="hidden dark:block size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-			<circle cx="12" cy="12" r="4"></circle>
-			<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-		</svg>
-	</button>
-}
-
-// ─── Tab bar icon glyphs ──────────────────────────────────────────────────────
-templ tabHomeIcon() {
-	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-full">
-		<path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"></path>
-		<path d="M9 21V12h6v9"></path>
-	</svg>
-}
-
-templ tabValuesIcon() {
-	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-full">
-		<path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.3 6.8 19l1-5.8-4.2-4.1 5.8-.8L12 3z"></path>
-	</svg>
-}
-
-templ tabToolsIcon() {
-	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-full">
-		<path d="M14.7 6.3a4 4 0 105.7 5.7l-2.8-2.8 1.4-1.4 2.8 2.8a6 6 0 11-8.5-8.5l2.8 2.8-1.4 1.4z"></path>
-		<path d="M3 21l7.5-7.5"></path>
-	</svg>
-}
-
-templ tabTasksIcon() {
-	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-full">
-		<rect x="4" y="4" width="16" height="16" rx="3"></rect>
-		<path d="M8 12l3 3 5-6"></path>
-	</svg>
-}
-
-templ tabStaffIcon() {
-	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-full">
-		<circle cx="12" cy="8" r="3.5"></circle>
-		<path d="M4.5 20c.8-3.8 4-6 7.5-6s6.7 2.2 7.5 6"></path>
-	</svg>
 }
 
 // navInitials returns up to 2 uppercase letters from a business name.
@@ -192,4 +75,3 @@ func navInitials(name string) string {
 	}
 	return string(out)
 }
-

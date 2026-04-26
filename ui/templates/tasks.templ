@@ -10,104 +10,100 @@ import (
 )
 
 templ TaskListPage(tasks []task.Task, nd NavData) {
-	@AppLayout("Tasks", nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader("Tasks") {
-				@button.Button(button.Props{Href: "/tasks/new", Size: button.SizeSm}) {
-					New Task
-				}
+	@AppLayout("Tasks", nd, emptySidebarNav()) {
+		@pageHeader("Tasks") {
+			@button.Button(button.Props{Href: "/tasks/new", Size: button.SizeSm}) {
+				New Task
 			}
-			if len(tasks) == 0 {
-				@emptyState(
-					"No tasks defined",
-					"Tasks are playbooks — a sequence of steps a staff profile can carry out end-to-end.",
-					"/tasks/new",
-					"Create your first task",
-				)
-			} else {
-				@rowList() {
-					for _, t := range tasks {
-						@rowItem() {
-							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
-								<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
-								if t.Description != "" {
-									<span class="text-xs text-muted-foreground truncate">{ t.Description }</span>
-								}
-							</div>
-							<span class="hidden sm:block text-xs text-muted-foreground font-mono shrink-0">{ countWord(len(t.Tools), "tool", "tools") }</span>
-							@rowActions("/tasks/"+t.ID+"/edit", "/tasks/"+t.ID+"/delete", "task")
-						}
+		}
+		if len(tasks) == 0 {
+			@emptyState(
+				"No tasks defined",
+				"Tasks are playbooks — a sequence of steps a staff profile can carry out end-to-end.",
+				"/tasks/new",
+				"Create your first task",
+			)
+		} else {
+			@rowList() {
+				for _, t := range tasks {
+					@rowItem() {
+						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+							<span class="text-sm font-brand font-semibold text-foreground truncate">{ t.Label }</span>
+							if t.Description != "" {
+								<span class="text-xs text-muted-foreground truncate">{ t.Description }</span>
+							}
+						</div>
+						<span class="hidden sm:block text-xs text-muted-foreground font-mono shrink-0">{ countWord(len(t.Tools), "tool", "tools") }</span>
+						@rowActions("/tasks/"+t.ID+"/edit", "/tasks/"+t.ID+"/delete", "task")
 					}
 				}
 			}
-		</div>
+		}
 	}
 }
 
 templ TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, formErr string) {
-	@AppLayout(formTitle("Task", isNew), nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader(formTitle("Task", isNew)) {
-				@button.Button(button.Props{Href: "/tasks", Variant: button.VariantGhost, Size: button.SizeSm}) {
-					Cancel
+	@AppLayout(formTitle("Task", isNew), nd, emptySidebarNav()) {
+		@pageHeader(formTitle("Task", isNew)) {
+			@button.Button(button.Props{Href: "/tasks", Variant: button.VariantGhost, Size: button.SizeSm}) {
+				Cancel
+			}
+		}
+		if formErr != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@alert.Description() {
+					{ formErr }
 				}
 			}
-			if formErr != "" {
-				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
-					@alert.Description() {
-						{ formErr }
+		}
+		<form method="post" action={ templ.SafeURL(formAction("/tasks", t.ID, isNew)) } class="flex flex-col gap-5">
+			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+				@field() {
+					@label.Label(label.Props{For: "id"}) {
+						ID
+					}
+					if isNew {
+						@input.Input(input.Props{ID: "id", Name: "id", Value: t.ID, Placeholder: "manage_social_media", Required: true})
+					} else {
+						@input.Input(input.Props{ID: "id", Name: "id", Value: t.ID, Disabled: true})
 					}
 				}
-			}
-			<form method="post" action={ templ.SafeURL(formAction("/tasks", t.ID, isNew)) } class="flex flex-col gap-5">
-				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-					@field() {
-						@label.Label(label.Props{For: "id"}) {
-							ID
-						}
-						if isNew {
-							@input.Input(input.Props{ID: "id", Name: "id", Value: t.ID, Placeholder: "manage_social_media", Required: true})
-						} else {
-							@input.Input(input.Props{ID: "id", Name: "id", Value: t.ID, Disabled: true})
-						}
+				@field() {
+					@label.Label(label.Props{For: "task-label"}) {
+						Label
 					}
-					@field() {
-						@label.Label(label.Props{For: "task-label"}) {
-							Label
-						}
-						@input.Input(input.Props{ID: "task-label", Name: "label", Value: t.Label, Placeholder: "Manage Social Media", Required: true})
+					@input.Input(input.Props{ID: "task-label", Name: "label", Value: t.Label, Placeholder: "Manage Social Media", Required: true})
+				}
+				@field() {
+					@label.Label(label.Props{For: "description"}) {
+						Description
 					}
-					@field() {
-						@label.Label(label.Props{For: "description"}) {
-							Description
+					<textarea id="description" name="description" rows="4" placeholder="What this task does…">{ t.Description }</textarea>
+				}
+			</div>
+			if len(tools) > 0 {
+				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
+					<h5>Tools</h5>
+					<div class="flex flex-col gap-2">
+						for _, tl := range tools {
+							<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+								<input
+									type="checkbox"
+									name="tools"
+									value={ tl.ID }
+									checked?={ includesStr(t.Tools, tl.ID) }
+									class="sr-only"
+								/>
+								<span class="flex-1 text-sm font-brand font-semibold text-foreground">{ tl.Label }</span>
+								@badge(tl.Type)
+							</label>
 						}
-						<textarea id="description" name="description" rows="4" placeholder="What this task does…">{ t.Description }</textarea>
-					}
-				</div>
-				if len(tools) > 0 {
-					<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
-						<h5>Tools</h5>
-						<div class="flex flex-col gap-2">
-							for _, tl := range tools {
-								<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-									<input
-										type="checkbox"
-										name="tools"
-										value={ tl.ID }
-										checked?={ includesStr(t.Tools, tl.ID) }
-										class="sr-only"
-									/>
-									<span class="flex-1 text-sm font-brand font-semibold text-foreground">{ tl.Label }</span>
-									@badge(tl.Type)
-								</label>
-							}
-						</div>
 					</div>
-				}
-				@button.Button(button.Props{Type: button.TypeSubmit}) {
-					Save
-				}
-			</form>
-		</div>
+				</div>
+			}
+			@button.Button(button.Props{Type: button.TypeSubmit}) {
+				Save
+			}
+		</form>
 	}
 }

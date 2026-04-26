@@ -9,50 +9,48 @@ import (
 )
 
 templ SettingsPage(cfg *settings.Settings, activeDataDir string, nd NavData, saved bool, formErr string) {
-	@AppLayout("Settings", nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader("Settings")
-			if saved {
-				@alert.Alert() {
-					@alert.Description() {
-						Settings saved.
-					}
+	@AppLayout("Settings", nd, emptySidebarNav()) {
+		@pageHeader("Settings")
+		if saved {
+			@alert.Alert() {
+				@alert.Description() {
+					Settings saved.
 				}
 			}
-			if formErr != "" {
-				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
-					@alert.Description() {
-						{ formErr }
-					}
+		}
+		if formErr != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@alert.Description() {
+					{ formErr }
 				}
 			}
-			<form method="post" action="/settings" class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-				@field() {
-					@label.Label(label.Props{For: "business_name"}) {
-						Business name
-					}
-					@input.Input(input.Props{ID: "business_name", Name: "business_name", Value: cfg.BusinessName, Placeholder: "Acme Co."})
+		}
+		<form method="post" action="/settings" class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+			@field() {
+				@label.Label(label.Props{For: "business_name"}) {
+					Business name
 				}
-				@field() {
-					@label.Label(label.Props{For: "business_details"}) {
-						Business details
-					}
-					<textarea id="business_details" name="business_details" rows="4" placeholder="Describe your business, tone, key values…">{ cfg.BusinessDetails }</textarea>
-					<p class="text-sm text-muted-foreground">Used to personalise agent context across all staff profiles.</p>
+				@input.Input(input.Props{ID: "business_name", Name: "business_name", Value: cfg.BusinessName, Placeholder: "Acme Co."})
+			}
+			@field() {
+				@label.Label(label.Props{For: "business_details"}) {
+					Business details
 				}
-				@field() {
-					@label.Label(label.Props{For: "data_dir"}) {
-						Data directory
-					}
-					@input.Input(input.Props{ID: "data_dir", Name: "data_dir", Value: cfg.DataDir, Placeholder: activeDataDir})
-					<p class="text-sm text-muted-foreground">
-						Active: <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">{ activeDataDir }</code>. Existing data will not be moved if you change this.
-					</p>
+				<textarea id="business_details" name="business_details" rows="4" placeholder="Describe your business, tone, key values…">{ cfg.BusinessDetails }</textarea>
+				<p class="text-sm text-muted-foreground">Used to personalise agent context across all staff profiles.</p>
+			}
+			@field() {
+				@label.Label(label.Props{For: "data_dir"}) {
+					Data directory
 				}
-				@button.Button(button.Props{Type: button.TypeSubmit}) {
-					Save
-				}
-			</form>
-		</div>
+				@input.Input(input.Props{ID: "data_dir", Name: "data_dir", Value: cfg.DataDir, Placeholder: activeDataDir})
+				<p class="text-sm text-muted-foreground">
+					Active: <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">{ activeDataDir }</code>. Existing data will not be moved if you change this.
+				</p>
+			}
+			@button.Button(button.Props{Type: button.TypeSubmit}) {
+				Save
+			}
+		</form>
 	}
 }

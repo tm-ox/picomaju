@@ -45,8 +45,6 @@
 
 :root {
     --radius: 0.65rem;
-    --topnav-h: 3.25rem;
-    --tabbar-h: 4.25rem;
     /* #f4f7fa — blue-tinted off-white page bg */
     --background: oklch(0.972 0.006 240);
     /* #0f1f38 — dark navy text */

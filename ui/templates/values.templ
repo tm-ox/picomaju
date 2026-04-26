@@ -10,128 +10,124 @@ import (
 )
 
 templ ValueListPage(values []*value.Value, cats []value.Category, nd NavData, activeCat string) {
-	@AppLayout("Values", nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader(func() string {
-				if activeCat != "" {
-					return categoryLabel(cats, activeCat)
-				}
-				return "Values"
-			}()) {
-				@button.Button(button.Props{Href: "/values/new", Size: button.SizeSm}) {
-					New Value
-				}
+	@AppLayout("Values", nd, emptySidebarNav()) {
+		@pageHeader(func() string {
+			if activeCat != "" {
+				return categoryLabel(cats, activeCat)
 			}
-			if len(values) == 0 {
-				@emptyState(
-					"No values yet",
-					"Values are rules your AI agents follow — tone, do's, don'ts, escalation triggers.",
-					"/values/new",
-					"Create your first value",
-				)
-			} else {
-				@rowList() {
-					for _, v := range values {
-						@rowItem() {
-							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
-								<span class="text-sm font-brand font-semibold text-foreground truncate">{ v.Title }</span>
-								<span class="text-xs text-muted-foreground font-mono">{ v.ID }</span>
-							</div>
-							<div class="hidden sm:flex items-center gap-2 shrink-0">
-								@badge(categoryLabel(cats, v.Category))
-								<span class="text-xs text-muted-foreground font-mono">p{ fmt.Sprintf("%d", v.Priority) }</span>
-							</div>
-							@rowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
-						}
+			return "Values"
+		}()) {
+			@button.Button(button.Props{Href: "/values/new", Size: button.SizeSm}) {
+				New Value
+			}
+		}
+		if len(values) == 0 {
+			@emptyState(
+				"No values yet",
+				"Values are rules your AI agents follow — tone, do's, don'ts, escalation triggers.",
+				"/values/new",
+				"Create your first value",
+			)
+		} else {
+			@rowList() {
+				for _, v := range values {
+					@rowItem() {
+						<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+							<span class="text-sm font-brand font-semibold text-foreground truncate">{ v.Title }</span>
+							<span class="text-xs text-muted-foreground font-mono">{ v.ID }</span>
+						</div>
+						<div class="hidden sm:flex items-center gap-2 shrink-0">
+							@badge(categoryLabel(cats, v.Category))
+							<span class="text-xs text-muted-foreground font-mono">p{ fmt.Sprintf("%d", v.Priority) }</span>
+						</div>
+						@rowActions("/values/"+v.ID+"/edit", "/values/"+v.ID+"/delete", "value")
 					}
 				}
 			}
-		</div>
+		}
 	}
 }
 
 templ ValueFormPage(v *value.Value, cats []value.Category, nd NavData, isNew bool, formErr string) {
-	@AppLayout(formTitle("Value", isNew), nd) {
-		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader(formTitle("Value", isNew)) {
-				@button.Button(button.Props{Href: "/values", Variant: button.VariantGhost, Size: button.SizeSm}) {
-					Cancel
+	@AppLayout(formTitle("Value", isNew), nd, emptySidebarNav()) {
+		@pageHeader(formTitle("Value", isNew)) {
+			@button.Button(button.Props{Href: "/values", Variant: button.VariantGhost, Size: button.SizeSm}) {
+				Cancel
+			}
+		}
+		if formErr != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@alert.Description() {
+					{ formErr }
 				}
 			}
-			if formErr != "" {
-				@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
-					@alert.Description() {
-						{ formErr }
-					}
+		}
+		<form method="post" action={ templ.SafeURL(formAction("/values", v.ID, isNew)) } class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+			@field() {
+				@label.Label(label.Props{For: "id"}) {
+					ID
+				}
+				if isNew {
+					@input.Input(input.Props{ID: "id", Name: "id", Value: v.ID, Placeholder: "tone_of_voice", Required: true})
+				} else {
+					@input.Input(input.Props{ID: "id", Name: "id", Value: v.ID, Disabled: true})
 				}
 			}
-			<form method="post" action={ templ.SafeURL(formAction("/values", v.ID, isNew)) } class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-				@field() {
-					@label.Label(label.Props{For: "id"}) {
-						ID
-					}
-					if isNew {
-						@input.Input(input.Props{ID: "id", Name: "id", Value: v.ID, Placeholder: "tone_of_voice", Required: true})
-					} else {
-						@input.Input(input.Props{ID: "id", Name: "id", Value: v.ID, Disabled: true})
-					}
+			@field() {
+				@label.Label(label.Props{For: "title"}) {
+					Title
 				}
-				@field() {
-					@label.Label(label.Props{For: "title"}) {
-						Title
-					}
-					@input.Input(input.Props{ID: "title", Name: "title", Value: v.Title, Required: true})
-				}
-				@field() {
-					@label.Label(label.Props{For: "category"}) {
-						Category
-					}
-					<select id="category" name="category" required>
-						<option value="">— select —</option>
-						for _, c := range cats {
-							<option value={ c.ID } selected?={ v.Category == c.ID }>{ c.Label }</option>
-						}
-					</select>
-				}
-				@field() {
-					@label.Label(label.Props{For: "version"}) {
-						Version
-					}
-					@input.Input(input.Props{ID: "version", Name: "version", Value: fmt.Sprintf("%d", v.Version), Type: "number", Required: true, Attributes: templ.Attributes{"min": "1"}})
-				}
-				@field() {
-					@label.Label(label.Props{For: "priority"}) {
-						Priority (0–100)
-					}
-					@input.Input(input.Props{ID: "priority", Name: "priority", Value: fmt.Sprintf("%d", v.Priority), Type: "number", Required: true, Attributes: templ.Attributes{"min": "0", "max": "100"}})
-				}
-				@field() {
-					@label.Label(label.Props{For: "body"}) {
-						Directive
-					}
-					<textarea id="body" name="body" rows="8">{ v.Body }</textarea>
-				}
-				<div class="flex items-center gap-3 pt-1">
-					@button.Button(button.Props{Type: button.TypeSubmit}) {
-						Save
-					}
-					if !isNew {
-						@button.Button(button.Props{
-							Type:    button.TypeButton,
-							Variant: button.VariantOutline,
-							Attributes: templ.Attributes{
-								"data-on-click": fmt.Sprintf("@post('/values/%s/validate-stream')", v.ID),
-							},
-						}) {
-							Validate
-						}
-					}
-				</div>
-			</form>
-			if !isNew {
-				<div id="validation-result"></div>
+				@input.Input(input.Props{ID: "title", Name: "title", Value: v.Title, Required: true})
 			}
-		</div>
+			@field() {
+				@label.Label(label.Props{For: "category"}) {
+					Category
+				}
+				<select id="category" name="category" required>
+					<option value="">— select —</option>
+					for _, c := range cats {
+						<option value={ c.ID } selected?={ v.Category == c.ID }>{ c.Label }</option>
+					}
+				</select>
+			}
+			@field() {
+				@label.Label(label.Props{For: "version"}) {
+					Version
+				}
+				@input.Input(input.Props{ID: "version", Name: "version", Value: fmt.Sprintf("%d", v.Version), Type: "number", Required: true, Attributes: templ.Attributes{"min": "1"}})
+			}
+			@field() {
+				@label.Label(label.Props{For: "priority"}) {
+					Priority (0–100)
+				}
+				@input.Input(input.Props{ID: "priority", Name: "priority", Value: fmt.Sprintf("%d", v.Priority), Type: "number", Required: true, Attributes: templ.Attributes{"min": "0", "max": "100"}})
+			}
+			@field() {
+				@label.Label(label.Props{For: "body"}) {
+					Directive
+				}
+				<textarea id="body" name="body" rows="8">{ v.Body }</textarea>
+			}
+			<div class="flex items-center gap-3 pt-1">
+				@button.Button(button.Props{Type: button.TypeSubmit}) {
+					Save
+				}
+				if !isNew {
+					@button.Button(button.Props{
+						Type:    button.TypeButton,
+						Variant: button.VariantOutline,
+						Attributes: templ.Attributes{
+							"data-on-click": fmt.Sprintf("@post('/values/%s/validate-stream')", v.ID),
+						},
+					}) {
+						Validate
+					}
+				}
+			</div>
+		</form>
+		if !isNew {
+			<div id="validation-result"></div>
+		}
 	}
 }
 
