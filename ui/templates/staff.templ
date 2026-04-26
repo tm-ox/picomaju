@@ -14,7 +14,7 @@ import (
 
 // ─── Staff list (home page at /) ─────────────────────────────────────────────
 templ StaffListPage(members []staff.Staff, nd NavData) {
-	@AppLayout("Staff", nd, emptySidebarNav()) {
+	@AppLayout("Staff", nd, staffListSidebarNav(members)) {
 		@pageHeader("Staff") {
 			@button.Button(button.Props{Href: "/staff/new", Size: button.SizeSm}) {
 				New Staff
@@ -28,39 +28,52 @@ templ StaffListPage(members []staff.Staff, nd NavData) {
 				"Create your first staff",
 			)
 		} else {
-			<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
-				for _, m := range members {
-					@staffRow(m)
-				}
-			</div>
+			@staffDashboard(members)
 		}
 	}
 }
 
-templ staffRow(m staff.Staff) {
-	<a href={ templ.SafeURL("/staff/" + m.ID) } class="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors">
-		<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
-			@staffIcon(m.Icon, m.Label)
-		</div>
-		<div class="flex-1 min-w-0 flex flex-col gap-0.5">
-			<div class="flex items-center gap-2">
-				<span class="text-sm font-brand font-semibold text-foreground truncate">{ m.Label }</span>
-				if m.Active {
-					<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400">Active</span>
-				} else {
-					<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-muted text-muted-foreground">Inactive</span>
-				}
-			</div>
-			if m.Description != "" {
-				<span class="text-xs text-muted-foreground truncate">{ m.Description }</span>
+templ staffListSidebarNav(members []staff.Staff) {
+	<nav class="flex flex-col gap-2 py-2 flex-1">
+		for _, m := range members {
+			@SidebarItem("/staff/"+m.ID, m.Label, m.ID, "") {
+				<div class="size-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-[0.625rem]">
+					@staffIcon(m.Icon, m.Label)
+				</div>
 			}
-		</div>
-		<div class="hidden sm:flex items-center gap-3 text-xs text-muted-foreground font-mono shrink-0">
-			<span>{ countWord(len(m.Tasks), "task", "tasks") }</span>
-			<span>{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
-		</div>
-		@icons.ChevronRight(templ.Attributes{"class": "size-4 text-muted-foreground shrink-0"})
-	</a>
+		}
+	</nav>
+}
+
+templ staffDashboard(members []staff.Staff) {
+	<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+		for _, m := range members {
+			<a href={ templ.SafeURL("/staff/" + m.ID) } class="bg-card rounded-lg border border-border p-4 flex flex-col gap-3 hover:border-primary/50 transition-colors">
+				<div class="flex items-center gap-3">
+					<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+						@staffIcon(m.Icon, m.Label)
+					</div>
+					<div class="flex-1 min-w-0">
+						<div class="flex items-center gap-2">
+							<span class="text-sm font-brand font-semibold text-foreground truncate">{ m.Label }</span>
+							if m.Active {
+								<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400">Active</span>
+							} else {
+								<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-muted text-muted-foreground">Inactive</span>
+							}
+						</div>
+						if m.Description != "" {
+							<p class="text-xs text-muted-foreground truncate mt-0.5">{ m.Description }</p>
+						}
+					</div>
+				</div>
+				<div class="flex gap-4 text-xs font-mono text-muted-foreground">
+					<span>{ countWord(len(m.Tasks), "task", "tasks") }</span>
+					<span>{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
+				</div>
+			</a>
+		}
+	</div>
 }
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
@@ -124,17 +137,17 @@ templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool)
 	<h2 class="text-base font-brand font-semibold text-foreground">Overview</h2>
 	<!-- Stats row -->
 	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-		@staffStatCard("Tasks", countWord(len(m.Tasks), "assigned", "assigned")) {
-			@icons.ClipboardList(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		@staffStatCardLink("Status", staffActiveLabel(m.Active), "/staff/"+m.ID+"?s=profile") {
+			@icons.Activity(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@staffStatCard("Tools", countWord(staffToolCount(m, tasks), "linked", "linked")) {
-			@icons.Wrench(templ.Attributes{"class": "size-4 text-muted-foreground"})
-		}
-		@staffStatCard("Values", countWord(len(m.ValueCategories)+len(m.Values), "ref", "refs")) {
+		@staffStatCardLink("Values", countWord(len(m.ValueCategories)+len(m.Values), "ref", "refs"), "/staff/"+m.ID+"?s=values") {
 			@icons.Star(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@staffStatCard("Status", staffActiveLabel(m.Active)) {
-			@icons.Activity(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		@staffStatCardLink("Tools", countWord(staffToolCount(m, tasks), "linked", "linked"), "/staff/"+m.ID+"?s=tools") {
+			@icons.Wrench(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@staffStatCardLink("Tasks", countWord(len(m.Tasks), "assigned", "assigned"), "/staff/"+m.ID+"?s=tasks") {
+			@icons.ClipboardList(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
 	</div>
 	<!-- Directives placeholder -->
@@ -163,6 +176,16 @@ templ staffStatCard(label, value string) {
 		</div>
 		<span class="text-sm font-brand font-semibold text-foreground">{ value }</span>
 	</div>
+}
+
+templ staffStatCardLink(label, value, href string) {
+	<a href={ templ.SafeURL(href) } class="bg-card rounded-lg border border-border p-4 flex flex-col gap-2 hover:border-primary/50 transition-colors">
+		<div class="flex items-center justify-between">
+			<span class="text-xs font-mono text-muted-foreground uppercase tracking-wide">{ label }</span>
+			{ children... }
+		</div>
+		<span class="text-sm font-brand font-semibold text-foreground">{ value }</span>
+	</a>
 }
 
 // ─── Profile section ──────────────────────────────────────────────────────────
