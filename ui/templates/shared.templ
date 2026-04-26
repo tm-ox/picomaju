@@ -5,6 +5,126 @@ import (
 	"picomaju/ui/components/button"
 )
 
+// SidebarLayout renders the full sidebar+main shell. Pass sidebar nav items via
+// nav; page content goes in children. The sidebar starts collapsed (icon-only)
+// on mobile and expanded on desktop; state persists in localStorage key "sidebar".
+templ SidebarLayout(title string, nav templ.Component) {
+	<style>
+		#sidebar {
+			position: relative;
+			height: 100%;
+			flex-shrink: 0;
+			width: 3.5rem;
+			transition: width 200ms ease;
+		}
+		#sidebar-main {
+			transition: transform 200ms ease;
+		}
+		#sidebar-layout {
+			height: calc(100dvh - var(--topnav-h) - var(--tabbar-h));
+		}
+		@media (min-width: 640px) {
+			#sidebar-layout {
+				height: calc(100dvh - var(--topnav-h));
+			}
+		}
+	</style>
+	<div
+		id="sidebar-layout"
+		class="relative flex overflow-hidden"
+	>
+		<aside
+			id="sidebar"
+			class="bg-card border-r border-border flex flex-col overflow-y-auto overflow-x-hidden"
+		>
+			<div class="flex items-center px-3 py-1.5 border-b border-border shrink-0">
+				<span data-sidebar-label class="pl-2 text-sm font-brand font-semibold text-foreground truncate flex-1 min-w-0">{ title }</span>
+				<button
+					onclick="toggleSidebar()"
+					class="size-8 shrink-0 ml-auto flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+					aria-label="Toggle sidebar"
+				>
+					@icons.PanelLeft(templ.Attributes{"class": "size-4"})
+				</button>
+			</div>
+			@nav
+		</aside>
+		<div id="sidebar-backdrop" class="absolute inset-0 z-40 bg-black/30 hidden" onclick="toggleSidebar()"></div>
+		<div id="sidebar-main" class="flex-1 min-w-0 overflow-y-auto flex flex-col">
+			{ children... }
+		</div>
+	</div>
+	<script>
+		(function () {
+			var KEY = "sidebar";
+			var W = "14rem";
+			var ICON_W = "3.5rem";
+
+			function isMobile() {
+				return window.innerWidth < 640;
+			}
+
+			function apply(open) {
+				var sb = document.getElementById("sidebar");
+				var main = document.getElementById("sidebar-main");
+				var bd = document.getElementById("sidebar-backdrop");
+				var labels = sb.querySelectorAll("[data-sidebar-label]");
+
+				sb.style.width = open ? W : ICON_W;
+				labels.forEach(function (el) {
+					el.style.display = open ? "" : "none";
+				});
+
+				if (isMobile() && open) {
+					sb.style.position = "absolute";
+					sb.style.zIndex = "50";
+					main.style.transform = "translateX(" + W + ")";
+					bd.classList.remove("hidden");
+				} else {
+					sb.style.position = "relative";
+					sb.style.zIndex = "";
+					main.style.transform = "";
+					bd.classList.add("hidden");
+				}
+
+				localStorage.setItem(KEY, open ? "open" : "closed");
+			}
+
+			window.toggleSidebar = function () {
+				var saved = localStorage.getItem(KEY);
+				var current = saved !== null ? saved === "open" : !isMobile();
+				apply(!current);
+			};
+
+			var saved = localStorage.getItem(KEY);
+			apply(saved !== null ? saved === "open" : !isMobile());
+
+			window.addEventListener("resize", function () {
+				var saved = localStorage.getItem(KEY);
+				apply(saved !== null ? saved === "open" : !isMobile());
+			});
+		})();
+	</script>
+}
+
+// SidebarItem renders a single sidebar nav link. Pass the icon as children.
+// Icon is wrapped in a size-8 container so it aligns with the toggle button.
+templ SidebarItem(href, lbl, key, active string) {
+	<a
+		href={ templ.SafeURL(href) }
+		class={
+			"flex items-center gap-2 mx-2 px-1 py-1.5 rounded-md text-sm transition-colors",
+			templ.KV("bg-muted text-foreground font-medium", active == key),
+			templ.KV("text-muted-foreground hover:text-foreground hover:bg-muted", active != key),
+		}
+	>
+		<span class="size-8 shrink-0 flex items-center justify-center">
+			{ children... }
+		</span>
+		<span data-sidebar-label>{ lbl }</span>
+	</a>
+}
+
 // pageHeader renders a section heading row with an optional right-slot action.
 templ pageHeader(title string) {
 	<div class="flex items-center justify-between gap-4 pb-4 border-b border-border">

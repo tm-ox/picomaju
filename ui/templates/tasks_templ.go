@@ -549,7 +549,7 @@ func TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, formE
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " class=\"size-4 rounded border-input accent-primary\"> <span class=\"flex-1 text-sm font-brand font-semibold text-foreground\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " class=\"sr-only\"> <span class=\"flex-1 text-sm font-brand font-semibold text-foreground\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

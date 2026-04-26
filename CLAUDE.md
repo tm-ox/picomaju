@@ -15,7 +15,7 @@ picomaju/
   design/
     tokens.json                  — W3C DTCG design tokens (canonical); import to Pencil/Penpot via Phase 3
   internal/                      — see internal/CLAUDE.md
-  web/                           — legacy frontend (preserved for reference; routes removed); see web/templates/CLAUDE.md
+  web/                           — legacy frontend (preserved for reference; routes removed)
     templates/
     static/
       style.css                  — all CSS; :root has full token system (lines 1–111)
@@ -24,7 +24,7 @@ picomaju/
       logo-symbol.svg            — crimson PM mark (140×98), hardcoded fill="#bf092f"
       logo-type.svg              — horizontal wordmark lockup
       logo-stack.svg             — stacked symbol + wordmark lockup
-  ui/                            — active frontend (templui + Tailwind CSS v4); migration complete
+  ui/                            — active frontend (templui + Tailwind CSS v4)
     assets/
       css/
         input.css                — Tailwind v4 @theme config; full brand token set in oklch
@@ -38,16 +38,17 @@ picomaju/
       templui.go                 — TwMerge, RandomID, ComponentScript, SetupScriptRoutes
     templates/
       layout.templ               — AppLayout (authenticated shell: topnav + tabbar + FAB); ThemeToggle
-      nav.templ                  — NavData struct; AppTopNav, AppBottomTabBar, AppFAB
+      nav.templ                  — NavData struct; AppTopNav (4-item desktop nav); AppBottomTabBar (4-tab mobile); AppFAB
       shared.templ               — pageHeader, emptyState, rowList, rowItem, badge, rowActions, formCard, field
-      helpers.go                 — pure Go helpers: formTitle, formAction, countWord, categoryLabel, configValue
+      helpers.go                 — pure Go helpers: formTitle, formAction, countWord, categoryLabel, configValue,
+                                   staffInitials, staffSectionTitle, staffActiveLabel, staffToolCount, staffIconOptions
       welcome.templ              — WelcomePage(lang, formErr)
       setup.templ                — SetupStep1Page, SetupStep2Page, SetupStep3Page
-      dashboard.templ            — DashboardPage(nd NavData)
+      dashboard.templ            — DashboardPage (unused; staff list is now home)
       values.templ               — ValueListPage, ValueFormPage, ValidationFragment
       tools.templ                — ToolListPage, NewToolPage, ToolFormPage
       tasks.templ                — TaskListPage, TaskFormPage
-      staff.templ                — StaffListPage, StaffFormPage
+      staff.templ                — StaffListPage, StaffFormPage, StaffDetailPage + sidebar sections
       settings.templ             — SettingsPage
       workshop.templ             — component styleguide at /ui/workshop
 ```
@@ -63,7 +64,7 @@ picomaju/
 
 ## Development workflow
 
-**New frontend (hot reload):**
+**Hot reload:**
 ```bash
 task dev
 ```
@@ -84,18 +85,32 @@ tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css
 
 `datastar.js` must be placed in `web/static/` manually — it is embedded into the binary at build time.
 
-Build excludes the `patches/` directory (contains design drop-in files, not a Go package):
+Build excludes the `patches/` directory:
 ```bash
 go build ./internal/... ./web/... .
 ```
 
 ## Implementation status
 
-**Done (new `/ui` frontend):** Full migration to templui + Tailwind CSS v4 complete. All screens active: welcome, 3-step onboarding, dashboard, values (with SSE validation), tools, tasks, staff, settings. Mobile-first shell: sticky top nav, bottom tab bar, per-section FAB. Legacy `/legacy/*` routes removed; `web/` preserved for reference. Brand tokens in oklch across light/dark. Theme persisted in `localStorage` key `theme`. See token notes below.
+**Done:** Full templui + Tailwind CSS v4 frontend. All screens active: welcome, 3-step onboarding, values (SSE validation), tools, tasks, staff, settings. Mobile-first shell: sticky top nav (4 items), bottom tab bar (4 tabs), per-section FAB. Brand tokens in oklch across light/dark. Theme in `localStorage` key `theme`.
+
+**Staff is now the home page (`/`).** Staff list shows as a `rowList`-style view with circular primary-colored avatars, active/inactive badges, and descriptions. Clicking a staff row opens the detail page.
+
+**Staff detail page** uses `SidebarLayout` with 5 sections: Overview → Profile → Values → Tools → Tasks. The sidebar title shows "Staff" (section label). Member name + avatar renders inline at the top of the main content area. Sidebar state persisted in `localStorage` key `sidebar`.
+
+**Sidebar (`SidebarLayout` / `SidebarItem` in `shared.templ`)** is a reusable shell for any page. Collapsed = icon-only strip (3.5rem) on both mobile and desktop. Expanded = 14rem with labels. Mobile expand: sidebar becomes `position:absolute` overlay, main content slides right via `translateX`; backdrop tap collapses. Desktop expand: sidebar in normal flex flow, main shrinks. Toggle button sits at the right edge of the sidebar header. `SidebarItem` uses `mx-2 px-1 py-1.5` with icon in a `size-8` container — icon center aligns with toggle button center (both at 28px from sidebar edge).
 
 **Done (legacy `/web` frontend, reference only):** Welcome + onboarding, dashboard, all CRUD sections, collapsible sidebar, full CSS token system, DTCG token file at `design/tokens.json`.
 
-**Deferred:** Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
+**Deferred:** Overview section data (agent activity, reports, analytics), Directive Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
+
+## UI conventions
+
+- **Checkboxes** are `sr-only` sitewide. The wrapping `<label>` card acts as the visual toggle via `has-[:checked]:border-primary has-[:checked]:bg-primary/5`.
+- **Dropdowns/popovers** use `bg-popover` which equals `--background` (not `--card`) in both light and dark modes.
+- **Active sidebar items** use `bg-muted text-foreground` — same as hover, no primary color.
+- **Staff avatars** are `size-9 rounded-full bg-primary text-primary-foreground`.
+- **Icon picker** is a popup dropdown (button trigger + `data-icon-panel` div). 28 Lucide icons + initials fallback. Selected state shown in the trigger circle preview.
 
 ## New frontend — token notes
 
@@ -107,6 +122,7 @@ Brand colors in oklch (mapped from legacy hex palette):
 | `--background` | `oklch(0.972 0.006 240)` | `oklch(0.115 0.042 258)` | `#f4f7fa` / `#0c1826` |
 | `--foreground` | `oklch(0.18 0.063 255)` | `oklch(0.924 0.028 230)` | `#0f1f38` / `#d8eaf4` |
 | `--card` | `oklch(1 0 0)` | `oklch(0.183 0.057 258)` | `#ffffff` / `#142640` |
+| `--popover` | `oklch(0.972 0.006 240)` | `oklch(0.115 0.042 258)` | equals `--background` |
 | `--muted-foreground` | `oklch(0.612 0.042 232)` | `oklch(0.573 0.057 222)` | `#7b92a8` / `#5a8a9f` |
 | `--border` / `--input` | `oklch(0.906 0.018 232)` | `oklch(0.265 0.062 254)` | `#dbe4ec` / `#1e3a55` |
 | `--sidebar` | `oklch(0.167 0.058 258)` | `oklch(0.082 0.04 258)` | `#132440` / `#080f1a` |

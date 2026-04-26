@@ -28,11 +28,10 @@ templ AppTopNav(nd NavData) {
 			</span>
 		</div>
 		<nav class="hidden sm:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2" aria-label="Primary">
-			@appNavLink("/", "Dash", nd.ActiveSection == "home")
+			@appNavLink("/", "Staff", nd.ActiveSection == "staff")
 			@appNavLink("/values", "Values", nd.ActiveSection == "values")
 			@appNavLink("/tools", "Tools", nd.ActiveSection == "tools")
 			@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks")
-			@appNavLink("/staff", "Staff", nd.ActiveSection == "staff")
 		</nav>
 		<div class="flex items-center gap-1">
 			@ThemeToggleInline()
@@ -67,12 +66,11 @@ templ AppBottomTabBar(nd NavData) {
 		aria-label="Primary"
 		style="padding-bottom: env(safe-area-inset-bottom)"
 	>
-		<div class="grid grid-cols-5 h-[var(--tabbar-h)]">
-			@appTab("/", tabHomeIcon(), "Home", nd.ActiveSection == "home")
+		<div class="grid grid-cols-4 h-[var(--tabbar-h)]">
+			@appTab("/", tabStaffIcon(), "Staff", nd.ActiveSection == "staff")
 			@appTab("/values", tabValuesIcon(), "Values", nd.ActiveSection == "values")
 			@appTab("/tools", tabToolsIcon(), "Tools", nd.ActiveSection == "tools")
 			@appTab("/tasks", tabTasksIcon(), "Tasks", nd.ActiveSection == "tasks")
-			@appTab("/staff", tabStaffIcon(), "Staff", nd.ActiveSection == "staff")
 		</div>
 	</nav>
 }
@@ -96,14 +94,14 @@ templ appTab(href string, icon templ.Component, label string, active bool) {
 // AppFAB renders the mobile floating action button for the active section.
 templ AppFAB(nd NavData) {
 	switch nd.ActiveSection {
+		case "staff":
+			@appFABLink("/staff/new", "New staff")
 		case "values":
 			@appFABLink("/values/new", "New value")
 		case "tools":
 			@appFABLink("/tools/new", "Add tool")
 		case "tasks":
 			@appFABLink("/tasks/new", "New task")
-		case "staff":
-			@appFABLink("/staff/new", "New staff")
 	}
 }
 

@@ -95,7 +95,7 @@ templ TaskFormPage(t *task.Task, tools []tool.Tool, nd NavData, isNew bool, form
 										name="tools"
 										value={ tl.ID }
 										checked?={ includesStr(t.Tools, tl.ID) }
-										class="size-4 rounded border-input accent-primary"
+										class="sr-only"
 									/>
 									<span class="flex-1 text-sm font-brand font-semibold text-foreground">{ tl.Label }</span>
 									@badge(tl.Type)

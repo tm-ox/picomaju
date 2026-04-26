@@ -48,12 +48,6 @@ func (h *uiHandler) initStores(dataDir string) error {
 	return nil
 }
 
-// --- Dashboard ---
-
-func (h *uiHandler) dashboardPage(w http.ResponseWriter, r *http.Request) {
-	uitemplates.DashboardPage(h.navData(r, "home")).Render(r.Context(), w)
-}
-
 // --- Setup (onboarding) ---
 
 func (h *uiHandler) setupPage(w http.ResponseWriter, r *http.Request) {
@@ -382,59 +376,116 @@ func (h *uiHandler) staffList(w http.ResponseWriter, r *http.Request) {
 	uitemplates.StaffListPage(members, h.navData(r, "staff")).Render(r.Context(), w)
 }
 
-func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
-	tasks, _ := h.tasks.List()
-	vals, _ := h.values.List()
-	uitemplates.StaffFormPage(&staff.Staff{}, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), true, "").Render(r.Context(), w)
-}
-
-func (h *uiHandler) editStaffForm(w http.ResponseWriter, r *http.Request) {
+func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	m, err := h.staff.Get(id)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
+	section := r.URL.Query().Get("s")
+	if section == "" {
+		section = "overview"
+	}
+	formErr := r.URL.Query().Get("err")
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
-	uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), false, "").Render(r.Context(), w)
+	tools, _ := h.tools.List()
+	uitemplates.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr).Render(r.Context(), w)
+}
+
+func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
+	uitemplates.StaffFormPage(&staff.Staff{}, h.navData(r, "staff"), "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
-	tasks, _ := h.tasks.List()
-	vals, _ := h.values.List()
 	m, err := staffFromForm(r)
 	if err != nil {
-		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), true, err.Error()).Render(r.Context(), w)
+		uitemplates.StaffFormPage(m, h.navData(r, "staff"), err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.staff.Create(m); err != nil {
-		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), true, err.Error()).Render(r.Context(), w)
+		uitemplates.StaffFormPage(m, h.navData(r, "staff"), err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/staff", http.StatusSeeOther)
+	http.Redirect(w, r, "/staff/"+m.ID, http.StatusSeeOther)
 }
 
-func (h *uiHandler) updateStaff(w http.ResponseWriter, r *http.Request) {
+func (h *uiHandler) updateStaffProfile(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	tasks, _ := h.tasks.List()
-	vals, _ := h.values.List()
-	m, err := staffFromForm(r)
+	m, err := h.staff.Get(id)
 	if err != nil {
-		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), false, err.Error()).Render(r.Context(), w)
+		http.NotFound(w, r)
 		return
 	}
-	m.ID = id
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=profile&err="+err.Error(), http.StatusSeeOther)
+		return
+	}
+	label := strings.TrimSpace(r.FormValue("label"))
+	if label == "" {
+		http.Redirect(w, r, "/staff/"+id+"?s=profile&err=Label+is+required", http.StatusSeeOther)
+		return
+	}
+	m.Label = label
+	m.Description = strings.TrimSpace(r.FormValue("description"))
+	m.Icon = r.FormValue("icon")
+	m.Active = r.FormValue("active") == "on"
 	if err := h.staff.Update(m); err != nil {
-		uitemplates.StaffFormPage(m, tasks, vals, value.DefaultCategories, h.navData(r, "staff"), false, err.Error()).Render(r.Context(), w)
+		http.Redirect(w, r, "/staff/"+id+"?s=profile&err="+err.Error(), http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, "/staff", http.StatusSeeOther)
+	http.Redirect(w, r, "/staff/"+id+"?s=profile", http.StatusSeeOther)
+}
+
+func (h *uiHandler) updateStaffTasks(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	m, err := h.staff.Get(id)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=tasks", http.StatusSeeOther)
+		return
+	}
+	tasks := r.Form["tasks"]
+	if tasks == nil {
+		tasks = []string{}
+	}
+	m.Tasks = tasks
+	h.staff.Update(m)
+	http.Redirect(w, r, "/staff/"+id+"?s=tasks", http.StatusSeeOther)
+}
+
+func (h *uiHandler) updateStaffValues(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	m, err := h.staff.Get(id)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=values", http.StatusSeeOther)
+		return
+	}
+	valueCats := r.Form["value_categories"]
+	if valueCats == nil {
+		valueCats = []string{}
+	}
+	values := r.Form["values"]
+	if values == nil {
+		values = []string{}
+	}
+	m.ValueCategories = valueCats
+	m.Values = values
+	h.staff.Update(m)
+	http.Redirect(w, r, "/staff/"+id+"?s=values", http.StatusSeeOther)
 }
 
 func (h *uiHandler) deleteStaff(w http.ResponseWriter, r *http.Request) {
 	h.staff.Delete(chi.URLParam(r, "id"))
-	http.Redirect(w, r, "/staff", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // --- Settings UI ---
@@ -543,23 +594,11 @@ func staffFromForm(r *http.Request) (*staff.Staff, error) {
 	if err := r.ParseForm(); err != nil {
 		return &staff.Staff{}, err
 	}
-	tasks := r.Form["tasks"]
-	if tasks == nil {
-		tasks = []string{}
-	}
-	valueCats := r.Form["value_categories"]
-	if valueCats == nil {
-		valueCats = []string{}
-	}
-	values := r.Form["values"]
-	if values == nil {
-		values = []string{}
-	}
 	return &staff.Staff{
-		ID:              strings.TrimSpace(r.FormValue("id")),
-		Label:           strings.TrimSpace(r.FormValue("label")),
-		Tasks:           tasks,
-		ValueCategories: valueCats,
-		Values:          values,
+		ID:          strings.TrimSpace(r.FormValue("id")),
+		Label:       strings.TrimSpace(r.FormValue("label")),
+		Description: strings.TrimSpace(r.FormValue("description")),
+		Active:      r.FormValue("active") == "on",
+		Icon:        r.FormValue("icon"),
 	}, nil
 }

@@ -54,7 +54,7 @@
     /* #ffffff — white card surface */
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.18 0.063 255);
-    --popover: oklch(1 0 0);
+    --popover: oklch(0.972 0.006 240);
     --popover-foreground: oklch(0.18 0.063 255);
     /* #bf092f — brand crimson */
     --primary: oklch(0.41 0.22 18.5);
@@ -93,7 +93,7 @@
     /* #142640 — dark navy surface */
     --card: oklch(0.183 0.057 258);
     --card-foreground: oklch(0.924 0.028 230);
-    --popover: oklch(0.183 0.057 258);
+    --popover: oklch(0.115 0.042 258);
     --popover-foreground: oklch(0.924 0.028 230);
     --primary: oklch(0.41 0.22 18.5);
     --primary-foreground: oklch(0.985 0 0);

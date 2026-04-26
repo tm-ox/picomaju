@@ -12,6 +12,9 @@ import (
 type Staff struct {
 	ID              string   `json:"id"`
 	Label           string   `json:"label"`
+	Description     string   `json:"description,omitempty"`
+	Active          bool     `json:"active"`
+	Icon            string   `json:"icon,omitempty"`
 	Tasks           []string `json:"tasks,omitempty"`            // task IDs
 	ValueCategories []string `json:"value_categories,omitempty"` // bulk inclusion by category
 	Values          []string `json:"values,omitempty"`           // individual value IDs

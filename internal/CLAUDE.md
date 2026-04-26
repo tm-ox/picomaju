@@ -17,7 +17,7 @@ tool/
 task/
   store.go        — Task type (id, label, description, tools[]) + CRUD on tasks.json
 staff/
-  store.go        — Staff type (id, label, tasks[], value_categories[], values[]) + CRUD on staff.json
+  store.go        — Staff type (id, label, description, active, icon, tasks[], value_categories[], values[]) + CRUD on staff.json
 api/
   router.go       — all routes wired here; setup gate middleware (allows /welcome + setup paths + /static/*)
   ui.go           — HTML + SSE handlers; uiHandler with mutex-guarded store init; navData() helper
@@ -95,6 +95,9 @@ Agent profile. Composed of Tasks + Values. The compile target.
   {
     "id": "support_agent",
     "label": "Support Agent",
+    "description": "Handles customer support and inquiries",
+    "active": true,
+    "icon": "headphones",
     "tasks": ["manage_social_media"],
     "value_categories": ["core_values", "communication"],
     "values": ["escalation_override"]
@@ -102,8 +105,7 @@ Agent profile. Composed of Tasks + Values. The compile target.
 ]}
 ```
 
-`value_categories` → bulk inclusion of all Values in those categories.
-`values` → individual Value IDs added on top.
+`description` and `icon` are display metadata (omitempty). `active` defaults to false. `icon` is a Lucide icon name (28 options) or empty for initials fallback. `value_categories` → bulk inclusion of all Values in those categories. `values` → individual Value IDs added on top.
 
 ## Value categories
 
@@ -144,7 +146,7 @@ The setup gate middleware allows `/welcome`, `/setup`, `/setup/first-staff`, `/s
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | dashboard (home screen) |
+| GET | `/` | staff list (home screen) |
 | GET | `/welcome` | welcome screen — language picker |
 | POST | `/welcome` | save language → redirect `/setup` |
 | GET | `/setup` | onboarding step 1 — business name + data dir + timezone + hours |
@@ -172,12 +174,15 @@ The setup gate middleware allows `/welcome`, `/setup`, `/setup/first-staff`, `/s
 | GET | `/tasks/:id/edit` | Task form (edit) |
 | POST | `/tasks/:id` | update Task → redirect `/tasks` |
 | POST | `/tasks/:id/delete` | delete Task → redirect `/tasks` |
-| GET | `/staff` | Staff list |
-| GET | `/staff/new` | Staff form (new) |
-| POST | `/staff` | create Staff → redirect `/staff` |
-| GET | `/staff/:id/edit` | Staff form (edit) |
-| POST | `/staff/:id` | update Staff → redirect `/staff` |
-| POST | `/staff/:id/delete` | delete Staff → redirect `/staff` |
+| GET | `/staff` | redirect → `/` |
+| GET | `/staff/new` | Staff form (new) — id, label, description, icon |
+| POST | `/staff` | create Staff → redirect `/staff/:id` |
+| GET | `/staff/:id` | Staff detail page (`?s=overview\|profile\|values\|tools\|tasks`) |
+| GET | `/staff/:id/edit` | redirect → `/staff/:id` |
+| POST | `/staff/:id/profile` | update label, description, icon, active → redirect `/staff/:id?s=profile` |
+| POST | `/staff/:id/tasks` | update task assignments → redirect `/staff/:id?s=tasks` |
+| POST | `/staff/:id/values` | update value/category assignments → redirect `/staff/:id?s=values` |
+| POST | `/staff/:id/delete` | delete Staff → redirect `/` |
 | GET | `/settings` | settings page |
 | POST | `/settings` | save settings → redirect `/settings?saved=1` |
 | GET | `/static/*` | embedded static assets |

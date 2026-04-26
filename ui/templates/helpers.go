@@ -2,7 +2,11 @@ package templates
 
 import (
 	"fmt"
+	"picomaju/internal/staff"
+	"picomaju/internal/task"
 	"picomaju/internal/value"
+	"strings"
+	"unicode"
 )
 
 func includesStr(slice []string, item string) bool {
@@ -57,4 +61,71 @@ func configValue(cfg map[string]any, key string) string {
 	}
 	s, _ := v.(string)
 	return s
+}
+
+func staffInitials(label string) string {
+	fields := strings.Fields(strings.TrimSpace(label))
+	var out []rune
+	for _, f := range fields {
+		for _, r := range f {
+			if unicode.IsLetter(r) {
+				out = append(out, unicode.ToUpper(r))
+				break
+			}
+		}
+		if len(out) >= 2 {
+			break
+		}
+	}
+	if len(out) == 0 {
+		return "?"
+	}
+	return string(out)
+}
+
+func staffSectionTitle(section string) string {
+	switch section {
+	case "overview":
+		return "Overview"
+	case "profile":
+		return "Profile"
+	case "values":
+		return "Values"
+	case "tools":
+		return "Tools"
+	case "tasks":
+		return "Tasks"
+	default:
+		return "Overview"
+	}
+}
+
+func staffActiveLabel(active bool) string {
+	if active {
+		return "Active"
+	}
+	return "Inactive"
+}
+
+// staffToolCount returns the number of unique tool IDs reachable via the staff member's assigned tasks.
+func staffToolCount(m *staff.Staff, tasks []task.Task) int {
+	seen := map[string]bool{}
+	for _, t := range tasks {
+		if includesStr(m.Tasks, t.ID) {
+			for _, toolID := range t.Tools {
+				seen[toolID] = true
+			}
+		}
+	}
+	return len(seen)
+}
+
+func staffIconOptions() []string {
+	return []string{
+		"user", "user-round", "bot", "headphones", "phone", "mail",
+		"calendar", "clipboard", "briefcase", "calculator",
+		"cpu", "database", "globe", "key", "megaphone", "message-circle",
+		"monitor", "package", "pencil", "shield", "star",
+		"truck", "wrench", "zap", "wallet", "award", "coffee", "flag",
+	}
 }

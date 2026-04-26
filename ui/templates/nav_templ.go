@@ -79,7 +79,7 @@ func AppTopNav(nd NavData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = appNavLink("/", "Dash", nd.ActiveSection == "home").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = appNavLink("/", "Staff", nd.ActiveSection == "staff").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -92,10 +92,6 @@ func AppTopNav(nd NavData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = appNavLink("/staff", "Staff", nd.ActiveSection == "staff").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -159,7 +155,7 @@ func appNavLink(href, label string, active bool) templ.Component {
 		var templ_7745c5c3_Var6 templ.SafeURL
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 52, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 51, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -185,7 +181,7 @@ func appNavLink(href, label string, active bool) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 59, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 58, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -221,11 +217,11 @@ func AppBottomTabBar(nd NavData) templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<nav class=\"fixed bottom-0 inset-x-0 sm:hidden z-[100] bg-sidebar border-t border-sidebar-border\" aria-label=\"Primary\" style=\"padding-bottom: env(safe-area-inset-bottom)\"><div class=\"grid grid-cols-5 h-[var(--tabbar-h)]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<nav class=\"fixed bottom-0 inset-x-0 sm:hidden z-[100] bg-sidebar border-t border-sidebar-border\" aria-label=\"Primary\" style=\"padding-bottom: env(safe-area-inset-bottom)\"><div class=\"grid grid-cols-4 h-[var(--tabbar-h)]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = appTab("/", tabHomeIcon(), "Home", nd.ActiveSection == "home").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = appTab("/", tabStaffIcon(), "Staff", nd.ActiveSection == "staff").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -238,10 +234,6 @@ func AppBottomTabBar(nd NavData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = appTab("/tasks", tabTasksIcon(), "Tasks", nd.ActiveSection == "tasks").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = appTab("/staff", tabStaffIcon(), "Staff", nd.ActiveSection == "staff").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -289,7 +281,7 @@ func appTab(href string, icon templ.Component, label string, active bool) templ.
 		var templ_7745c5c3_Var12 templ.SafeURL
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 82, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 80, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -323,7 +315,7 @@ func appTab(href string, icon templ.Component, label string, active bool) templ.
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 92, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 90, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -360,6 +352,11 @@ func AppFAB(nd NavData) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch nd.ActiveSection {
+		case "staff":
+			templ_7745c5c3_Err = appFABLink("/staff/new", "New staff").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		case "values":
 			templ_7745c5c3_Err = appFABLink("/values/new", "New value").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -372,11 +369,6 @@ func AppFAB(nd NavData) templ.Component {
 			}
 		case "tasks":
 			templ_7745c5c3_Err = appFABLink("/tasks/new", "New task").Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case "staff":
-			templ_7745c5c3_Err = appFABLink("/staff/new", "New staff").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -413,7 +405,7 @@ func appFABLink(href, label string) templ.Component {
 		var templ_7745c5c3_Var17 templ.SafeURL
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 112, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 110, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -426,7 +418,7 @@ func appFABLink(href, label string) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 113, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/nav.templ`, Line: 111, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

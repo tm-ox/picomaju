@@ -1,8 +1,10 @@
 package templates
 
 import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
+	"picomaju/internal/tool"
 	"picomaju/internal/value"
 	"picomaju/ui/components/alert"
 	"picomaju/ui/components/button"
@@ -10,6 +12,7 @@ import (
 	"picomaju/ui/components/label"
 )
 
+// ─── Staff list (home page at /) ─────────────────────────────────────────────
 templ StaffListPage(members []staff.Staff, nd NavData) {
 	@AppLayout("Staff", nd) {
 		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
@@ -26,18 +29,253 @@ templ StaffListPage(members []staff.Staff, nd NavData) {
 					"Create your first staff",
 				)
 			} else {
-				@rowList() {
+				<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
 					for _, m := range members {
-						@rowItem() {
-							<div class="flex-1 min-w-0 flex flex-col gap-0.5">
-								<span class="text-sm font-brand font-semibold text-foreground truncate">{ m.Label }</span>
-								<span class="text-xs text-muted-foreground font-mono">{ m.ID }</span>
+						@staffRow(m)
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+templ staffRow(m staff.Staff) {
+	<a href={ templ.SafeURL("/staff/" + m.ID) } class="flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors">
+		<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+			@staffIcon(m.Icon, m.Label)
+		</div>
+		<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+			<div class="flex items-center gap-2">
+				<span class="text-sm font-brand font-semibold text-foreground truncate">{ m.Label }</span>
+				if m.Active {
+					<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400">Active</span>
+				} else {
+					<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-muted text-muted-foreground">Inactive</span>
+				}
+			</div>
+			if m.Description != "" {
+				<span class="text-xs text-muted-foreground truncate">{ m.Description }</span>
+			}
+		</div>
+		<div class="hidden sm:flex items-center gap-3 text-xs text-muted-foreground font-mono shrink-0">
+			<span>{ countWord(len(m.Tasks), "task", "tasks") }</span>
+			<span>{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
+		</div>
+		@icons.ChevronRight(templ.Attributes{"class": "size-4 text-muted-foreground shrink-0"})
+	</a>
+}
+
+// ─── Staff detail page ───────────────────────────────────────────────────────
+templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd NavData, section string, formErr string) {
+	@AppLayout(m.Label, nd) {
+		@SidebarLayout("Staff", staffSidebarNav(m, section)) {
+			<div class="flex-1 max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
+				<div class="flex items-center gap-3">
+					<div class="size-9 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
+						@staffIcon(m.Icon, m.Label)
+					</div>
+					<h3 class="font-brand font-bold text-foreground">{ m.Label }</h3>
+				</div>
+				if formErr != "" {
+					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+						@alert.Description() {
+							{ formErr }
+						}
+					}
+				}
+				switch section {
+					case "profile":
+						@staffProfileSection(m)
+					case "values":
+						@staffValuesSection(m, values, cats)
+					case "tools":
+						@staffToolsSection(m, tasks, tools)
+					case "tasks":
+						@staffTasksSection(m, tasks)
+					default:
+						@staffOverviewSection(m, tasks, tools)
+				}
+			</div>
+		}
+	}
+}
+
+templ staffSidebarNav(m *staff.Staff, section string) {
+	<nav class="flex flex-col gap-0.5 py-2 flex-1">
+		@SidebarItem("/staff/"+m.ID+"?s=overview", "Overview", "overview", section) {
+			@icons.LayoutDashboard(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/staff/"+m.ID+"?s=profile", "Profile", "profile", section) {
+			@icons.UserRound(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/staff/"+m.ID+"?s=values", "Values", "values", section) {
+			@icons.Star(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/staff/"+m.ID+"?s=tools", "Tools", "tools", section) {
+			@icons.Wrench(templ.Attributes{"class": "size-4"})
+		}
+		@SidebarItem("/staff/"+m.ID+"?s=tasks", "Tasks", "tasks", section) {
+			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
+		}
+	</nav>
+	<div class="py-2 border-t border-border shrink-0">
+		@SidebarItem("/", "All Staff", "", section) {
+			@icons.ArrowLeft(templ.Attributes{"class": "size-4"})
+		}
+	</div>
+}
+
+// ─── Overview section ─────────────────────────────────────────────────────────
+templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
+	<h2 class="text-base font-brand font-semibold text-foreground">Overview</h2>
+	<!-- Stats row -->
+	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+		@staffStatCard("Tasks", countWord(len(m.Tasks), "assigned", "assigned")) {
+			@icons.ClipboardList(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@staffStatCard("Tools", countWord(staffToolCount(m, tasks), "linked", "linked")) {
+			@icons.Wrench(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@staffStatCard("Values", countWord(len(m.ValueCategories)+len(m.Values), "ref", "refs")) {
+			@icons.Star(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@staffStatCard("Status", staffActiveLabel(m.Active)) {
+			@icons.Activity(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+	</div>
+	<!-- Directives placeholder -->
+	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
+		<div class="flex items-center justify-between">
+			<h5 class="text-sm font-brand font-semibold text-foreground">Directives</h5>
+			<span class="text-xs font-mono text-muted-foreground">Coming soon</span>
+		</div>
+		<p class="text-sm text-muted-foreground">Compiled agent directives (AGENTS.md, SOUL.md) will appear here once the compiler is active.</p>
+	</div>
+	<!-- Activity placeholder -->
+	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
+		<div class="flex items-center justify-between">
+			<h5 class="text-sm font-brand font-semibold text-foreground">Activity & Reports</h5>
+			<span class="text-xs font-mono text-muted-foreground">Coming soon</span>
+		</div>
+		<p class="text-sm text-muted-foreground">Agent activity logs, conversation summaries, and performance analytics will appear here.</p>
+	</div>
+}
+
+templ staffStatCard(label, value string) {
+	<div class="bg-card rounded-lg border border-border p-4 flex flex-col gap-2">
+		<div class="flex items-center justify-between">
+			<span class="text-xs font-mono text-muted-foreground uppercase tracking-wide">{ label }</span>
+			{ children... }
+		</div>
+		<span class="text-sm font-brand font-semibold text-foreground">{ value }</span>
+	</div>
+}
+
+// ─── Profile section ──────────────────────────────────────────────────────────
+templ staffProfileSection(m *staff.Staff) {
+	<h2 class="text-base font-brand font-semibold text-foreground">Profile</h2>
+	<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/profile") } class="flex flex-col gap-5">
+		<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+			<div class="flex flex-col gap-1.5">
+				<span class="text-xs font-mono text-muted-foreground">ID</span>
+				<span class="text-sm font-mono text-foreground">{ m.ID }</span>
+			</div>
+			@field() {
+				@label.Label(label.Props{For: "staff-label"}) {
+					Label
+				}
+				@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
+			}
+			@field() {
+				@label.Label(label.Props{For: "staff-description"}) {
+					Description
+				}
+				@input.Input(input.Props{ID: "staff-description", Name: "description", Value: m.Description, Placeholder: "Handles customer support and inquiries"})
+			}
+			<div class="flex flex-col gap-1.5">
+				<span class="text-sm font-medium text-foreground">Active</span>
+				<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5 w-fit">
+					<input
+						type="checkbox"
+						name="active"
+						value="on"
+						checked?={ m.Active }
+						class="sr-only"
+					/>
+					<span class="text-sm text-foreground">Enable this staff member</span>
+				</label>
+			</div>
+		</div>
+		<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
+			<div class="flex flex-col gap-0.5">
+				<span class="text-sm font-medium text-foreground">Icon</span>
+				<p class="text-xs text-muted-foreground">Represents this staff member across the app.</p>
+			</div>
+			@staffIconPicker(m.Icon, m.Label)
+		</div>
+		@button.Button(button.Props{Type: button.TypeSubmit}) {
+			Save
+		}
+	</form>
+}
+
+// ─── Values section ───────────────────────────────────────────────────────────
+templ staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Category) {
+	<h2 class="text-base font-brand font-semibold text-foreground">Values</h2>
+	<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/values") } class="flex flex-col gap-5">
+		if len(cats) == 0 {
+			<p class="text-sm text-muted-foreground">No values created yet. <a href="/values/new" class="text-primary underline underline-offset-2">Add a value</a> first.</p>
+		} else {
+			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+				<p class="text-sm text-muted-foreground">Select a category to include all its values, or pick individual values below.</p>
+				for _, cat := range cats {
+					<div class="flex flex-col gap-2">
+						<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/50 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+							<input
+								type="checkbox"
+								name="value_categories"
+								value={ cat.ID }
+								checked?={ includesStr(m.ValueCategories, cat.ID) }
+								class="sr-only"
+							/>
+							<span class="text-sm font-brand font-semibold text-foreground">{ cat.Label }</span>
+						</label>
+						@staffValuePicker(cat.ID, values, m.Values)
+					</div>
+				}
+			</div>
+			@button.Button(button.Props{Type: button.TypeSubmit}) {
+				Save
+			}
+		}
+	</form>
+}
+
+// ─── Tools section ────────────────────────────────────────────────────────────
+templ staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
+	<h2 class="text-base font-brand font-semibold text-foreground">Tools</h2>
+	if staffToolCount(m, tasks) == 0 {
+		<p class="text-sm text-muted-foreground">
+			No tools linked yet. Assign tasks with tools in the
+			<a href={ templ.SafeURL("/staff/" + m.ID + "?s=tasks") } class="text-primary underline underline-offset-2">Tasks</a>
+			section.
+		</p>
+	} else {
+		<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
+			for _, t := range tasks {
+				if includesStr(m.Tasks, t.ID) {
+					for _, tl := range tools {
+						if includesStr(t.Tools, tl.ID) {
+							<div class="flex items-center gap-3 px-4 py-3">
+								<div class="size-8 shrink-0 rounded-md bg-muted flex items-center justify-center">
+									@icons.Wrench(templ.Attributes{"class": "size-3.5 text-muted-foreground"})
+								</div>
+								<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+									<span class="text-sm font-brand font-semibold text-foreground">{ tl.Label }</span>
+									<span class="text-xs text-muted-foreground font-mono">via { t.Label }</span>
+								</div>
+								@badge(tl.Type)
 							</div>
-							<div class="hidden sm:flex items-center gap-2 shrink-0">
-								<span class="text-xs text-muted-foreground">{ countWord(len(m.Tasks), "task", "tasks") }</span>
-								<span class="text-xs text-muted-foreground">{ countWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs") }</span>
-							</div>
-							@rowActions("/staff/"+m.ID+"/edit", "/staff/"+m.ID+"/delete", "staff member")
 						}
 					}
 				}
@@ -46,11 +284,45 @@ templ StaffListPage(members []staff.Staff, nd NavData) {
 	}
 }
 
-templ StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, cats []value.Category, nd NavData, isNew bool, formErr string) {
-	@AppLayout(formTitle("Staff", isNew), nd) {
+// ─── Tasks section ────────────────────────────────────────────────────────────
+templ staffTasksSection(m *staff.Staff, tasks []task.Task) {
+	<h2 class="text-base font-brand font-semibold text-foreground">Tasks</h2>
+	<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/tasks") } class="flex flex-col gap-5">
+		if len(tasks) == 0 {
+			<p class="text-sm text-muted-foreground">No tasks created yet. <a href="/tasks/new" class="text-primary underline underline-offset-2">Add a task</a> first.</p>
+		} else {
+			<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-3">
+				for _, t := range tasks {
+					<label class="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+						<input
+							type="checkbox"
+							name="tasks"
+							value={ t.ID }
+							checked?={ includesStr(m.Tasks, t.ID) }
+							class="sr-only"
+						/>
+						<div class="flex flex-col gap-0.5 min-w-0">
+							<span class="text-sm font-brand font-semibold text-foreground">{ t.Label }</span>
+							if t.Description != "" {
+								<span class="text-xs text-muted-foreground">{ t.Description }</span>
+							}
+						</div>
+					</label>
+				}
+			</div>
+			@button.Button(button.Props{Type: button.TypeSubmit}) {
+				Save
+			}
+		}
+	</form>
+}
+
+// ─── New staff form (/staff/new) ──────────────────────────────────────────────
+templ StaffFormPage(m *staff.Staff, nd NavData, formErr string) {
+	@AppLayout("New Staff", nd) {
 		<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6">
-			@pageHeader(formTitle("Staff", isNew)) {
-				@button.Button(button.Props{Href: "/staff", Variant: button.VariantGhost, Size: button.SizeSm}) {
+			@pageHeader("New Staff") {
+				@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeSm}) {
 					Cancel
 				}
 			}
@@ -61,17 +333,13 @@ templ StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, ca
 					}
 				}
 			}
-			<form method="post" action={ templ.SafeURL(formAction("/staff", m.ID, isNew)) } class="flex flex-col gap-5">
+			<form method="post" action="/staff" class="flex flex-col gap-5">
 				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
 					@field() {
 						@label.Label(label.Props{For: "id"}) {
 							ID
 						}
-						if isNew {
-							@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Placeholder: "support_agent", Required: true})
-						} else {
-							@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Disabled: true})
-						}
+						@input.Input(input.Props{ID: "id", Name: "id", Value: m.ID, Placeholder: "support_agent", Required: true})
 					}
 					@field() {
 						@label.Label(label.Props{For: "staff-label"}) {
@@ -79,59 +347,174 @@ templ StaffFormPage(m *staff.Staff, tasks []task.Task, values []*value.Value, ca
 						}
 						@input.Input(input.Props{ID: "staff-label", Name: "label", Value: m.Label, Placeholder: "Support Agent", Required: true})
 					}
-				</div>
-				if len(tasks) > 0 {
-					<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
-						<h5>Tasks</h5>
-						<div class="flex flex-col gap-2">
-							for _, t := range tasks {
-								<label class="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-									<input
-										type="checkbox"
-										name="tasks"
-										value={ t.ID }
-										checked?={ includesStr(m.Tasks, t.ID) }
-										class="size-4 rounded border-input accent-primary mt-0.5"
-									/>
-									<div class="flex flex-col gap-0.5 min-w-0">
-										<span class="text-sm font-brand font-semibold text-foreground">{ t.Label }</span>
-										if t.Description != "" {
-											<span class="text-xs text-muted-foreground">{ t.Description }</span>
-										}
-									</div>
-								</label>
-							}
-						</div>
-					</div>
-				}
-				if len(cats) > 0 {
-					<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
-						<div class="flex flex-col gap-0.5">
-							<h5>Values</h5>
-							<p class="text-sm text-muted-foreground">Select a category to include all its values, or pick individual values below.</p>
-						</div>
-						for _, cat := range cats {
-							<div class="flex flex-col gap-2">
-								<label class="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/50 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-									<input
-										type="checkbox"
-										name="value_categories"
-										value={ cat.ID }
-										checked?={ includesStr(m.ValueCategories, cat.ID) }
-										class="size-4 rounded border-input accent-primary"
-									/>
-									<span class="text-sm font-brand font-semibold text-foreground">{ cat.Label }</span>
-								</label>
-								@staffValuePicker(cat.ID, values, m.Values)
-							</div>
+					@field() {
+						@label.Label(label.Props{For: "staff-description"}) {
+							Description
 						}
+						@input.Input(input.Props{ID: "staff-description", Name: "description", Value: m.Description, Placeholder: "Handles customer support and inquiries"})
+					}
+				</div>
+				<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4">
+					<div class="flex flex-col gap-0.5">
+						<span class="text-sm font-medium text-foreground">Icon</span>
+						<p class="text-xs text-muted-foreground">Represents this staff member across the app.</p>
 					</div>
-				}
+					@staffIconPicker(m.Icon, m.Label)
+				</div>
 				@button.Button(button.Props{Type: button.TypeSubmit}) {
-					Save
+					Create
 				}
 			</form>
 		</div>
+	}
+}
+
+// ─── Icon picker popup ────────────────────────────────────────────────────────
+templ staffIconPicker(selected, lbl string) {
+	<div data-icon-picker class="relative w-fit">
+		<button
+			type="button"
+			class="flex items-center gap-2 px-2 py-2 rounded-lg border border-border hover:border-muted-foreground bg-background transition-colors"
+			onclick="this.closest('[data-icon-picker]').querySelector('[data-icon-panel]').classList.toggle('hidden')"
+		>
+			<div class="size-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm shrink-0">
+				<span data-icon-preview="" class={ templ.KV("hidden", selected != "") }>{ staffInitials(lbl) }</span>
+				for _, opt := range staffIconOptions() {
+					<span data-icon-preview={ opt } class={ templ.KV("hidden", selected != opt) }>
+						@staffIcon(opt, "")
+					</span>
+				}
+			</div>
+			@icons.ChevronDown(templ.Attributes{"class": "size-3.5 text-muted-foreground"})
+		</button>
+		<div
+			data-icon-panel
+			class="hidden absolute z-50 top-full left-0 mt-1.5 bg-popover border border-border rounded-xl shadow-lg p-3"
+		>
+			<div class="flex flex-wrap gap-1.5 w-72 max-h-52 overflow-y-auto">
+				<label
+					title="Initials"
+					class={
+						"size-9 rounded-full flex items-center justify-center cursor-pointer transition-all font-brand font-semibold text-sm ring-offset-background",
+						templ.KV("bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2", selected == ""),
+						templ.KV("bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground", selected != ""),
+					}
+				>
+					<input type="radio" name="icon" value="" checked?={ selected == "" } class="sr-only"/>
+					{ staffInitials(lbl) }
+				</label>
+				for _, opt := range staffIconOptions() {
+					<label
+						title={ opt }
+						class={
+							"size-9 rounded-full flex items-center justify-center cursor-pointer transition-all ring-offset-background",
+							templ.KV("bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2", selected == opt),
+							templ.KV("bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground", selected != opt),
+						}
+					>
+						<input type="radio" name="icon" value={ opt } checked?={ selected == opt } class="sr-only"/>
+						@staffIcon(opt, "")
+					</label>
+				}
+			</div>
+		</div>
+	</div>
+	<script>
+		(function () {
+			var pickers = document.querySelectorAll("[data-icon-picker]");
+
+			document.addEventListener(
+				"click",
+				function (e) {
+					pickers.forEach(function (picker) {
+						if (!picker.contains(e.target)) {
+							var panel = picker.querySelector("[data-icon-panel]");
+							if (panel) panel.classList.add("hidden");
+						}
+					});
+				},
+				true,
+			);
+
+			pickers.forEach(function (picker) {
+				picker.querySelectorAll('input[name="icon"]').forEach(function (radio) {
+					radio.addEventListener("change", function () {
+						var val = this.value;
+						picker
+							.querySelectorAll("[data-icon-preview]")
+							.forEach(function (el) {
+								el.classList.toggle("hidden", el.dataset.iconPreview !== val);
+							});
+						var panel = picker.querySelector("[data-icon-panel]");
+						if (panel) panel.classList.add("hidden");
+					});
+				});
+			});
+		})();
+	</script>
+}
+
+// ─── Icon components ──────────────────────────────────────────────────────────
+templ staffIcon(iconName, lbl string) {
+	switch iconName {
+		case "user":
+			@icons.User(templ.Attributes{"class": "size-4"})
+		case "user-round":
+			@icons.UserRound(templ.Attributes{"class": "size-4"})
+		case "bot":
+			@icons.Bot(templ.Attributes{"class": "size-4"})
+		case "headphones":
+			@icons.Headphones(templ.Attributes{"class": "size-4"})
+		case "phone":
+			@icons.Phone(templ.Attributes{"class": "size-4"})
+		case "mail":
+			@icons.Mail(templ.Attributes{"class": "size-4"})
+		case "calendar":
+			@icons.Calendar(templ.Attributes{"class": "size-4"})
+		case "clipboard":
+			@icons.Clipboard(templ.Attributes{"class": "size-4"})
+		case "briefcase":
+			@icons.Briefcase(templ.Attributes{"class": "size-4"})
+		case "calculator":
+			@icons.Calculator(templ.Attributes{"class": "size-4"})
+		case "cpu":
+			@icons.Cpu(templ.Attributes{"class": "size-4"})
+		case "database":
+			@icons.Database(templ.Attributes{"class": "size-4"})
+		case "globe":
+			@icons.Globe(templ.Attributes{"class": "size-4"})
+		case "key":
+			@icons.Key(templ.Attributes{"class": "size-4"})
+		case "megaphone":
+			@icons.Megaphone(templ.Attributes{"class": "size-4"})
+		case "message-circle":
+			@icons.MessageCircle(templ.Attributes{"class": "size-4"})
+		case "monitor":
+			@icons.Monitor(templ.Attributes{"class": "size-4"})
+		case "package":
+			@icons.Package(templ.Attributes{"class": "size-4"})
+		case "pencil":
+			@icons.Pencil(templ.Attributes{"class": "size-4"})
+		case "shield":
+			@icons.Shield(templ.Attributes{"class": "size-4"})
+		case "star":
+			@icons.Star(templ.Attributes{"class": "size-4"})
+		case "truck":
+			@icons.Truck(templ.Attributes{"class": "size-4"})
+		case "wrench":
+			@icons.Wrench(templ.Attributes{"class": "size-4"})
+		case "zap":
+			@icons.Zap(templ.Attributes{"class": "size-4"})
+		case "wallet":
+			@icons.Wallet(templ.Attributes{"class": "size-4"})
+		case "award":
+			@icons.Award(templ.Attributes{"class": "size-4"})
+		case "coffee":
+			@icons.Coffee(templ.Attributes{"class": "size-4"})
+		case "flag":
+			@icons.Flag(templ.Attributes{"class": "size-4"})
+		default:
+			{ staffInitials(lbl) }
 	}
 }
 
@@ -145,7 +528,7 @@ templ staffValuePicker(catID string, values []*value.Value, selected []string) {
 						name="values"
 						value={ v.ID }
 						checked?={ includesStr(selected, v.ID) }
-						class="size-3.5 rounded border-input accent-primary"
+						class="sr-only"
 					/>
 					{ v.Title }
 				</label>

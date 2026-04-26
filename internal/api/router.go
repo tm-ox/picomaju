@@ -58,8 +58,8 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Get("/setup/integrations", ui.integrationsPage)                 // step 3 — tool picker
 	r.Post("/setup/integrations", ui.completeIntegrations)            // -> /values
 
-	// Dashboard
-	r.Get("/", ui.dashboardPage)
+	// Home — staff list
+	r.Get("/", ui.staffList)
 
 	// Values
 	r.Get("/values", ui.valueList)
@@ -87,11 +87,18 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Post("/tasks/{id}/delete", ui.deleteTask)
 
 	// Staff
-	r.Get("/staff", ui.staffList)
+	r.Get("/staff", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
 	r.Get("/staff/new", ui.newStaffForm)
-	r.Get("/staff/{id}/edit", ui.editStaffForm)
+	r.Get("/staff/{id}", ui.staffDetail)
+	r.Get("/staff/{id}/edit", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/staff/"+chi.URLParam(r, "id"), http.StatusSeeOther)
+	})
 	r.Post("/staff", ui.createStaff)
-	r.Post("/staff/{id}", ui.updateStaff)
+	r.Post("/staff/{id}/profile", ui.updateStaffProfile)
+	r.Post("/staff/{id}/tasks", ui.updateStaffTasks)
+	r.Post("/staff/{id}/values", ui.updateStaffValues)
 	r.Post("/staff/{id}/delete", ui.deleteStaff)
 
 	// Settings
