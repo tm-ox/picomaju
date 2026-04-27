@@ -74,7 +74,7 @@ func appStyles() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<style>\n\t\t#sidebar { transition: width 200ms ease; }\n\t\t#sidebar-main { transition: transform 200ms ease; }\n\t\t#sidebar [data-sidebar-label] { white-space: nowrap; }\n\t\tdialog { border: none; padding: 0; background: transparent; max-width: 100%; }\n\t\tdialog::backdrop { background: rgba(0,0,0,0.4); }\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<style>\n\t\t#sidebar { transition: width 200ms ease; }\n\t\t#sidebar-main { transition: transform 200ms ease; }\n\t\t#sidebar [data-sidebar-label] { white-space: nowrap; }\n\t\tdialog { border: none; padding: 0; background: transparent; }\n\t\tdialog::backdrop { background: rgba(0,0,0,0.4); }\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

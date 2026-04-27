@@ -1455,7 +1455,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<dialog id=\"staff-values-dialog\" class=\"w-full max-w-sm rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Values</span> <button type=\"button\" onclick=\"document.getElementById('staff-values-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<dialog id=\"staff-values-dialog\" class=\"w-full w-[calc(100%-3rem)] max-w-2xl rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Values</span> <button type=\"button\" onclick=\"document.getElementById('staff-values-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1895,7 +1895,7 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<dialog id=\"staff-tasks-dialog\" class=\"w-full max-w-sm rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Tasks</span> <button type=\"button\" onclick=\"document.getElementById('staff-tasks-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<dialog id=\"staff-tasks-dialog\" class=\"w-full w-[calc(100%-3rem)] max-w-2xl rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Tasks</span> <button type=\"button\" onclick=\"document.getElementById('staff-tasks-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
