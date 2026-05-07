@@ -109,7 +109,8 @@
     --input: oklch(0.265 0.062 254);
     --ring: oklch(0.573 0.057 222);
     /* #080f1a — darker than bg for sidebar */
-    --sidebar: oklch(0.082 0.04 258);
+    --sidebar: oklch(0.167 0.058 258);
+    /*--sidebar: oklch(0.082 0.04 258);*/
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.41 0.22 18.5);
     --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -150,6 +151,6 @@
         @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring;
     }
     textarea {
-        @apply flex min-h-[7rem] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring resize-y;
+        @apply flex min-h-28 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring resize-y;
     }
 }
