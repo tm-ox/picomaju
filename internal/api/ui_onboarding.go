@@ -55,10 +55,10 @@ func (h *uiHandler) completeFirstStaff(w http.ResponseWriter, r *http.Request) {
 	id := slugify(label)
 
 	m := &staff.Staff{
-		ID:    id,
-		Label: label,
+		ID:          id,
+		Label:       label,
+		Description: role,
 	}
-	_ = role
 
 	if err := h.staff.Create(m); err != nil {
 		if !strings.Contains(err.Error(), "already exists") {

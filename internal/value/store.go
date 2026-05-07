@@ -40,7 +40,22 @@ func (s *Store) List() ([]*Value, error) {
 	return values, nil
 }
 
+func validID(id string) bool {
+	if id == "" {
+		return false
+	}
+	for _, r := range id {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_') {
+			return false
+		}
+	}
+	return true
+}
+
 func (s *Store) Get(id string) (*Value, error) {
+	if !validID(id) {
+		return nil, fmt.Errorf("invalid value id %q", id)
+	}
 	v, err := s.readFile(id + ".md")
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -52,6 +67,9 @@ func (s *Store) Get(id string) (*Value, error) {
 }
 
 func (s *Store) Create(v *Value) error {
+	if !validID(v.ID) {
+		return fmt.Errorf("invalid value id %q", v.ID)
+	}
 	if err := os.MkdirAll(s.dir, 0755); err != nil {
 		return err
 	}
@@ -59,10 +77,16 @@ func (s *Store) Create(v *Value) error {
 }
 
 func (s *Store) Update(v *Value) error {
+	if !validID(v.ID) {
+		return fmt.Errorf("invalid value id %q", v.ID)
+	}
 	return s.writeFile(v)
 }
 
 func (s *Store) Delete(id string) error {
+	if !validID(id) {
+		return fmt.Errorf("invalid value id %q", id)
+	}
 	err := os.Remove(filepath.Join(s.dir, id+".md"))
 	if os.IsNotExist(err) {
 		return fmt.Errorf("value %q not found", id)

@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"picomaju/internal/compiler"
 	"picomaju/internal/license"
 	"picomaju/internal/payment"
+	"picomaju/internal/picoclaw"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -39,6 +41,7 @@ type uiHandler struct {
 	chats    *chat.Store
 	settings *settings.Store
 	license  *license.Store
+	picoclaw *picoclaw.Manager
 	dataDir  string
 }
 
@@ -95,6 +98,10 @@ func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 	hours := strings.TrimSpace(r.FormValue("hours"))
 	if dataDir == "" {
 		setuptpl.SetupStep1Page(businessName, dataDir, tz, hours, "Data directory is required.").Render(r.Context(), w)
+		return
+	}
+	if !filepath.IsAbs(dataDir) {
+		setuptpl.SetupStep1Page(businessName, dataDir, tz, hours, "Data directory must be an absolute path.").Render(r.Context(), w)
 		return
 	}
 	// Load existing settings to preserve Languages set on welcome screen.
@@ -454,7 +461,10 @@ func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 	if chats == nil {
 		chats = []chat.Chat{}
 	}
-	stafftpl.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled).Render(r.Context(), w)
+	lic, _ := h.license.Load()
+	licensed := lic != nil && lic.IsActive()
+	running := h.picoclaw.IsRunning(id)
+	stafftpl.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled, licensed, running).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -482,7 +492,7 @@ func (h *uiHandler) updateStaffProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := r.ParseForm(); err != nil {
-		http.Redirect(w, r, "/staff/"+id+"?s=profile&err="+err.Error(), http.StatusSeeOther)
+		http.Redirect(w, r, "/staff/"+id+"?s=profile&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}
 	label := strings.TrimSpace(r.FormValue("label"))
@@ -495,7 +505,7 @@ func (h *uiHandler) updateStaffProfile(w http.ResponseWriter, r *http.Request) {
 	m.Icon = r.FormValue("icon")
 	m.Active = r.FormValue("active") == "on"
 	if err := h.staff.Update(m); err != nil {
-		http.Redirect(w, r, "/staff/"+id+"?s=profile&err="+err.Error(), http.StatusSeeOther)
+		http.Redirect(w, r, "/staff/"+id+"?s=profile&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}
 	http.Redirect(w, r, "/staff/"+id+"?s=profile", http.StatusSeeOther)
@@ -517,7 +527,10 @@ func (h *uiHandler) updateStaffTasks(w http.ResponseWriter, r *http.Request) {
 		tasks = []string{}
 	}
 	m.Tasks = tasks
-	h.staff.Update(m)
+	if err := h.staff.Update(m); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=tasks&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+id+"?s=tasks", http.StatusSeeOther)
 }
 
@@ -542,7 +555,10 @@ func (h *uiHandler) updateStaffValues(w http.ResponseWriter, r *http.Request) {
 	}
 	m.ValueCategories = valueCats
 	m.Values = values
-	h.staff.Update(m)
+	if err := h.staff.Update(m); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=values&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+id+"?s=values", http.StatusSeeOther)
 }
 
@@ -561,7 +577,10 @@ func (h *uiHandler) removeStaffTask(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	m.Tasks = kept
-	h.staff.Update(m)
+	if err := h.staff.Update(m); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=tasks&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+id+"?s=tasks", http.StatusSeeOther)
 }
 
@@ -580,7 +599,10 @@ func (h *uiHandler) removeStaffValueCat(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 	m.ValueCategories = kept
-	h.staff.Update(m)
+	if err := h.staff.Update(m); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=values&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+id+"?s=values", http.StatusSeeOther)
 }
 
@@ -599,13 +621,80 @@ func (h *uiHandler) removeStaffValue(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	m.Values = kept
-	h.staff.Update(m)
+	if err := h.staff.Update(m); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?s=values&err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+id+"?s=values", http.StatusSeeOther)
 }
 
 func (h *uiHandler) deleteStaff(w http.ResponseWriter, r *http.Request) {
 	h.staff.Delete(chi.URLParam(r, "id"))
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// --- Picoclaw lifecycle ---
+
+func (h *uiHandler) activateStaff(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	lic, err := h.license.Load()
+	if err != nil || !lic.IsActive() {
+		http.Redirect(w, r, "/license", http.StatusSeeOther)
+		return
+	}
+	m, err := h.staff.Get(id)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	workspaceDir := h.workspaceDir(id)
+	in, err := h.resolveCompilerInput(m)
+	if err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
+	toolCfgs := make([]picoclaw.ToolConfig, 0, len(in.Tools))
+	for _, t := range in.Tools {
+		toolCfgs = append(toolCfgs, picoclaw.ToolConfig{Type: t.Type, Config: t.Config})
+	}
+	cfg := picoclaw.Config{
+		AgentID:      id,
+		WorkspaceDir: workspaceDir,
+		Tools:        toolCfgs,
+	}
+	if lic.Token != "" {
+		base := os.Getenv("PICOMAJU_BASE_URL")
+		if base == "" {
+			base = "http://localhost:18800"
+		}
+		cfg.LLMProxy = &picoclaw.LLMProxyConfig{
+			URL:   base + "/proxy/v1",
+			Token: lic.Token,
+		}
+	}
+	if err := picoclaw.WriteConfig(cfg, workspaceDir); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
+	version := os.Getenv("PICOCLAW_VERSION")
+	if version == "" {
+		version = picoclaw.DefaultVersion
+	}
+	if err := h.picoclaw.EnsureBinary(h.dataDir, version); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
+	if err := h.picoclaw.Start(id, workspaceDir, h.dataDir); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, "/staff/"+id, http.StatusSeeOther)
+}
+
+func (h *uiHandler) deactivateStaff(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	h.picoclaw.Stop(id)
+	http.Redirect(w, r, "/staff/"+id, http.StatusSeeOther)
 }
 
 // --- Compiler ---
@@ -619,16 +708,20 @@ func (h *uiHandler) compileStaff(w http.ResponseWriter, r *http.Request) {
 	}
 	in, err := h.resolveCompilerInput(m)
 	if err != nil {
-		http.Redirect(w, r, "/staff/"+id+"?err="+err.Error(), http.StatusSeeOther)
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}
 	out := compiler.Compile(in)
 	workspaceDir := h.workspaceDir(id)
 	if err := compiler.Write(out, workspaceDir); err != nil {
-		http.Redirect(w, r, "/staff/"+id+"?err="+err.Error(), http.StatusSeeOther)
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, "/staff/"+id+"?compiled=1", http.StatusSeeOther)
+	target := "/staff/" + id + "?compiled=1"
+	if len(out.Warnings) > 0 {
+		target += "&warn=" + url.QueryEscape(strings.Join(out.Warnings, "; "))
+	}
+	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 
 func (h *uiHandler) workspaceDir(staffID string) string {
@@ -778,7 +871,10 @@ func (h *uiHandler) createMessage(w http.ResponseWriter, r *http.Request) {
 			c.Title = content
 		}
 	}
-	h.chats.Update(c) //nolint:errcheck
+	if err := h.chats.Update(c); err != nil {
+		http.Error(w, "could not save message", http.StatusInternalServerError)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
 }
 
@@ -796,7 +892,10 @@ func (h *uiHandler) renameChat(w http.ResponseWriter, r *http.Request) {
 	}
 	if title := strings.TrimSpace(r.FormValue("title")); title != "" {
 		c.Title = title
-		h.chats.Update(c) //nolint:errcheck
+		if err := h.chats.Update(c); err != nil {
+			http.Error(w, "could not rename chat", http.StatusInternalServerError)
+			return
+		}
 	}
 	http.Redirect(w, r, "/staff/"+staffID+"/chats/"+chatID, http.StatusSeeOther)
 }
@@ -804,7 +903,10 @@ func (h *uiHandler) renameChat(w http.ResponseWriter, r *http.Request) {
 func (h *uiHandler) deleteChat(w http.ResponseWriter, r *http.Request) {
 	staffID := chi.URLParam(r, "id")
 	chatID := chi.URLParam(r, "chatId")
-	h.chats.Delete(chatID) //nolint:errcheck
+	if err := h.chats.Delete(chatID); err != nil {
+		http.Error(w, "could not delete chat", http.StatusInternalServerError)
+		return
+	}
 	http.Redirect(w, r, "/staff/"+staffID, http.StatusSeeOther)
 }
 
@@ -842,6 +944,10 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		DataDir:         newDataDir,
 	}
 	if newDataDir != "" && newDataDir != activeDir {
+		if !filepath.IsAbs(newDataDir) {
+			settingstpl.SettingsPage(cfg, activeDir, h.navData(r, ""), false, "Data directory must be an absolute path.").Render(r.Context(), w)
+			return
+		}
 		if err := h.initStores(newDataDir); err != nil {
 			settingstpl.SettingsPage(cfg, activeDir, h.navData(r, ""), false, "Cannot use that directory: "+err.Error()).Render(r.Context(), w)
 			return
@@ -864,10 +970,38 @@ func (h *uiHandler) licensePage(w http.ResponseWriter, r *http.Request) {
 	if l == nil {
 		l = &license.License{}
 	}
+	// If subscription is expired, attempt to re-verify with Stripe before showing the page.
+	if !l.IsActive() && l.Active && isSubscriptionPlan(l.Plan) && l.Token != "" {
+		h.tryRenewSubscription(l)
+		l, _ = h.license.Load()
+		if l == nil {
+			l = &license.License{}
+		}
+	}
 	activated := r.URL.Query().Get("activated") == "1"
 	formErr := r.URL.Query().Get("err")
 	dev := os.Getenv("DEV") != ""
 	licensetpl.LicensePage(l, h.navData(r, "license"), activated, formErr, dev).Render(r.Context(), w)
+}
+
+func isSubscriptionPlan(plan string) bool {
+	return plan == license.PlanStarter || plan == license.PlanPro
+}
+
+// tryRenewSubscription verifies the subscription with Stripe and extends the
+// local expiry by 35 days if still active. Errors are silently ignored — the
+// caller re-loads the license and checks IsActive() after the call.
+func (h *uiHandler) tryRenewSubscription(l *license.License) {
+	cfg := payment.LoadConfig()
+	if !cfg.StripeConfigured() || l.Token == "" {
+		return
+	}
+	active, err := payment.VerifyStripeSubscription(cfg, l.Token)
+	if err != nil || !active {
+		return
+	}
+	l.ExpiresAt = time.Now().AddDate(0, 0, 35).Unix()
+	_ = h.license.Save(l)
 }
 
 func (h *uiHandler) licenseCheckout(w http.ResponseWriter, r *http.Request) {
@@ -896,7 +1030,7 @@ func (h *uiHandler) licenseCheckout(w http.ResponseWriter, r *http.Request) {
 		redirectURL, err = payment.StripeCheckoutURL(cfg, packID, planID)
 	}
 	if err != nil {
-		http.Redirect(w, r, "/license?err="+err.Error(), http.StatusSeeOther)
+		http.Redirect(w, r, "/license?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
@@ -964,15 +1098,29 @@ func valueFromForm(r *http.Request) (*value.Value, error) {
 	if err := r.ParseForm(); err != nil {
 		return &value.Value{}, err
 	}
-	version, _ := strconv.Atoi(r.FormValue("version"))
-	priority, _ := strconv.Atoi(r.FormValue("priority"))
+	version, err := strconv.Atoi(r.FormValue("version"))
+	if err != nil || version < 1 {
+		version = 1
+	}
+	priority, err := strconv.Atoi(r.FormValue("priority"))
+	if err != nil || priority < 0 || priority > 100 {
+		priority = 50
+	}
+	title := strings.TrimSpace(r.FormValue("title"))
+	if len(title) > 200 {
+		return &value.Value{}, fmt.Errorf("title too long (max 200 characters)")
+	}
+	body := strings.TrimSpace(r.FormValue("body"))
+	if len(body) > 10000 {
+		return &value.Value{}, fmt.Errorf("body too long (max 10,000 characters)")
+	}
 	return &value.Value{
 		ID:       strings.TrimSpace(r.FormValue("id")),
-		Title:    strings.TrimSpace(r.FormValue("title")),
+		Title:    title,
 		Category: r.FormValue("category"),
 		Version:  version,
 		Priority: priority,
-		Body:     strings.TrimSpace(r.FormValue("body")),
+		Body:     body,
 	}, nil
 }
 
@@ -980,14 +1128,22 @@ func taskFromForm(r *http.Request) (*task.Task, error) {
 	if err := r.ParseForm(); err != nil {
 		return &task.Task{}, err
 	}
+	label := strings.TrimSpace(r.FormValue("label"))
+	if len(label) > 200 {
+		return &task.Task{}, fmt.Errorf("label too long (max 200 characters)")
+	}
+	desc := strings.TrimSpace(r.FormValue("description"))
+	if len(desc) > 2000 {
+		return &task.Task{}, fmt.Errorf("description too long (max 2,000 characters)")
+	}
 	tools := r.Form["tools"]
 	if tools == nil {
 		tools = []string{}
 	}
 	return &task.Task{
 		ID:          strings.TrimSpace(r.FormValue("id")),
-		Label:       strings.TrimSpace(r.FormValue("label")),
-		Description: strings.TrimSpace(r.FormValue("description")),
+		Label:       label,
+		Description: desc,
 		Tools:       tools,
 	}, nil
 }
@@ -996,10 +1152,18 @@ func staffFromForm(r *http.Request) (*staff.Staff, error) {
 	if err := r.ParseForm(); err != nil {
 		return &staff.Staff{}, err
 	}
+	label := strings.TrimSpace(r.FormValue("label"))
+	if len(label) > 200 {
+		return &staff.Staff{}, fmt.Errorf("label too long (max 200 characters)")
+	}
+	desc := strings.TrimSpace(r.FormValue("description"))
+	if len(desc) > 2000 {
+		return &staff.Staff{}, fmt.Errorf("description too long (max 2,000 characters)")
+	}
 	return &staff.Staff{
 		ID:          strings.TrimSpace(r.FormValue("id")),
-		Label:       strings.TrimSpace(r.FormValue("label")),
-		Description: strings.TrimSpace(r.FormValue("description")),
+		Label:       label,
+		Description: desc,
 		Active:      r.FormValue("active") == "on",
 		Icon:        r.FormValue("icon"),
 	}, nil

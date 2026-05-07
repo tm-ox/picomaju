@@ -23,22 +23,26 @@ type Input struct {
 
 // Output holds the three generated workspace files as strings.
 type Output struct {
-	AgentMD string
-	SoulMD  string
-	UserMD  string
+	AgentMD  string
+	SoulMD   string
+	UserMD   string
+	Warnings []string
 }
 
 // Compile generates AGENT.md, SOUL.md, and USER.md from resolved staff data.
 func Compile(in Input) Output {
+	agentMD, warnings := buildAgent(in)
 	return Output{
-		AgentMD: buildAgent(in),
-		SoulMD:  buildSoul(in),
-		UserMD:  buildUser(in),
+		AgentMD:  agentMD,
+		SoulMD:   buildSoul(in),
+		UserMD:   buildUser(in),
+		Warnings: warnings,
 	}
 }
 
-func buildAgent(in Input) string {
+func buildAgent(in Input) (string, []string) {
 	var b strings.Builder
+	var warnings []string
 
 	b.WriteString("---\n")
 	fmt.Fprintf(&b, "name: %s\n", in.Staff.Label)
@@ -70,6 +74,8 @@ func buildAgent(in Input) string {
 			for _, tid := range t.Tools {
 				if tl, ok := toolIndex[tid]; ok {
 					labels = append(labels, tl.Label)
+				} else {
+					warnings = append(warnings, fmt.Sprintf("task %q references missing tool %q", t.Label, tid))
 				}
 			}
 			if len(labels) > 0 {
@@ -91,7 +97,7 @@ func buildAgent(in Input) string {
 		b.WriteString("\n")
 	}
 
-	return b.String()
+	return b.String(), warnings
 }
 
 func buildSoul(in Input) string {

@@ -7,6 +7,18 @@ import (
 	"path/filepath"
 )
 
+func validID(id string) bool {
+	if id == "" {
+		return false
+	}
+	for _, r := range id {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_') {
+			return false
+		}
+	}
+	return true
+}
+
 // Task is a task definition assigned to a Staff member.
 // It describes what the agent does and which Tools it uses to do it.
 type Task struct {
@@ -42,6 +54,9 @@ func (s *Store) Get(id string) (*Task, error) {
 }
 
 func (s *Store) Create(t *Task) error {
+	if !validID(t.ID) {
+		return fmt.Errorf("invalid task id %q: use only letters, digits, hyphens, underscores", t.ID)
+	}
 	tasks, err := s.load()
 	if err != nil {
 		return err

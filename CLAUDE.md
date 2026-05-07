@@ -6,9 +6,11 @@ Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Life
 
 ## Status
 
-**Implemented:** Full UI (staff / values / tools / tasks / chat shell) · Directive Compiler · License store · Plan & Credits page · Payment infrastructure (Stripe + Xendit) · Chat activation gate
+**Implemented:** Full UI (staff / values / tools / tasks / chat shell) · Directive Compiler · License store · Plan & Credits page · Payment infrastructure (Stripe + Xendit) · Chat activation gate · Compile/Activate split · Picoclaw lifecycle (download + subprocess management) · LLM proxy (Anthropic passthrough + credit metering + rate limiting) · Subscription renewal verification (Stripe)
 
-**Next:** Staff overview Compile vs Activate split → Picoclaw lifecycle (download + subprocess) → LLM proxy
+**Security hardened (2026-05-07):** Xendit webhook constant-time compare · credits validation · URL-encoded error redirects · store write error handling · value/task ID path traversal prevention · license mutex (atomic credit deduction) · form field length caps · absolute path enforcement for data dir · compiler warnings for unresolved tool refs · onboarding role field wired
+
+**Next:** Control Plane dashboard
 
 ## Product tiers
 
@@ -54,6 +56,8 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 | `XENDIT_API_KEY` | — | Xendit API key (`xnd_production_…`) |
 | `XENDIT_WEBHOOK_TOKEN` | — | Xendit callback token (from Xendit dashboard) |
 | `PICOMAJU_BASE_URL` | — | Public base URL for payment redirect URLs |
+| `PICOCLAW_VERSION` | `0.1.0` | picoclaw release version to download on first activation |
+| `ANTHROPIC_API_KEY` | — | Anthropic API key for LLM proxy (`sk-ant-…`) |
 
 ## Sub-docs
 
@@ -62,8 +66,5 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 
 ## Deferred
 
-- **Staff overview: Compile vs Activate split** — "Compile" (free) always shown; separate "Activate" button gated on `license.IsActive()`; Activate triggers picoclaw download + start
-- **Picoclaw lifecycle** — download binary from GitHub releases on activation, extract to `{dataDir}/bin/picoclaw`, generate full `config.json`, manage subprocess (start/stop/restart), hot-reload via `POST /agent/:id/reload`
-- **LLM proxy** — route picoclaw LLM calls through picomaju backend for metering; picoclaw config points to proxy endpoint; requires backend deployment
 - **Subscription renewal** — on expiry, re-verify against payment provider; currently 35-day local expiry safety net only
 - **Manifest versioning**, Control Plane dashboard, Sidecar Execution, Managed Lifecycle, Overview section analytics

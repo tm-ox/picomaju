@@ -1,6 +1,6 @@
 # ui/
 
-Active frontend: templui v1.10.0 + Tailwind CSS v4.2.4. `web/` is legacy reference only.
+Active frontend: templui v1.10.0 + Tailwind CSS v4.2.4.
 
 Components added via `templui add <name>`. Installed: button, alert, label, card, input, selectbox (+ icon, popover, aspectratio deps).
 

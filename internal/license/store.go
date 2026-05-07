@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -52,6 +53,7 @@ func (l *License) PlanLabel() string {
 }
 
 type Store struct {
+	mu   sync.Mutex
 	path string
 }
 
@@ -60,6 +62,18 @@ func NewStore(path string) *Store {
 }
 
 func (s *Store) Load() (*License, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.load()
+}
+
+func (s *Store) Save(l *License) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.save(l)
+}
+
+func (s *Store) load() (*License, error) {
 	b, err := os.ReadFile(s.path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -74,7 +88,7 @@ func (s *Store) Load() (*License, error) {
 	return &l, nil
 }
 
-func (s *Store) Save(l *License) error {
+func (s *Store) save(l *License) error {
 	if err := os.MkdirAll(filepath.Dir(s.path), 0755); err != nil {
 		return err
 	}
@@ -85,10 +99,12 @@ func (s *Store) Save(l *License) error {
 	return os.WriteFile(s.path, b, 0644)
 }
 
-// DeductCredit decrements credits_remaining by 1 and saves.
+// DeductCredit decrements credits_remaining by 1 and saves atomically.
 // Returns false if no credits remain.
 func (s *Store) DeductCredit() (bool, error) {
-	l, err := s.Load()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	l, err := s.load()
 	if err != nil {
 		return false, err
 	}
@@ -99,5 +115,5 @@ func (s *Store) DeductCredit() (bool, error) {
 	if l.CreditsRemaining == 0 {
 		l.Active = false
 	}
-	return true, s.Save(l)
+	return true, s.save(l)
 }

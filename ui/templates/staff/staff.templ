@@ -81,7 +81,7 @@ templ staffDashboard(members []staff.Staff) {
 }
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
-templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat, compiled bool) {
+templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat, compiled bool, licensed bool, running bool) {
 	@shell.AppLayout(m.Label, nd, staffSidebarNav(m, section, chats)) {
 		<div class="flex items-center gap-3">
 			<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
@@ -106,7 +106,7 @@ templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, valu
 			case "tasks":
 				@staffTasksSection(m, tasks)
 			default:
-				@staffOverviewSection(m, tasks, tools, compiled)
+				@staffOverviewSection(m, tasks, tools, compiled, licensed, running)
 		}
 	}
 }
@@ -154,7 +154,7 @@ templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
 }
 
 // ─── Overview section ─────────────────────────────────────────────────────────
-templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, compiled bool) {
+templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, compiled bool, licensed bool, running bool) {
 	<h2 class="text-base font-brand font-semibold text-foreground">Overview</h2>
 	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 		@staffStatCardLink("Status", staffActiveLabel(m.Active), "/staff/"+m.ID+"?s=profile") {
@@ -174,7 +174,7 @@ templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool,
 		<div class="flex items-center justify-between">
 			<h5 class="text-sm font-brand font-semibold text-foreground">Directives</h5>
 			if compiled {
-				<span class="text-xs font-mono text-green-600 dark:text-green-400">Deployed</span>
+				<span class="text-xs font-mono text-green-600 dark:text-green-400">Compiled</span>
 			}
 		</div>
 		if compiled {
@@ -184,14 +184,45 @@ templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool,
 		}
 		<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/compile") }>
 			@button.Button(button.Props{Type: button.TypeSubmit, Variant: button.VariantOutline, Size: button.SizeSm}) {
-				@icons.Zap(templ.Attributes{"class": "size-3.5"})
+				@icons.FileCode(templ.Attributes{"class": "size-3.5"})
 				if compiled {
 					Recompile
 				} else {
-					Compile &amp; Deploy
+					Compile
 				}
 			}
 		</form>
+	</div>
+	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
+		<div class="flex items-center justify-between">
+			<h5 class="text-sm font-brand font-semibold text-foreground">Runtime</h5>
+			if running {
+				<span class="text-xs font-mono text-green-600 dark:text-green-400">Running</span>
+			}
+		</div>
+		if !licensed {
+			<p class="text-sm text-muted-foreground">Activate to run this agent with live LLM calls via PicoClaw.</p>
+			@button.Button(button.Props{Href: "/license", Variant: button.VariantOutline, Size: button.SizeSm}) {
+				@icons.Zap(templ.Attributes{"class": "size-3.5"})
+				Upgrade to Activate
+			}
+		} else if running {
+			<p class="text-sm text-muted-foreground">PicoClaw agent process is active.</p>
+			<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/deactivate") }>
+				@button.Button(button.Props{Type: button.TypeSubmit, Variant: button.VariantOutline, Size: button.SizeSm}) {
+					@icons.StopCircle(templ.Attributes{"class": "size-3.5"})
+					Stop
+				}
+			</form>
+		} else {
+			<p class="text-sm text-muted-foreground">Start the PicoClaw agent process to enable live LLM calls.</p>
+			<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/activate") }>
+				@button.Button(button.Props{Type: button.TypeSubmit, Size: button.SizeSm}) {
+					@icons.Play(templ.Attributes{"class": "size-3.5"})
+					Activate
+				}
+			</form>
+		}
 	</div>
 	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
 		<div class="flex items-center justify-between">

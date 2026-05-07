@@ -65,7 +65,10 @@ func (h *uiHandler) activateFromStripe(session stripe.CheckoutSession) error {
 	meta := session.Metadata
 	switch meta["type"] {
 	case "credits":
-		credits, _ := strconv.Atoi(meta["credits"])
+		credits, err := strconv.Atoi(meta["credits"])
+		if err != nil || credits <= 0 {
+			return fmt.Errorf("invalid credits value %q", meta["credits"])
+		}
 		l.Active = true
 		l.Plan = license.PlanCredits
 		l.CreditsRemaining += credits
@@ -98,8 +101,8 @@ func (h *uiHandler) xenditWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Xendit webhook verification: X-CALLBACK-TOKEN header must match our token.
-	if r.Header.Get("X-CALLBACK-TOKEN") != cfg.XenditWebhookToken {
+	// Xendit webhook verification: constant-time compare to prevent timing attacks.
+	if !hmac.Equal([]byte(r.Header.Get("X-CALLBACK-TOKEN")), []byte(cfg.XenditWebhookToken)) {
 		http.Error(w, "invalid callback token", http.StatusUnauthorized)
 		return
 	}
@@ -140,7 +143,10 @@ func (h *uiHandler) activateFromXendit(invoiceID string, meta map[string]string)
 
 	switch meta["type"] {
 	case "credits":
-		credits, _ := strconv.Atoi(meta["credits"])
+		credits, err := strconv.Atoi(meta["credits"])
+		if err != nil || credits <= 0 {
+			return fmt.Errorf("invalid credits value %q", meta["credits"])
+		}
 		l.Active = true
 		l.Plan = license.PlanCredits
 		l.CreditsRemaining += credits

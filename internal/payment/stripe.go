@@ -5,6 +5,7 @@ import (
 
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/checkout/session"
+	"github.com/stripe/stripe-go/v82/subscription"
 )
 
 // StripeCheckoutURL creates a Stripe Checkout session and returns the redirect URL.
@@ -77,4 +78,19 @@ func StripeCheckoutURL(cfg Config, packID, planID string) (string, error) {
 		return "", fmt.Errorf("stripe checkout session: %w", err)
 	}
 	return s.URL, nil
+}
+
+// VerifyStripeSubscription returns true if the Stripe subscription is active or trialing.
+func VerifyStripeSubscription(cfg Config, subscriptionID string) (bool, error) {
+	stripe.Key = cfg.StripeSecretKey
+	sub, err := subscription.Get(subscriptionID, nil)
+	if err != nil {
+		return false, fmt.Errorf("stripe subscription lookup: %w", err)
+	}
+	switch sub.Status {
+	case stripe.SubscriptionStatusActive, stripe.SubscriptionStatusTrialing:
+		return true, nil
+	default:
+		return false, nil
+	}
 }

@@ -11,6 +11,7 @@ import (
 	"picomaju/internal/api"
 	"picomaju/internal/chat"
 	"picomaju/internal/license"
+	"picomaju/internal/picoclaw"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -67,8 +68,11 @@ func main() {
 		static = http.FS(sub)
 	}
 
+	pm := picoclaw.NewManager()
+	defer pm.StopAll()
+
 	addr := env("ADDR", ":18800")
-	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, chatStore, licenseStore, settingsStore, dataDir, static)
+	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, chatStore, licenseStore, settingsStore, dataDir, static, pm)
 
 	// ui/assets served from disk during active development
 	r.Handle("GET /ui/assets/*", http.StripPrefix("/ui/assets/", http.FileServer(http.Dir("ui/assets"))))

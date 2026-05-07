@@ -11,6 +11,9 @@ payment/stripe.go    — StripeCheckoutURL(cfg, packID, planID) → Stripe Check
 payment/xendit.go    — XenditCheckoutURL(cfg, packID, planID) → Xendit invoice URL (IDR)
 compiler/compiler.go — Compile(Input) Output; builds AGENT.md, SOUL.md, USER.md
 compiler/write.go    — Write(Output, workspaceDir); InjectConfig(configPath, AgentEntry)
+picoclaw/manager.go  — Manager{processes map[staffID]*os.Process}; EnsureBinary(dataDir, version); Start/Stop/IsRunning/StopAll; BinaryPath → {dataDir}/bin/picoclaw; DefaultVersion="0.1.0"; repo=picomaju/picoclaw
+picoclaw/config.go   — Config{agent_id, workspace_dir, tools[], llm_proxy{url,token}}; WriteConfig → {workspaceDir}/config.json
+llmproxy/handler.go  — Handler; POST /proxy/v1/* → https://api.anthropic.com/v1/*; auth via Bearer token matched to license.Token; deducts 1 credit per 200 on credits plan; SSE streaming via http.Flusher
 value/model.go       — Value, DirectiveEntry, ValidationResult, ValidationError
 value/store.go       — CRUD on <data_dir>/values/<id>.md (YAML frontmatter + body)
 value/validator.go   — required field check; priority clamp [0–100]
@@ -116,6 +119,9 @@ Setup gate: redirect to `/welcome` until data dir configured. Exempt: `/welcome`
 | POST | `/staff/:id/values` | update value/category assignments |
 | POST | `/staff/:id/delete` | delete → `/` |
 | POST | `/staff/:id/compile` | compile workspace files → `?compiled=1` |
+| POST | `/staff/:id/activate` | download picoclaw if needed + write config.json (with llm_proxy) + start subprocess (license required) |
+| POST | `/staff/:id/deactivate` | stop picoclaw subprocess |
+| POST | `/proxy/v1/*` | LLM proxy → Anthropic API; auth via Bearer/X-Proxy-Token = license.Token; metering for credits plan |
 | POST | `/staff/:id/chats` | create chat → chat page |
 | GET | `/staff/:id/chats/:chatId` | chat page |
 | POST | `/staff/:id/chats/:chatId/messages` | append message (redirects `/license` if not active) |

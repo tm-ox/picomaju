@@ -2,12 +2,15 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"picomaju/internal/chat"
 	"picomaju/internal/license"
+	"picomaju/internal/llmproxy"
+	"picomaju/internal/picoclaw"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -15,7 +18,7 @@ import (
 	"picomaju/internal/value"
 )
 
-func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
+func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem, pm *picoclaw.Manager) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -29,6 +32,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		license:  licenseStore,
 		settings: settingsStore,
 		dataDir:  dataDir,
+		picoclaw: pm,
 	}
 
 	// Paths that must work before the data dir is configured.
@@ -46,13 +50,18 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 				!setupPaths[req.URL.Path] &&
 				!strings.HasPrefix(req.URL.Path, "/static/") &&
 				!strings.HasPrefix(req.URL.Path, "/ui/") &&
-				!strings.HasPrefix(req.URL.Path, "/webhooks/") {
+				!strings.HasPrefix(req.URL.Path, "/webhooks/") &&
+				!strings.HasPrefix(req.URL.Path, "/proxy/") {
 				http.Redirect(w, req, "/welcome", http.StatusSeeOther)
 				return
 			}
 			next.ServeHTTP(w, req)
 		})
 	})
+
+	// LLM proxy — picoclaw routes LLM calls here; proxy adds Anthropic auth + metering.
+	proxy := llmproxy.NewHandler(licenseStore, os.Getenv("ANTHROPIC_API_KEY"))
+	r.Handle("/proxy/v1/*", proxy)
 
 	// Setup (onboarding) — welcome + 3 steps
 	r.Post("/welcome", ui.completeWelcome) //   -> /setup
@@ -109,6 +118,8 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Post("/staff/{id}/values/{valueId}/remove", ui.removeStaffValue)
 	r.Post("/staff/{id}/delete", ui.deleteStaff)
 	r.Post("/staff/{id}/compile", ui.compileStaff)
+	r.Post("/staff/{id}/activate", ui.activateStaff)
+	r.Post("/staff/{id}/deactivate", ui.deactivateStaff)
 
 	// Chats
 	r.Post("/staff/{id}/chats", ui.createChat)
