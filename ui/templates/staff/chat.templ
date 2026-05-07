@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData, licensed bool) {
-	@shell.ChatAppLayout("Chat — "+m.Label, nd, staffSidebarNav(m, c.ID, chats)) {
+templ StaffChatPage(members []staff.Staff, m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData, licensed bool) {
+	@shell.ChatAppLayout("Chat — "+m.Label, nd, staffAccordionNav(members, m.ID, c.ID, chats)) {
 		<div class="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
 			<div class="flex items-center gap-2 min-w-0 flex-1">
 				<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
@@ -117,9 +117,9 @@ templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.Na
 templ chatBubble(msg chat.Message) {
 	if msg.Role == "user" {
 		<div class="flex justify-end">
-			<div class="max-w-[80%] bg-blue-600 text-blue-50 rounded-2xl rounded-br-sm px-4 py-2.5">
+			<div class="max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5">
 				<p class="text-sm whitespace-pre-wrap">{ msg.Content }</p>
-				<p class="text-[0.625rem] text-blue-200 mt-1 text-right">{ chatTimestamp(msg.Timestamp) }</p>
+				<p class="text-[0.625rem] text-primary-foreground/60 mt-1 text-right">{ chatTimestamp(msg.Timestamp) }</p>
 			</div>
 		</div>
 	} else {

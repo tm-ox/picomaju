@@ -7,6 +7,7 @@ import (
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
 	"picomaju/ui/components/card"
+	"picomaju/ui/components/nativeselect"
 	"picomaju/ui/templates/shell"
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"strconv"
@@ -97,10 +98,10 @@ templ WelcomePage(lang, formErr string) {
 							@label.Label(label.Props{For: "language"}) {
 								Language / Bahasa
 							}
-							<select id="language" name="language">
+							@nativeselect.Select(nativeselect.Props{ID: "language", Name: "language"}) {
 								@welcomeLangOption("en", "English", lang == "en" || lang == "")
 								@welcomeLangOption("id", "Bahasa Indonesia", lang == "id")
-							</select>
+							}
 						</div>
 						@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
 							Get started
@@ -171,7 +172,7 @@ templ SetupStep1Page(businessName, dataDir, timezone, hours, formErr string) {
 						@label.Label(label.Props{For: "timezone"}) {
 							Timezone
 						}
-						<select id="timezone" name="timezone">
+						@nativeselect.Select(nativeselect.Props{ID: "timezone", Name: "timezone"}) {
 							@tzOption("Asia/Jakarta", timezone)
 							@tzOption("Asia/Makassar", timezone)
 							@tzOption("Asia/Jayapura", timezone)
@@ -183,7 +184,7 @@ templ SetupStep1Page(businessName, dataDir, timezone, hours, formErr string) {
 							@tzOption("Europe/London", timezone)
 							@tzOption("America/New_York", timezone)
 							@tzOption("UTC", timezone)
-						</select>
+						}
 					</div>
 					<div class="flex flex-col gap-1.5">
 						@label.Label(label.Props{For: "hours"}) {

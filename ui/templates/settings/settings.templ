@@ -6,6 +6,7 @@ import (
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/components/textarea"
 	"picomaju/ui/templates/shell"
 )
 
@@ -37,7 +38,7 @@ templ SettingsPage(cfg *internalsettings.Settings, activeDataDir string, nd shel
 				@label.Label(label.Props{For: "business_details"}) {
 					Business details
 				}
-				<textarea id="business_details" name="business_details" rows="4" placeholder="Describe your business, tone, key values…">{ cfg.BusinessDetails }</textarea>
+				@textarea.Textarea(textarea.Props{ID: "business_details", Name: "business_details", Rows: 4, Placeholder: "Describe your business, tone, key values…", Value: cfg.BusinessDetails})
 				<p class="text-sm text-muted-foreground">Used to personalise agent context across all staff profiles.</p>
 			}
 			@shell.Field() {

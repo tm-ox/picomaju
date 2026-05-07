@@ -7,6 +7,8 @@ import (
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/components/nativeselect"
+	"picomaju/ui/components/textarea"
 	"picomaju/ui/templates/shell"
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
@@ -115,12 +117,12 @@ templ ValueFormPage(v *value.Value, cats []value.Category, nd shell.NavData, isN
 				@label.Label(label.Props{For: "category"}) {
 					Category
 				}
-				<select id="category" name="category" required>
+				@nativeselect.Select(nativeselect.Props{ID: "category", Name: "category", Required: true}) {
 					<option value="">— select —</option>
 					for _, c := range cats {
 						<option value={ c.ID } selected?={ v.Category == c.ID }>{ c.Label }</option>
 					}
-				</select>
+				}
 			}
 			@shell.Field() {
 				@label.Label(label.Props{For: "version"}) {
@@ -138,7 +140,7 @@ templ ValueFormPage(v *value.Value, cats []value.Category, nd shell.NavData, isN
 				@label.Label(label.Props{For: "body"}) {
 					Directive
 				}
-				<textarea id="body" name="body" rows="8">{ v.Body }</textarea>
+				@textarea.Textarea(textarea.Props{ID: "body", Name: "body", Rows: 8, Value: v.Body})
 			}
 			<div class="flex items-center gap-3 pt-1">
 				@button.Button(button.Props{Type: button.TypeSubmit}) {

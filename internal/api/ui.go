@@ -464,21 +464,33 @@ func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 	lic, _ := h.license.Load()
 	licensed := lic != nil && lic.IsActive()
 	running := h.picoclaw.IsRunning(id)
-	stafftpl.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled, licensed, running).Render(r.Context(), w)
+	members, _ := h.staff.List()
+	if members == nil {
+		members = []staff.Staff{}
+	}
+	stafftpl.StaffDetailPage(members, m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled, licensed, running).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
-	stafftpl.StaffFormPage(&staff.Staff{}, h.navData(r, "staff"), "").Render(r.Context(), w)
+	members, _ := h.staff.List()
+	if members == nil {
+		members = []staff.Staff{}
+	}
+	stafftpl.StaffFormPage(members, &staff.Staff{}, h.navData(r, "staff"), "").Render(r.Context(), w)
 }
 
 func (h *uiHandler) createStaff(w http.ResponseWriter, r *http.Request) {
+	members, _ := h.staff.List()
+	if members == nil {
+		members = []staff.Staff{}
+	}
 	m, err := staffFromForm(r)
 	if err != nil {
-		stafftpl.StaffFormPage(m, h.navData(r, "staff"), err.Error()).Render(r.Context(), w)
+		stafftpl.StaffFormPage(members, m, h.navData(r, "staff"), err.Error()).Render(r.Context(), w)
 		return
 	}
 	if err := h.staff.Create(m); err != nil {
-		stafftpl.StaffFormPage(m, h.navData(r, "staff"), err.Error()).Render(r.Context(), w)
+		stafftpl.StaffFormPage(members, m, h.navData(r, "staff"), err.Error()).Render(r.Context(), w)
 		return
 	}
 	http.Redirect(w, r, "/staff/"+m.ID, http.StatusSeeOther)
@@ -834,7 +846,11 @@ func (h *uiHandler) chatPage(w http.ResponseWriter, r *http.Request) {
 		chats = []chat.Chat{}
 	}
 	l, _ := h.license.Load()
-	stafftpl.StaffChatPage(m, c, chats, h.navData(r, "staff"), l.IsActive()).Render(r.Context(), w)
+	allMembers, _ := h.staff.List()
+	if allMembers == nil {
+		allMembers = []staff.Staff{}
+	}
+	stafftpl.StaffChatPage(allMembers, m, c, chats, h.navData(r, "staff"), l.IsActive()).Render(r.Context(), w)
 }
 
 func (h *uiHandler) createMessage(w http.ResponseWriter, r *http.Request) {

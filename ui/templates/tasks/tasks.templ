@@ -7,6 +7,7 @@ import (
 	"picomaju/ui/components/button"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/components/textarea"
 	"picomaju/ui/templates/shell"
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
@@ -105,7 +106,7 @@ templ TaskFormPage(t *task.Task, tools []tool.Tool, nd shell.NavData, isNew bool
 					@label.Label(label.Props{For: "description"}) {
 						Description
 					}
-					<textarea id="description" name="description" rows="4" placeholder="What this task does…">{ t.Description }</textarea>
+					@textarea.Textarea(textarea.Props{ID: "description", Name: "description", Rows: 4, Placeholder: "What this task does…", Value: t.Description})
 				}
 			}
 			if len(tools) > 0 {

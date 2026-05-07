@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData, licensed bool) templ.Component {
+func StaffChatPage(members []staff.Staff, m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData, licensed bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -257,7 +257,7 @@ func StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.Nav
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = shell.ChatAppLayout("Chat — "+m.Label, nd, staffSidebarNav(m, c.ID, chats)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = shell.ChatAppLayout("Chat — "+m.Label, nd, staffAccordionNav(members, m.ID, c.ID, chats)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -287,7 +287,7 @@ func chatBubble(msg chat.Message) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if msg.Role == "user" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"flex justify-end\"><div class=\"max-w-[80%] bg-blue-600 text-blue-50 rounded-2xl rounded-br-sm px-4 py-2.5\"><p class=\"text-sm whitespace-pre-wrap\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"flex justify-end\"><div class=\"max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5\"><p class=\"text-sm whitespace-pre-wrap\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -300,14 +300,14 @@ func chatBubble(msg chat.Message) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</p><p class=\"text-[0.625rem] text-blue-200 mt-1 text-right\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</p><p class=\"text-[0.625rem] text-primary-foreground/60 mt-1 text-right\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(chatTimestamp(msg.Timestamp))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/chat.templ`, Line: 122, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/chat.templ`, Line: 122, Col: 104}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {

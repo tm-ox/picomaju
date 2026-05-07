@@ -16,7 +16,7 @@ import (
 
 // ─── Staff list (home page at /) ─────────────────────────────────────────────
 templ StaffListPage(members []staff.Staff, nd shell.NavData) {
-	@shell.AppLayout("Staff", nd, staffListSidebarNav(members)) {
+	@shell.AppLayout("Staff", nd, staffAccordionNav(members, "", "", nil)) {
 		@shell.PageHeader("Staff") {
 			@button.Button(button.Props{Href: "/staff/new", Size: button.SizeIcon}) {
 				@icons.Plus(templ.Attributes{"class": "size-4"})
@@ -35,18 +35,126 @@ templ StaffListPage(members []staff.Staff, nd shell.NavData) {
 	}
 }
 
-templ staffListSidebarNav(members []staff.Staff) {
-	<nav class="flex flex-col gap-2 py-2 flex-1">
-		for _, m := range members {
-			@shell.SidebarItem("/staff/"+m.ID, m.Label, m.ID, "") {
-				if m.Icon == "" {
-					@icons.UserRound(templ.Attributes{"class": "size-4"})
-				} else {
-					@staffIcon(m.Icon, "")
-				}
+templ staffAccordionNav(members []staff.Staff, activeID string, activeKey string, chats []chat.Chat) {
+	<nav class="flex flex-col py-2 flex-1">
+		for i, m := range members {
+			{{ isActive := m.ID == activeID }}
+			if i > 0 {
+				<div class="mx-3 border-t border-sidebar-border/30"></div>
 			}
+			<div data-staff-accordion class="py-1">
+				<div class={
+					"flex items-center mx-2 rounded-md text-sm transition-colors",
+					templ.KV("bg-sidebar-accent text-sidebar-foreground font-medium", isActive),
+					templ.KV("text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent", !isActive),
+				}>
+					<a
+						href={ templ.SafeURL("/staff/" + m.ID) }
+						class="flex items-center gap-2 flex-1 min-w-0 pl-1 py-1"
+					>
+						<span class="size-8 shrink-0 flex items-center justify-center">
+							if m.Icon == "" {
+								@icons.UserRound(templ.Attributes{"class": "size-4"})
+							} else {
+								@staffIcon(m.Icon, "")
+							}
+						</span>
+						<span data-sidebar-label class="flex-1 min-w-0 truncate">{ m.Label }</span>
+					</a>
+					<button
+						data-sidebar-label
+						type="button"
+						class={
+							"size-8 shrink-0 flex items-center justify-center text-sidebar-foreground/40 hover:text-sidebar-foreground/80 transition-all duration-200 cursor-pointer",
+							templ.KV("rotate-180", isActive),
+						}
+						onclick="staffAccordionToggle(this)"
+						aria-label={ "Expand " + m.Label }
+					>
+						@icons.ChevronDown(templ.Attributes{"class": "size-3.5"})
+					</button>
+				</div>
+				<div
+					data-sidebar-label
+					data-accordion-content
+					class={ "pt-1", templ.KV("hidden", !isActive) }
+				>
+					@staffAccordionSubItems(m.ID, activeKey, isActive, chats)
+				</div>
+			</div>
 		}
 	</nav>
+	<script>
+		function staffAccordionToggle(btn) {
+			var nav = btn.closest('nav');
+			var target = btn.closest('[data-staff-accordion]');
+			var content = target.querySelector('[data-accordion-content]');
+			var opening = content.classList.contains('hidden');
+			nav.querySelectorAll('[data-staff-accordion]').forEach(function(acc) {
+				var c = acc.querySelector('[data-accordion-content]');
+				var b = acc.querySelector('button[data-sidebar-label]');
+				if (c) c.classList.add('hidden');
+				if (b) b.classList.remove('rotate-180');
+			});
+			if (opening) {
+				content.classList.remove('hidden');
+				btn.classList.add('rotate-180');
+			}
+		}
+	</script>
+}
+
+templ staffAccordionSubItems(staffID string, activeKey string, isActive bool, chats []chat.Chat) {
+	@staffSubItem("/staff/"+staffID+"?s=overview", "Overview", "overview", activeKey) {
+		@icons.LayoutDashboard(templ.Attributes{"class": "size-3.5"})
+	}
+	@staffSubItem("/staff/"+staffID+"?s=profile", "Profile", "profile", activeKey) {
+		@icons.UserRound(templ.Attributes{"class": "size-3.5"})
+	}
+	@staffSubItem("/staff/"+staffID+"?s=values", "Values", "values", activeKey) {
+		@icons.Star(templ.Attributes{"class": "size-3.5"})
+	}
+	@staffSubItem("/staff/"+staffID+"?s=tools", "Tools", "tools", activeKey) {
+		@icons.Wrench(templ.Attributes{"class": "size-3.5"})
+	}
+	@staffSubItem("/staff/"+staffID+"?s=tasks", "Tasks", "tasks", activeKey) {
+		@icons.ClipboardList(templ.Attributes{"class": "size-3.5"})
+	}
+	<div class="mx-4 my-1.5 border-t border-sidebar-border/50"></div>
+	<form method="post" action={ templ.SafeURL("/staff/" + staffID + "/chats") }>
+		<button
+			type="submit"
+			class="w-full flex items-center gap-1.5 mx-2 pl-7 pr-2 py-1.5 rounded-md text-sm font-medium transition-colors bg-primary/15 text-sidebar-primary hover:bg-primary/25 cursor-pointer"
+		>
+			<span class="size-5 shrink-0 flex items-center justify-center">
+				@icons.MessageSquarePlus(templ.Attributes{"class": "size-3.5"})
+			</span>
+			New Chat
+		</button>
+	</form>
+	if isActive {
+		for _, c := range chats {
+			@staffSubItem("/staff/"+staffID+"/chats/"+c.ID, c.Title, c.ID, activeKey) {
+				@icons.MessageSquare(templ.Attributes{"class": "size-3.5"})
+			}
+		}
+	}
+}
+
+templ staffSubItem(href, label, key, activeKey string) {
+	<a
+		href={ templ.SafeURL(href) }
+		class={
+			"flex items-center gap-1.5 mx-2 pl-7 pr-2 py-1.5 rounded-md text-sm transition-colors",
+			templ.KV("bg-sidebar-accent text-sidebar-foreground", activeKey == key),
+			templ.KV("text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent", activeKey != key),
+		}
+	>
+		<span class="size-5 shrink-0 flex items-center justify-center">
+			{ children... }
+		</span>
+		{ label }
+	</a>
 }
 
 templ staffDashboard(members []staff.Staff) {
@@ -81,8 +189,8 @@ templ staffDashboard(members []staff.Staff) {
 }
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
-templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat, compiled bool, licensed bool, running bool) {
-	@shell.AppLayout(m.Label, nd, staffSidebarNav(m, section, chats)) {
+templ StaffDetailPage(members []staff.Staff, m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat, compiled bool, licensed bool, running bool) {
+	@shell.AppLayout(m.Label, nd, staffAccordionNav(members, m.ID, section, chats)) {
 		<div class="flex items-center gap-3">
 			<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
 				@staffIcon(m.Icon, m.Label)
@@ -111,47 +219,6 @@ templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, valu
 	}
 }
 
-templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
-	<nav class="flex flex-col gap-2 py-2 flex-1">
-		@shell.SidebarItem("/staff/"+m.ID+"?s=overview", "Overview", "overview", section) {
-			@icons.LayoutDashboard(templ.Attributes{"class": "size-4"})
-		}
-		@shell.SidebarItem("/staff/"+m.ID+"?s=profile", "Profile", "profile", section) {
-			@icons.UserRound(templ.Attributes{"class": "size-4"})
-		}
-		@shell.SidebarItem("/staff/"+m.ID+"?s=values", "Values", "values", section) {
-			@icons.Star(templ.Attributes{"class": "size-4"})
-		}
-		@shell.SidebarItem("/staff/"+m.ID+"?s=tools", "Tools", "tools", section) {
-			@icons.Wrench(templ.Attributes{"class": "size-4"})
-		}
-		@shell.SidebarItem("/staff/"+m.ID+"?s=tasks", "Tasks", "tasks", section) {
-			@icons.ClipboardList(templ.Attributes{"class": "size-4"})
-		}
-		<div class="mx-2 my-1 border-t border-sidebar-border"></div>
-		<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/chats") } class="px-2">
-			<button
-				type="submit"
-				class="w-full flex items-center gap-2 px-1 py-0.5 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-			>
-				<span class="size-8 shrink-0 flex items-center justify-center">
-					@icons.MessageSquarePlus(templ.Attributes{"class": "size-4"})
-				</span>
-				<span data-sidebar-label>New Chat</span>
-			</button>
-		</form>
-		for _, c := range chats {
-			@shell.SidebarItem("/staff/"+m.ID+"/chats/"+c.ID, c.Title, c.ID, section) {
-				@icons.MessageSquare(templ.Attributes{"class": "size-4"})
-			}
-		}
-	</nav>
-	<div class="py-2 border-t border-sidebar-border shrink-0">
-		@shell.SidebarItem("/", "All Staff", "", section) {
-			@icons.ArrowLeft(templ.Attributes{"class": "size-4"})
-		}
-	</div>
-}
 
 // ─── Overview section ─────────────────────────────────────────────────────────
 templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, compiled bool, licensed bool, running bool) {
@@ -486,8 +553,8 @@ templ staffTasksSection(m *staff.Staff, tasks []task.Task) {
 }
 
 // ─── New staff form (/staff/new) ──────────────────────────────────────────────
-templ StaffFormPage(m *staff.Staff, nd shell.NavData, formErr string) {
-	@shell.AppLayout("New Staff", nd, shell.EmptySidebarNav()) {
+templ StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, formErr string) {
+	@shell.AppLayout("New Staff", nd, staffAccordionNav(members, "", "", nil)) {
 		@shell.PageHeader("New Staff") {
 			@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
