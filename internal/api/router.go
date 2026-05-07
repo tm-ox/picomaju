@@ -105,6 +105,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Post("/staff/{id}/value-cats/{catId}/remove", ui.removeStaffValueCat)
 	r.Post("/staff/{id}/values/{valueId}/remove", ui.removeStaffValue)
 	r.Post("/staff/{id}/delete", ui.deleteStaff)
+	r.Post("/staff/{id}/compile", ui.compileStaff)
 
 	// Chats
 	r.Post("/staff/{id}/chats", ui.createChat)

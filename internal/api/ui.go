@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"picomaju/internal/chat"
+	"picomaju/internal/compiler"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -440,6 +441,7 @@ func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 		section = "overview"
 	}
 	formErr := r.URL.Query().Get("err")
+	compiled := r.URL.Query().Get("compiled") == "1"
 	tasks, _ := h.tasks.List()
 	vals, _ := h.values.List()
 	tools, _ := h.tools.List()
@@ -447,7 +449,7 @@ func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 	if chats == nil {
 		chats = []chat.Chat{}
 	}
-	stafftpl.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats).Render(r.Context(), w)
+	stafftpl.StaffDetailPage(m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -601,6 +603,116 @@ func (h *uiHandler) deleteStaff(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// --- Compiler ---
+
+func (h *uiHandler) compileStaff(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	m, err := h.staff.Get(id)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	in, err := h.resolveCompilerInput(m)
+	if err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+err.Error(), http.StatusSeeOther)
+		return
+	}
+	out := compiler.Compile(in)
+	workspaceDir := h.workspaceDir(id)
+	if err := compiler.Write(out, workspaceDir); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+err.Error(), http.StatusSeeOther)
+		return
+	}
+	cfg, _ := h.settings.Load()
+	if cfg != nil && cfg.PicoClawHome != "" {
+		configPath := filepath.Join(cfg.PicoClawHome, "config.json")
+		entry := compiler.AgentEntry{
+			ID:          id,
+			Workspace:   workspaceDir,
+			Description: m.Description,
+		}
+		compiler.InjectConfig(configPath, entry) //nolint:errcheck
+	}
+	http.Redirect(w, r, "/staff/"+id+"?compiled=1", http.StatusSeeOther)
+}
+
+func (h *uiHandler) workspaceDir(staffID string) string {
+	h.mu.RLock()
+	dataDir := h.dataDir
+	h.mu.RUnlock()
+	cfg, _ := h.settings.Load()
+	if cfg != nil && cfg.PicoClawHome != "" {
+		return filepath.Join(cfg.PicoClawHome, "workspace-"+staffID)
+	}
+	return filepath.Join(dataDir, "agents", "workspace-"+staffID)
+}
+
+func (h *uiHandler) resolveCompilerInput(m *staff.Staff) (compiler.Input, error) {
+	allTasks, err := h.tasks.List()
+	if err != nil {
+		return compiler.Input{}, err
+	}
+	allTools, err := h.tools.List()
+	if err != nil {
+		return compiler.Input{}, err
+	}
+	allValues, err := h.values.List()
+	if err != nil {
+		return compiler.Input{}, err
+	}
+	cfg, _ := h.settings.Load()
+
+	// Resolve assigned tasks
+	taskSet := make(map[string]bool, len(m.Tasks))
+	for _, tid := range m.Tasks {
+		taskSet[tid] = true
+	}
+	var tasks []task.Task
+	for _, t := range allTasks {
+		if taskSet[t.ID] {
+			tasks = append(tasks, t)
+		}
+	}
+
+	// Collect tool IDs referenced by assigned tasks
+	toolSet := make(map[string]bool)
+	for _, t := range tasks {
+		for _, tid := range t.Tools {
+			toolSet[tid] = true
+		}
+	}
+	var tools []tool.Tool
+	for _, tl := range allTools {
+		if toolSet[tl.ID] {
+			tools = append(tools, tl)
+		}
+	}
+
+	// Resolve values: categories + individual IDs
+	catSet := make(map[string]bool, len(m.ValueCategories))
+	for _, c := range m.ValueCategories {
+		catSet[c] = true
+	}
+	indivSet := make(map[string]bool, len(m.Values))
+	for _, vid := range m.Values {
+		indivSet[vid] = true
+	}
+	var values []*value.Value
+	for _, v := range allValues {
+		if catSet[v.Category] || indivSet[v.ID] {
+			values = append(values, v)
+		}
+	}
+
+	return compiler.Input{
+		Staff:    m,
+		Tasks:    tasks,
+		Tools:    tools,
+		Values:   values,
+		Settings: cfg,
+	}, nil
+}
+
 // --- Chat UI ---
 
 func (h *uiHandler) createChat(w http.ResponseWriter, r *http.Request) {
@@ -729,8 +841,10 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	newDataDir := strings.TrimSpace(r.FormValue("data_dir"))
 	cfg := &settings.Settings{
-		BusinessName: strings.TrimSpace(r.FormValue("business_name")),
-		DataDir:      newDataDir,
+		BusinessName:    strings.TrimSpace(r.FormValue("business_name")),
+		BusinessDetails: strings.TrimSpace(r.FormValue("business_details")),
+		DataDir:         newDataDir,
+		PicoClawHome:    strings.TrimSpace(r.FormValue("picoclaw_home")),
 	}
 	if newDataDir != "" && newDataDir != activeDir {
 		if err := h.initStores(newDataDir); err != nil {

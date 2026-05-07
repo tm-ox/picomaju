@@ -49,6 +49,13 @@ templ SettingsPage(cfg *internalsettings.Settings, activeDataDir string, nd shel
 					Active: <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">{ activeDataDir }</code>. Existing data will not be moved if you change this.
 				</p>
 			}
+			@shell.Field() {
+				@label.Label(label.Props{For: "picoclaw_home"}) {
+					PicoClaw home
+				}
+				@input.Input(input.Props{ID: "picoclaw_home", Name: "picoclaw_home", Value: cfg.PicoClawHome, Placeholder: "~/.picoclaw"})
+				<p class="text-sm text-muted-foreground">Path to your PicoClaw home directory. When set, compiled agent workspaces are written there and <code class="font-mono text-xs bg-muted px-1 py-0.5 rounded">config.json</code> is updated automatically.</p>
+			}
 			@button.Button(button.Props{Type: button.TypeSubmit}) {
 				Save
 			}

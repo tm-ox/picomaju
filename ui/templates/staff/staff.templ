@@ -81,7 +81,7 @@ templ staffDashboard(members []staff.Staff) {
 }
 
 // ─── Staff detail page ───────────────────────────────────────────────────────
-templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat) {
+templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, values []*value.Value, cats []value.Category, nd shell.NavData, section string, formErr string, chats []chat.Chat, compiled bool) {
 	@shell.AppLayout(m.Label, nd, staffSidebarNav(m, section, chats)) {
 		<div class="flex items-center gap-3">
 			<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm">
@@ -106,7 +106,7 @@ templ StaffDetailPage(m *staff.Staff, tasks []task.Task, tools []tool.Tool, valu
 			case "tasks":
 				@staffTasksSection(m, tasks)
 			default:
-				@staffOverviewSection(m, tasks, tools)
+				@staffOverviewSection(m, tasks, tools, compiled)
 		}
 	}
 }
@@ -154,7 +154,7 @@ templ staffSidebarNav(m *staff.Staff, section string, chats []chat.Chat) {
 }
 
 // ─── Overview section ─────────────────────────────────────────────────────────
-templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) {
+templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, compiled bool) {
 	<h2 class="text-base font-brand font-semibold text-foreground">Overview</h2>
 	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 		@staffStatCardLink("Status", staffActiveLabel(m.Active), "/staff/"+m.ID+"?s=profile") {
@@ -173,9 +173,25 @@ templ staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool)
 	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
 		<div class="flex items-center justify-between">
 			<h5 class="text-sm font-brand font-semibold text-foreground">Directives</h5>
-			<span class="text-xs font-mono text-muted-foreground">Coming soon</span>
+			if compiled {
+				<span class="text-xs font-mono text-green-600 dark:text-green-400">Deployed</span>
+			}
 		</div>
-		<p class="text-sm text-muted-foreground">Compiled agent directives (AGENTS.md, SOUL.md) will appear here once the compiler is active.</p>
+		if compiled {
+			<p class="text-sm text-muted-foreground">Workspace files (AGENT.md, SOUL.md, USER.md) written successfully.</p>
+		} else {
+			<p class="text-sm text-muted-foreground">Compile this agent's profile into workspace identity files for PicoClaw.</p>
+		}
+		<form method="post" action={ templ.SafeURL("/staff/" + m.ID + "/compile") }>
+			@button.Button(button.Props{Type: button.TypeSubmit, Variant: button.VariantOutline, Size: button.SizeSm}) {
+				@icons.Zap(templ.Attributes{"class": "size-3.5"})
+				if compiled {
+					Recompile
+				} else {
+					Compile &amp; Deploy
+				}
+			}
+		</form>
 	</div>
 	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-3">
 		<div class="flex items-center justify-between">

@@ -93,7 +93,7 @@ When `activeCat == ""`, Values and Tools list pages render items in `listSection
 
 **Home `/`**: `StaffListPage` renders `staffDashboard` — 2-col card grid, each card links to `/staff/:id`.
 
-**Detail `/staff/:id`**: `StaffDetailPage(m, tasks, tools, values, cats, nd, section, formErr, chats)`. Sections: overview / profile / values / tools / tasks. Overview stat cards ordered Status → Values → Tools → Tasks; each is `staffStatCardLink` linking to `?s=profile/values/tools/tasks`.
+**Detail `/staff/:id`**: `StaffDetailPage(m, tasks, tools, values, cats, nd, section, formErr, chats, compiled bool)`. Sections: overview / profile / values / tools / tasks. Overview stat cards ordered Status → Values → Tools → Tasks; each is `staffStatCardLink` linking to `?s=profile/values/tools/tasks`. Directives card has "Compile & Deploy" button (`POST /staff/:id/compile`); shows "Deployed" + "Recompile" after `?compiled=1`.
 
 **Chat `/staff/:id/chats/:chatId`**: `StaffChatPage(m, c, chats, nd)` using `ChatAppLayout`. Three `shrink-0`/`flex-1`/`shrink-0` children: header with inline rename form + delete button, messages scroll area, input panel. Send button uses `ArrowUp` icon. Rename: text input styled as plain text, checkmark button on `group-focus-within:opacity-100`, auto-submits on blur if changed.
 

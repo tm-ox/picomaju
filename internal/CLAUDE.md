@@ -3,7 +3,9 @@
 ## Packages
 
 ```
-settings/store.go   — Settings{business_name, business_details, data_dir, languages[], timezone, hours}; file-backed JSON
+settings/store.go   — Settings{business_name, business_details, data_dir, picoclaw_home, languages[], timezone, hours}; file-backed JSON
+compiler/compiler.go — Compile(Input) Output; builds AGENT.md, SOUL.md, USER.md from resolved staff+values+tasks+tools+settings
+compiler/write.go   — Write(Output, workspaceDir); InjectConfig(configPath, AgentEntry) upserts agent in picoclaw config.json
 value/model.go      — Value, DirectiveEntry, ValidationResult, ValidationError
 value/store.go      — CRUD on <data_dir>/values/<id>.md (YAML frontmatter + body)
 value/validator.go  — required field check; priority clamp [0–100]
@@ -88,6 +90,7 @@ Mutations: form POST + redirect. SSE validate uses datastar. Setup gate exempts 
 | POST | `/staff/:id/tasks` | update task assignments |
 | POST | `/staff/:id/values` | update value/category assignments |
 | POST | `/staff/:id/delete` | delete → `/` |
+| POST | `/staff/:id/compile` | compile workspace files → redirect `?compiled=1` |
 | POST | `/staff/:id/chats` | create chat → `/staff/:id/chats/:chatId` |
 | GET | `/staff/:id/chats/:chatId` | chat page |
 | POST | `/staff/:id/chats/:chatId/messages` | append user message; auto-renames from first message |
