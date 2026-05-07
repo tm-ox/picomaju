@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData) {
+templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.NavData, licensed bool) {
 	@shell.ChatAppLayout("Chat — "+m.Label, nd, staffSidebarNav(m, c.ID, chats)) {
 		<div class="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
 			<div class="flex items-center gap-2 min-w-0 flex-1">
@@ -54,8 +54,13 @@ templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.Na
 						@icons.MessageSquare(templ.Attributes{"class": "size-5 text-primary"})
 					</div>
 					<div class="flex flex-col gap-1">
-						<span class="text-sm font-brand font-semibold text-foreground">Start the conversation</span>
-						<span class="text-xs text-muted-foreground">Send a message to { m.Label }</span>
+						if licensed {
+							<span class="text-sm font-brand font-semibold text-foreground">Start the conversation</span>
+							<span class="text-xs text-muted-foreground">Send a message to { m.Label }</span>
+						} else {
+							<span class="text-sm font-brand font-semibold text-foreground">Activate to chat</span>
+							<span class="text-xs text-muted-foreground">Add credits or subscribe to start talking to { m.Label }</span>
+						}
 					</div>
 				</div>
 			} else {
@@ -67,26 +72,44 @@ templ StaffChatPage(m *staff.Staff, c *chat.Chat, chats []chat.Chat, nd shell.Na
 			}
 		</div>
 		<div class="shrink-0 px-4 pb-6 pt-2 bg-background">
-			<form
-				method="post"
-				action={ templ.SafeURL("/staff/" + m.ID + "/chats/" + c.ID + "/messages") }
-				class="bg-card rounded-lg border border-border p-3 flex gap-2 items-start"
-			>
-				<textarea
-					name="content"
-					rows="2"
-					placeholder={ "Message " + m.Label + "…" }
-					class="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none leading-relaxed"
-					onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
-				></textarea>
-				<button
-					type="submit"
-					class="mt-0.5 size-8 shrink-0 rounded-md bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors cursor-pointer"
-					aria-label="Send"
+			if licensed {
+				<form
+					method="post"
+					action={ templ.SafeURL("/staff/" + m.ID + "/chats/" + c.ID + "/messages") }
+					class="bg-card rounded-lg border border-border p-3 flex gap-2 items-start"
 				>
-					@icons.ArrowUp(templ.Attributes{"class": "size-4"})
-				</button>
-			</form>
+					<textarea
+						name="content"
+						rows="2"
+						placeholder={ "Message " + m.Label + "…" }
+						class="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none leading-relaxed"
+						onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
+					></textarea>
+					<button
+						type="submit"
+						class="mt-0.5 size-8 shrink-0 rounded-md bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors cursor-pointer"
+						aria-label="Send"
+					>
+						@icons.ArrowUp(templ.Attributes{"class": "size-4"})
+					</button>
+				</form>
+			} else {
+				<a
+					href="/license"
+					class="flex items-center justify-between gap-3 bg-card rounded-lg border border-border px-4 py-3 hover:border-primary/50 transition-colors"
+				>
+					<div class="flex items-center gap-3">
+						<div class="size-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+							@icons.Zap(templ.Attributes{"class": "size-4 text-primary"})
+						</div>
+						<div class="flex flex-col gap-0.5">
+							<span class="text-sm font-brand font-semibold text-foreground">Activate plan</span>
+							<span class="text-xs text-muted-foreground">Credits or subscription required to chat</span>
+						</div>
+					</div>
+					@icons.ChevronRight(templ.Attributes{"class": "size-4 text-muted-foreground shrink-0"})
+				</a>
+			}
 		</div>
 	}
 }

@@ -1,0 +1,155 @@
+package licensetpl
+
+import (
+	internallicense "picomaju/internal/license"
+	"picomaju/ui/components/alert"
+	"picomaju/ui/components/button"
+	"picomaju/ui/templates/shell"
+	"strconv"
+)
+
+templ LicensePage(l *internallicense.License, nd shell.NavData, activated bool, formErr string, dev bool) {
+	@shell.AppLayout("Plan & Credits", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader("Plan & Credits")
+		if activated {
+			@alert.Alert() {
+				@alert.Description() {
+					Plan activated — you're all set.
+				}
+			}
+		}
+		if formErr != "" {
+			@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+				@alert.Description() {
+					{ formErr }
+				}
+			}
+		}
+		<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+			<div class="flex items-center justify-between">
+				<div class="flex flex-col gap-1">
+					<span class="text-xs font-mono text-muted-foreground uppercase tracking-wide">Current plan</span>
+					<span class="text-lg font-brand font-semibold text-foreground">{ l.PlanLabel() }</span>
+				</div>
+				if l.IsActive() {
+					<span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 px-2.5 py-1 rounded-full">
+						<span class="size-1.5 rounded-full bg-green-500"></span>
+						Active
+					</span>
+				} else {
+					<span class="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-muted border border-border px-2.5 py-1 rounded-full">
+						<span class="size-1.5 rounded-full bg-muted-foreground/50"></span>
+						Inactive
+					</span>
+				}
+			</div>
+			if l.Plan == internallicense.PlanCredits {
+				<div class="flex flex-col gap-1.5">
+					<div class="flex items-center justify-between text-sm">
+						<span class="text-muted-foreground">Credits remaining</span>
+						<span class="font-brand font-semibold text-foreground">{ strconv.Itoa(l.CreditsRemaining) }</span>
+					</div>
+					<div class="w-full h-2 bg-muted rounded-full overflow-hidden">
+						<div
+							class="h-full bg-primary rounded-full transition-all"
+							style={ "width:" + creditsBarWidth(l.CreditsRemaining) }
+						></div>
+					</div>
+				</div>
+			}
+		</div>
+		if !l.IsActive() {
+			@alert.Alert() {
+				@alert.Description() {
+					You're on the free plan. Compile and preview agents at no cost — activate a plan to run live agents and enable chat.
+				}
+			}
+		}
+		<div class="flex flex-col gap-3">
+			<h5 class="text-sm font-brand font-semibold text-foreground">Top up credits</h5>
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+				@creditPackCard("100 credits", "USD $5", "IDR 80k", "/license/checkout?pkg=100&provider=stripe")
+				@creditPackCard("500 credits", "USD $20", "IDR 320k", "/license/checkout?pkg=500&provider=stripe")
+				@creditPackCard("1,500 credits", "USD $50", "IDR 790k", "/license/checkout?pkg=1500&provider=stripe")
+			</div>
+		</div>
+		<div class="flex flex-col gap-3">
+			<h5 class="text-sm font-brand font-semibold text-foreground">Subscription plans</h5>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+				@planCard("Starter", "300 credits / month", "USD $12 / mo", "IDR 190k / mo", "/license/checkout?plan=starter&provider=stripe")
+				@planCard("Pro", "Unlimited", "USD $29 / mo", "IDR 460k / mo", "/license/checkout?plan=pro&provider=stripe")
+			</div>
+		</div>
+		if dev {
+			<div class="bg-card rounded-lg border border-dashed border-border p-4 flex flex-col gap-3">
+				<h5 class="text-xs font-mono text-muted-foreground uppercase tracking-wide">Dev — simulate activation</h5>
+				<div class="flex flex-wrap gap-2">
+					<form method="post" action="/license/activate-dev">
+						<input type="hidden" name="plan" value="credits"/>
+						@button.Button(button.Props{Type: button.TypeSubmit, Variant: button.VariantOutline, Size: button.SizeSm}) {
+							999 credits
+						}
+					</form>
+					<form method="post" action="/license/activate-dev">
+						<input type="hidden" name="plan" value="starter"/>
+						@button.Button(button.Props{Type: button.TypeSubmit, Variant: button.VariantOutline, Size: button.SizeSm}) {
+							Starter plan
+						}
+					</form>
+					<form method="post" action="/license/activate-dev">
+						<input type="hidden" name="plan" value="pro"/>
+						@button.Button(button.Props{Type: button.TypeSubmit, Variant: button.VariantOutline, Size: button.SizeSm}) {
+							Pro plan
+						}
+					</form>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ creditPackCard(credits, usdPrice, idrPrice, href string) {
+	<div class="bg-card rounded-lg border border-border p-4 flex flex-col gap-3">
+		<div class="flex flex-col gap-0.5">
+			<span class="text-sm font-brand font-semibold text-foreground">{ credits }</span>
+			<span class="text-xs text-muted-foreground">{ usdPrice } · { idrPrice }</span>
+		</div>
+		<div class="flex flex-col gap-2">
+			@button.Button(button.Props{Href: href, Size: button.SizeSm}) {
+				Pay with card
+			}
+			@button.Button(button.Props{Href: href + "&provider=xendit", Variant: button.VariantOutline, Size: button.SizeSm}) {
+				GoPay / OVO / QRIS
+			}
+		</div>
+	</div>
+}
+
+templ planCard(name, quota, usdPrice, idrPrice, href string) {
+	<div class="bg-card rounded-lg border border-border p-4 flex flex-col gap-3">
+		<div class="flex flex-col gap-0.5">
+			<span class="text-sm font-brand font-semibold text-foreground">{ name }</span>
+			<span class="text-xs text-muted-foreground">{ quota } · { usdPrice } · { idrPrice }</span>
+		</div>
+		<div class="flex flex-col gap-2">
+			@button.Button(button.Props{Href: href, Size: button.SizeSm}) {
+				Subscribe with card
+			}
+			@button.Button(button.Props{Href: href + "&provider=xendit", Variant: button.VariantOutline, Size: button.SizeSm}) {
+				GoPay / OVO / QRIS
+			}
+		</div>
+	</div>
+}
+
+func creditsBarWidth(remaining int) string {
+	const max = 1500
+	pct := remaining * 100 / max
+	if pct > 100 {
+		pct = 100
+	}
+	if pct < 0 {
+		pct = 0
+	}
+	return strconv.Itoa(pct) + "%"
+}

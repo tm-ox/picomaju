@@ -17,6 +17,7 @@ Templates are organised into sub-packages under `ui/templates/`. Each directory 
 | `values/` | `valuestpl` | `ValueListPage`, `ValueFormPage`, `ValidationFragment`; private: sidebar nav, `groupValuesByCat` |
 | `tools/` | `toolstpl` | `ToolListPage`, `NewToolPage`, `ToolFormPage`; private: sidebar nav, `groupToolsByCat`, `configValue` |
 | `tasks/` | `taskstpl` | `TaskListPage`, `TaskFormPage`; private: sidebar nav |
+| `license/` | `licensetpl` | `LicensePage(l, nd, activated, formErr, dev)` — plan status, credits bar, credit pack + plan cards, dev activation panel |
 | `settings/` | `settingstpl` | `SettingsPage` |
 | `setup/` | `setuptpl` | `WelcomePage`, `DashboardPage`, `SetupStep1Page`, `SetupStep2Page`, `SetupStep3Page` |
 | `workshop/` | `workshoptpl` | `WorkshopPage` |
@@ -42,7 +43,7 @@ Content area: `max-w-2xl mx-auto flex-1 flex flex-col min-h-0 overflow-hidden` i
 **Sidebar** (`bg-sidebar`, `h-dvh`, dark):
 - Header: `size-7` business avatar + name (`data-sidebar-label`) + desktop toggle (`hidden sm:flex`)
 - Middle: `@nav` (page-specific)
-- Footer: Settings + theme toggle (both as `SidebarItem`)
+- Footer: Plan & Credits (Zap icon, `/license`) + Settings + theme toggle (all as `SidebarItem`)
 
 **In-content header** (`h-12 border-b`): mobile hamburger (`flex sm:hidden`) left; `hidden sm:flex` nav links (Staff / Values / Tools / Tasks) center.
 
@@ -95,7 +96,7 @@ When `activeCat == ""`, Values and Tools list pages render items in `listSection
 
 **Detail `/staff/:id`**: `StaffDetailPage(m, tasks, tools, values, cats, nd, section, formErr, chats, compiled bool)`. Sections: overview / profile / values / tools / tasks. Overview stat cards ordered Status → Values → Tools → Tasks; each is `staffStatCardLink` linking to `?s=profile/values/tools/tasks`. Directives card has "Compile & Deploy" button (`POST /staff/:id/compile`); shows "Deployed" + "Recompile" after `?compiled=1`.
 
-**Chat `/staff/:id/chats/:chatId`**: `StaffChatPage(m, c, chats, nd)` using `ChatAppLayout`. Three `shrink-0`/`flex-1`/`shrink-0` children: header with inline rename form + delete button, messages scroll area, input panel. Send button uses `ArrowUp` icon. Rename: text input styled as plain text, checkmark button on `group-focus-within:opacity-100`, auto-submits on blur if changed.
+**Chat `/staff/:id/chats/:chatId`**: `StaffChatPage(m, c, chats, nd, licensed bool)` using `ChatAppLayout`. When `licensed=false`: empty state copy changes to "Activate to chat"; input panel replaced with a `/license` upgrade prompt card. `POST .../messages` redirects to `/license` if not active. Three `shrink-0`/`flex-1`/`shrink-0` children: header with inline rename form + delete button, messages scroll area, input panel. Send button uses `ArrowUp` icon. Rename: text input styled as plain text, checkmark button on `group-focus-within:opacity-100`, auto-submits on blur if changed.
 
 ## UI conventions
 

@@ -13,12 +13,15 @@ import (
 	"github.com/go-chi/chi/v5"
 	"picomaju/internal/chat"
 	"picomaju/internal/compiler"
+	"picomaju/internal/license"
+	"picomaju/internal/payment"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
 	"picomaju/internal/value"
 	"picomaju/ui/templates/shell"
+	licensetpl "picomaju/ui/templates/license"
 	settingstpl "picomaju/ui/templates/settings"
 	setuptpl "picomaju/ui/templates/setup"
 	stafftpl "picomaju/ui/templates/staff"
@@ -35,6 +38,7 @@ type uiHandler struct {
 	staff    *staff.Store
 	chats    *chat.Store
 	settings *settings.Store
+	license  *license.Store
 	dataDir  string
 }
 
@@ -55,6 +59,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 	h.tools = tool.NewStore(filepath.Join(dataDir, "tools.json"))
 	h.staff = staff.NewStore(filepath.Join(dataDir, "staff.json"))
 	h.chats = chat.NewStore(filepath.Join(dataDir, "chats.json"))
+	h.license = license.NewStore(filepath.Join(dataDir, "license.json"))
 	h.dataDir = dataDir
 	h.mu.Unlock()
 	return nil
@@ -623,28 +628,13 @@ func (h *uiHandler) compileStaff(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/staff/"+id+"?err="+err.Error(), http.StatusSeeOther)
 		return
 	}
-	cfg, _ := h.settings.Load()
-	if cfg != nil && cfg.PicoClawHome != "" {
-		configPath := filepath.Join(cfg.PicoClawHome, "config.json")
-		entry := compiler.AgentEntry{
-			ID:          id,
-			Workspace:   workspaceDir,
-			Description: m.Description,
-		}
-		compiler.InjectConfig(configPath, entry) //nolint:errcheck
-	}
 	http.Redirect(w, r, "/staff/"+id+"?compiled=1", http.StatusSeeOther)
 }
 
 func (h *uiHandler) workspaceDir(staffID string) string {
 	h.mu.RLock()
-	dataDir := h.dataDir
-	h.mu.RUnlock()
-	cfg, _ := h.settings.Load()
-	if cfg != nil && cfg.PicoClawHome != "" {
-		return filepath.Join(cfg.PicoClawHome, "workspace-"+staffID)
-	}
-	return filepath.Join(dataDir, "agents", "workspace-"+staffID)
+	defer h.mu.RUnlock()
+	return filepath.Join(h.dataDir, "agents", "workspace-"+staffID)
 }
 
 func (h *uiHandler) resolveCompilerInput(m *staff.Staff) (compiler.Input, error) {
@@ -750,12 +740,18 @@ func (h *uiHandler) chatPage(w http.ResponseWriter, r *http.Request) {
 	if chats == nil {
 		chats = []chat.Chat{}
 	}
-	stafftpl.StaffChatPage(m, c, chats, h.navData(r, "staff")).Render(r.Context(), w)
+	l, _ := h.license.Load()
+	stafftpl.StaffChatPage(m, c, chats, h.navData(r, "staff"), l.IsActive()).Render(r.Context(), w)
 }
 
 func (h *uiHandler) createMessage(w http.ResponseWriter, r *http.Request) {
 	staffID := chi.URLParam(r, "id")
 	chatID := chi.URLParam(r, "chatId")
+	l, _ := h.license.Load()
+	if !l.IsActive() {
+		http.Redirect(w, r, "/license", http.StatusSeeOther)
+		return
+	}
 	c, err := h.chats.Get(chatID)
 	if err != nil {
 		http.NotFound(w, r)
@@ -844,7 +840,6 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		BusinessName:    strings.TrimSpace(r.FormValue("business_name")),
 		BusinessDetails: strings.TrimSpace(r.FormValue("business_details")),
 		DataDir:         newDataDir,
-		PicoClawHome:    strings.TrimSpace(r.FormValue("picoclaw_home")),
 	}
 	if newDataDir != "" && newDataDir != activeDir {
 		if err := h.initStores(newDataDir); err != nil {
@@ -860,6 +855,87 @@ func (h *uiHandler) saveSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/settings?saved=1", http.StatusSeeOther)
+}
+
+// --- License UI ---
+
+func (h *uiHandler) licensePage(w http.ResponseWriter, r *http.Request) {
+	l, _ := h.license.Load()
+	if l == nil {
+		l = &license.License{}
+	}
+	activated := r.URL.Query().Get("activated") == "1"
+	formErr := r.URL.Query().Get("err")
+	dev := os.Getenv("DEV") != ""
+	licensetpl.LicensePage(l, h.navData(r, "license"), activated, formErr, dev).Render(r.Context(), w)
+}
+
+func (h *uiHandler) licenseCheckout(w http.ResponseWriter, r *http.Request) {
+	packID := r.URL.Query().Get("pkg")
+	planID := r.URL.Query().Get("plan")
+	provider := payment.Provider(r.URL.Query().Get("provider"))
+
+	cfg := payment.LoadConfig()
+
+	var (
+		redirectURL string
+		err         error
+	)
+	switch provider {
+	case payment.ProviderXendit:
+		if !cfg.XenditConfigured() {
+			http.Redirect(w, r, "/license?err=xendit_not_configured", http.StatusSeeOther)
+			return
+		}
+		redirectURL, err = payment.XenditCheckoutURL(cfg, packID, planID)
+	default:
+		if !cfg.StripeConfigured() {
+			http.Redirect(w, r, "/license?err=stripe_not_configured", http.StatusSeeOther)
+			return
+		}
+		redirectURL, err = payment.StripeCheckoutURL(cfg, packID, planID)
+	}
+	if err != nil {
+		http.Redirect(w, r, "/license?err="+err.Error(), http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+}
+
+func (h *uiHandler) licenseCheckoutSuccess(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/license?activated=1", http.StatusSeeOther)
+}
+
+// licenseActivateDev writes a test license directly — only available when DEV env is set.
+func (h *uiHandler) licenseActivateDev(w http.ResponseWriter, r *http.Request) {
+	if os.Getenv("DEV") == "" {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	plan := r.FormValue("plan") // "credits", "starter", "pro"
+	if plan == "" {
+		plan = license.PlanCredits
+	}
+	l := &license.License{
+		Active: true,
+		Plan:   plan,
+		Token:  "dev",
+	}
+	switch plan {
+	case license.PlanCredits:
+		l.CreditsRemaining = 999
+	case license.PlanStarter, license.PlanPro:
+		l.ExpiresAt = time.Now().AddDate(0, 1, 0).Unix()
+	}
+	if err := h.license.Save(l); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/license?activated=1", http.StatusSeeOther)
 }
 
 // --- Helpers ---

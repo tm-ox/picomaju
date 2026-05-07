@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"picomaju/internal/chat"
+	"picomaju/internal/license"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
@@ -14,7 +15,7 @@ import (
 	"picomaju/internal/value"
 )
 
-func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
+func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -25,6 +26,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		tools:    toolStore,
 		staff:    staffStore,
 		chats:    chatStore,
+		license:  licenseStore,
 		settings: settingsStore,
 		dataDir:  dataDir,
 	}
@@ -43,7 +45,8 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 			if !ui.configured() &&
 				!setupPaths[req.URL.Path] &&
 				!strings.HasPrefix(req.URL.Path, "/static/") &&
-				!strings.HasPrefix(req.URL.Path, "/ui/") {
+				!strings.HasPrefix(req.URL.Path, "/ui/") &&
+				!strings.HasPrefix(req.URL.Path, "/webhooks/") {
 				http.Redirect(w, req, "/welcome", http.StatusSeeOther)
 				return
 			}
@@ -113,6 +116,16 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	r.Post("/staff/{id}/chats/{chatId}/messages", ui.createMessage)
 	r.Post("/staff/{id}/chats/{chatId}/rename", ui.renameChat)
 	r.Post("/staff/{id}/chats/{chatId}/delete", ui.deleteChat)
+
+	// License
+	r.Get("/license", ui.licensePage)
+	r.Get("/license/checkout", ui.licenseCheckout)
+	r.Get("/license/checkout/success", ui.licenseCheckoutSuccess)
+	r.Post("/license/activate-dev", ui.licenseActivateDev)
+
+	// Payment webhooks — exempt from setup gate via path prefix
+	r.Post("/webhooks/stripe", ui.stripeWebhook)
+	r.Post("/webhooks/xendit", ui.xenditWebhook)
 
 	// Settings
 	r.Get("/settings", ui.settingsPage)

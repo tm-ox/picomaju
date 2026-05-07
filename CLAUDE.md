@@ -2,7 +2,34 @@
 
 Mobile-first agent orchestrator for small business owners. Runs via **picoclaw** (Go, single binary, <10MB RAM, native APK) on Android. UI served at `:18800`.
 
-Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Lifecycle. **Implemented: Directive Compiler + UI.** Others have planning docs, no code.
+Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Lifecycle.
+
+## Status
+
+**Implemented:** Full UI (staff / values / tools / tasks / chat shell) · Directive Compiler · License store · Plan & Credits page · Payment infrastructure (Stripe + Xendit) · Chat activation gate
+
+**Next:** Staff overview Compile vs Activate split → Picoclaw lifecycle (download + subprocess) → LLM proxy
+
+## Product tiers
+
+**Free — Configure & Preview**: full UI, directive compilation, workspace file preview. No LLM, no picoclaw.
+
+**Paid — Execute**: picoclaw downloaded on first activation, agent chat, live LLM calls via proxy. Users never configure LLM keys.
+
+**Pricing**: pay-as-you-go credits (primary); subscription plans (Starter / Pro) for power users.
+
+## Payment stack
+
+- **Stripe** — international (cards, Apple/Google Pay)
+- **Xendit** — SE Asia (GoPay, OVO, DANA, QRIS; ID/PH/MY/TH/VN)
+
+Webhooks delivered directly to the app (`/webhooks/stripe`, `/webhooks/xendit`). On payment confirmed, `license.json` is written locally. No separate backend required for v1. LLM proxy (future) will require a backend for metering.
+
+Payment infrastructure is fully implemented and gated behind env vars. No code changes needed when accounts are created — just set the env vars.
+
+## Picoclaw integration
+
+Not bundled, not downloaded during onboarding. Fetched from GitHub releases on first activation (`picoclaw-android-universal.zip` or platform equivalent), extracted to `{dataDir}/bin/picoclaw`, managed as a subprocess thereafter. User has zero visibility. Picomaju owns full `config.json` generation.
 
 ## Dev workflow
 
@@ -21,7 +48,12 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 | `PICOMAJU_CONFIG` | `~/.config/picomaju/settings.json` | config file path |
 | `DATA_DIR` | — | skip onboarding; use this data dir |
 | `ADDR` | `:18800` | listen address |
-| `DEV` | — | serve `ui/static/` from disk |
+| `DEV` | — | serve static from disk; enables dev-activate route |
+| `STRIPE_SECRET_KEY` | — | Stripe secret key (`sk_live_…` or `sk_test_…`) |
+| `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret (`whsec_…`) |
+| `XENDIT_API_KEY` | — | Xendit API key (`xnd_production_…`) |
+| `XENDIT_WEBHOOK_TOKEN` | — | Xendit callback token (from Xendit dashboard) |
+| `PICOMAJU_BASE_URL` | — | Public base URL for payment redirect URLs |
 
 ## Sub-docs
 
@@ -30,4 +62,8 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 
 ## Deferred
 
-Directive Compiler output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload via `POST /agent/:id/reload`, manifest versioning, Control Plane dashboard, Sidecar Execution, Managed Lifecycle, Overview section analytics.
+- **Staff overview: Compile vs Activate split** — "Compile" (free) always shown; separate "Activate" button gated on `license.IsActive()`; Activate triggers picoclaw download + start
+- **Picoclaw lifecycle** — download binary from GitHub releases on activation, extract to `{dataDir}/bin/picoclaw`, generate full `config.json`, manage subprocess (start/stop/restart), hot-reload via `POST /agent/:id/reload`
+- **LLM proxy** — route picoclaw LLM calls through picomaju backend for metering; picoclaw config points to proxy endpoint; requires backend deployment
+- **Subscription renewal** — on expiry, re-verify against payment provider; currently 35-day local expiry safety net only
+- **Manifest versioning**, Control Plane dashboard, Sidecar Execution, Managed Lifecycle, Overview section analytics

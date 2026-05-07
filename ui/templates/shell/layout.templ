@@ -62,6 +62,9 @@ templ appSidebarAside(nd NavData, nav templ.Component) {
 		</div>
 		@nav
 		<div class="mt-auto border-t border-sidebar-border shrink-0 py-2">
+			@SidebarItem("/license", "Plan & Credits", "license", nd.ActiveSection) {
+				@icons.Zap(templ.Attributes{"class": "size-4"})
+			}
 			@SidebarItem("/settings", "Settings", "settings", nd.ActiveSection) {
 				@icons.Settings(templ.Attributes{"class": "size-4"})
 			}
