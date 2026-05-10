@@ -1,11 +1,11 @@
 <div align="center">
-    <img src="web/static/logo-symbol.svg" alt="PicoMaju" width="170"/>
+    <img src="ui/static/logo-symbol.svg" alt="PicoMaju" width="170"/>
 </div>
 
 <br>
 
 <div align="center">
-    <img src="web/static/type.svg" alt="PicoMaju" width="170"/>
+    <img src="ui/static/logo-type.svg" alt="PicoMaju" width="170"/>
 </div>
 
 ---
@@ -54,7 +54,7 @@ Everything in Picomaju maps to four building blocks:
 git clone <repo>
 cd picomaju
 
-# Download datastar.js from https://data-star.dev (place in web/static/)
+# Download datastar.js from https://data-star.dev (place in ui/static/)
 # Build Tailwind CSS output
 tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css
 
@@ -87,7 +87,7 @@ Manual workflow:
 
 ```sh
 templ generate
-go build ./internal/... ./web/... .
+go build .
 tailwindcss -i ./ui/assets/css/input.css -o ./ui/assets/css/output.css
 ```
 
@@ -105,41 +105,53 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 
 **Environment variables** (advanced / managed deployments):
 
-| Var               | Description                                       |
-| ----------------- | ------------------------------------------------- |
-| `PICOMAJU_CONFIG` | Override config file path                         |
-| `DATA_DIR`        | Skip onboarding; use this data directory directly |
-| `ADDR`            | Listen address (default `:18800`)                 |
-| `DEV`             | Serve static files from disk                      |
+| Var                      | Description                                                  |
+| ------------------------ | ------------------------------------------------------------ |
+| `PICOMAJU_CONFIG`        | Override config file path                                    |
+| `DATA_DIR`               | Skip onboarding; use this data directory directly            |
+| `ADDR`                   | Listen address (default `:18800`)                            |
+| `DEV`                    | Serve static files from disk; enables `/license/activate-dev` |
+| `STRIPE_SECRET_KEY`      | Stripe secret key (`sk_live_…` or `sk_test_…`)               |
+| `STRIPE_WEBHOOK_SECRET`  | Stripe webhook signing secret (`whsec_…`)                    |
+| `XENDIT_API_KEY`         | Xendit API key (`xnd_production_…`)                          |
+| `XENDIT_WEBHOOK_TOKEN`   | Xendit callback token                                        |
+| `PICOMAJU_BASE_URL`      | Public base URL for payment redirect URLs                    |
+| `PICOCLAW_VERSION`       | picoclaw release to download on first activation (default `0.1.0`) |
+| `ANTHROPIC_API_KEY`      | Anthropic API key for LLM proxy (`sk-ant-…`)                 |
 
 ---
 
 ## Project status
 
-**Current:** Full migration to new frontend (`/ui`, templui + Tailwind CSS v4) complete. All sections live: onboarding, dashboard, values (with SSE validation), tools, tasks, staff, settings. Mobile-first shell with sticky top nav, bottom tab bar, per-section FAB. Component workshop at `/ui/workshop`.
+**Implemented:** Full UI (home dashboard · staff · values · tools · tasks · chat · settings · users · login · profile) · Directive Compiler · License store · Plan & Credits page · Payment infrastructure (Stripe + Xendit) · Chat activation gate · Picoclaw lifecycle (download + subprocess management) · LLM proxy (Anthropic passthrough + credit metering + rate limiting) · User system (PIN auth · roles · session · user management · profile). Component workshop at `/ui/workshop`.
 
-**Deferred:** Compiled output (AGENTS.md, SOUL.md, picoclaw config.json injection), hot-reload into running agents, Control Plane dashboard, Sidecar Execution, Managed Lifecycle.
+**Next:** Home dashboard — wire real data (agent count, active agents, messages today, credits); Activity tab (chat history); Agents tab (live picoclaw status).
+
+**Deferred:** Sidecar Execution, Managed Lifecycle, manifest versioning.
 
 ---
 
 ## Repo layout
 
 ```
-main.go                  entry point; mounts both /web and /ui routes
+main.go                  entry point; serves /static/* and all app routes
 Taskfile.yml             task dev (hot reload), task build:css
 .templui.json            templui CLI config
 internal/
   settings/              config file store
-  value/ tool/ task/ staff/  domain models + file stores
-  api/                   HTTP handlers (HTML UI + SSE)
-    router.go            all routes + setup gate middleware
+  value/ tool/ task/ staff/ chat/ user/  domain models + file stores
+  license/ payment/      license store + Stripe/Xendit checkout
+  picoclaw/              binary lifecycle manager + config writer
+  llmproxy/              Anthropic passthrough proxy with credit metering
+  api/                   HTTP handlers (HTML UI + SSE + webhooks)
+    router.go            all routes + setup gate + auth gate middleware
     ui.go                core page handlers
     ui_onboarding.go     onboarding step handlers
-web/                     legacy frontend (preserved for reference; not active)
-  templates/             templ components (all section pages)
-  static/                style.css, app.js, datastar.js (not committed), logo SVGs
-ui/                      active frontend (templui + Tailwind CSS v4)
-  assets/css/input.css   Tailwind @theme config + brand tokens (oklch)
+    ui_users.go          login/logout, user CRUD, profile
+    webhooks.go          Stripe + Xendit webhook handlers
+ui/                      frontend (templui + Tailwind CSS v4)
+  static/                logo SVGs, datastar.js (not committed — place manually)
+  assets/css/input.css   Tailwind @theme config + brand tokens
   assets/css/output.css  generated; gitignored
   assets/js/             templui component JS
   components/            templui components (CLI workflow)

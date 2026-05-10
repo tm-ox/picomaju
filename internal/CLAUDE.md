@@ -90,7 +90,7 @@ Stripe plan activation requires `Plan.StripePriceID` to be set (populated when p
 
 ## Routes
 
-Setup gate: redirect to `/welcome` until data dir configured. Exempt: `/welcome`, `/setup*`, `/static/*, `/ui/*`, `/webhooks/*`, `/login`.
+Setup gate: redirect to `/welcome` until data dir configured. Exempt: `/welcome`, `/setup*`, `/static/*`, `/ui/*`, `/webhooks/*`, `/login`.
 Auth gate: redirect to `/login` when users exist and no valid session.
 
 | Method | Path | Handler |
