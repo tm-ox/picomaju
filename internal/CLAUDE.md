@@ -23,9 +23,10 @@ tool/catalog.go      — Integration catalog: 8 entries; CatalogByCategory/ID/Ty
 task/store.go        — Task{id, label, description, tools[]}; CRUD on tasks.json
 staff/store.go       — Staff{id, label, description, active, icon, tasks[], value_categories[], values[]}; CRUD on staff.json
 chat/store.go        — Chat{id, staff_id, title, created_at, messages[]}, Message{role, content, ts}; CRUD on chats.json; ListByStaff(staffID)
-api/router.go        — all routes; setup gate middleware (exempts /welcome, /setup*, /static/*, /webhooks/*)
-api/ui.go            — HTML + SSE handlers; uiHandler{stores + license + settings}; navData() helper
-api/ui_onboarding.go — completeWelcome; firstStaffPage/completeFirstStaff; slugify
+api/router.go        — all routes; setup gate + auth gate middleware
+api/ui.go            — HTML + SSE handlers; uiHandler; navData() helper; homePage handler
+api/ui_users.go      — login/logout, user CRUD (owner-only), /profile self-edit
+api/ui_onboarding.go — completeWelcome; ownerPage/completeOwner; firstStaffPage/completeFirstStaff; slugify
 api/webhooks.go      — stripeWebhook; xenditWebhook; activateFromStripe/Xendit → license.json
 api/sse.go           — SSEMergeFragment() for datastar
 api/helpers.go       — jsonOK / jsonErr
@@ -89,15 +90,40 @@ Stripe plan activation requires `Plan.StripePriceID` to be set (populated when p
 
 ## Routes
 
-Setup gate: redirect to `/welcome` until data dir configured. Exempt: `/welcome`, `/setup*`, `/static/*`, `/ui/*`, `/webhooks/*`.
+Setup gate: redirect to `/welcome` until data dir configured. Exempt: `/welcome`, `/setup*`, `/static/*, `/ui/*`, `/webhooks/*`, `/login`.
+Auth gate: redirect to `/login` when users exist and no valid session.
 
 | Method | Path | Handler |
 |--------|------|---------|
-| GET | `/` | staff dashboard |
+| GET | `/` | home dashboard (`?t=overview\|activity\|agents`) |
+| GET/POST | `/login` | user picker + PIN → session |
+| POST | `/logout` | clear session → `/login` |
+| GET/POST | `/profile` | self-edit: name, description, PIN (any logged-in user) |
+| GET | `/users` | user list (owner only) |
+| GET/POST | `/users/new` `/users` | create user (owner only) |
+| GET/POST | `/users/:id/edit` `/users/:id` | edit user (owner only) |
+| POST | `/users/:id/delete` | delete user (owner only) |
 | GET/POST | `/welcome` | language picker → `/setup` |
 | GET/POST | `/setup` | step 1: business name, data dir, tz, hours |
-| GET/POST | `/setup/first-staff` | step 2: first staff profile |
-| GET/POST | `/setup/integrations` | step 3: tool picker → `/values` |
+| GET/POST | `/setup/owner` | step 2: owner account → `/setup/first-staff` |
+| GET/POST | `/setup/first-staff` | step 3: first staff profile |
+| GET/POST | `/setup/integrations` | step 4: tool picker → `/values` |
+| GET | `/staff` | staff list |
+| GET | `/staff/new` | new staff form |
+| POST | `/staff` | create → `/staff/:id` |
+| GET | `/staff/:id[?s=overview\|profile\|values\|tools\|tasks]` | detail (`?compiled=1`, `?err=`) |
+| POST | `/staff/:id/profile` | update profile |
+| POST | `/staff/:id/tasks` | update task assignments |
+| POST | `/staff/:id/values` | update value/category assignments |
+| POST | `/staff/:id/delete` | delete → `/staff` |
+| POST | `/staff/:id/compile` | compile workspace files → `?compiled=1` |
+| POST | `/staff/:id/activate` | download picoclaw + write config.json + start subprocess (license required) |
+| POST | `/staff/:id/deactivate` | stop picoclaw subprocess |
+| POST | `/staff/:id/chats` | create chat → chat page |
+| GET | `/staff/:id/chats/:chatId` | chat page |
+| POST | `/staff/:id/chats/:chatId/messages` | append message (redirects `/license` if not active) |
+| POST | `/staff/:id/chats/:chatId/rename` | rename |
+| POST | `/staff/:id/chats/:chatId/delete` | delete → `/staff/:id` |
 | GET | `/values[?cat=]` | value list |
 | GET/POST | `/values/new` `/values` | create value |
 | GET/POST | `/values/:id/edit` `/values/:id` | edit value |
@@ -111,26 +137,11 @@ Setup gate: redirect to `/welcome` until data dir configured. Exempt: `/welcome`
 | GET/POST | `/tasks/new` `/tasks` | create task |
 | GET/POST | `/tasks/:id/edit` `/tasks/:id` | edit task |
 | POST | `/tasks/:id/delete` | delete |
-| GET | `/staff/new` | new staff form |
-| POST | `/staff` | create → `/staff/:id` |
-| GET | `/staff/:id[?s=overview\|profile\|values\|tools\|tasks]` | detail page (`?compiled=1`, `?err=`) |
-| POST | `/staff/:id/profile` | update profile |
-| POST | `/staff/:id/tasks` | update task assignments |
-| POST | `/staff/:id/values` | update value/category assignments |
-| POST | `/staff/:id/delete` | delete → `/` |
-| POST | `/staff/:id/compile` | compile workspace files → `?compiled=1` |
-| POST | `/staff/:id/activate` | download picoclaw if needed + write config.json (with llm_proxy) + start subprocess (license required) |
-| POST | `/staff/:id/deactivate` | stop picoclaw subprocess |
-| POST | `/proxy/v1/*` | LLM proxy → Anthropic API; auth via Bearer/X-Proxy-Token = license.Token; metering for credits plan |
-| POST | `/staff/:id/chats` | create chat → chat page |
-| GET | `/staff/:id/chats/:chatId` | chat page |
-| POST | `/staff/:id/chats/:chatId/messages` | append message (redirects `/license` if not active) |
-| POST | `/staff/:id/chats/:chatId/rename` | rename |
-| POST | `/staff/:id/chats/:chatId/delete` | delete → `/staff/:id` |
 | GET | `/license` | plan & credits (`?activated=1`, `?err=`) |
 | GET | `/license/checkout` | → Stripe/Xendit checkout (`?pkg=`, `?plan=`, `?provider=stripe\|xendit`) |
 | GET | `/license/checkout/success` | post-payment landing → `/license?activated=1` |
 | POST | `/license/activate-dev` | DEV env only — instant test license |
+| POST | `/proxy/v1/*` | LLM proxy → Anthropic API; auth via license.Token; metering for credits plan |
 | POST | `/webhooks/stripe` | Stripe webhook (sig verify → license update) |
 | POST | `/webhooks/xendit` | Xendit webhook (token verify → license update) |
 | GET/POST | `/settings` | settings page |

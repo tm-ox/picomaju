@@ -90,8 +90,8 @@ templ appTopBar(nd NavData) {
 			</button>
 		</div>
 		<nav class="hidden sm:flex items-center gap-0.5" aria-label="Primary">
-			@appNavLink("/", "Staff", nd.ActiveSection == "staff") {
-				@icons.UserRound(templ.Attributes{"class": "size-3.5"})
+			@appNavLink("/", "Home", nd.ActiveSection == "home") {
+				@icons.House(templ.Attributes{"class": "size-3.5"})
 			}
 			@appNavLink("/values", "Values", nd.ActiveSection == "values") {
 				@icons.Star(templ.Attributes{"class": "size-3.5"})
@@ -101,6 +101,9 @@ templ appTopBar(nd NavData) {
 			}
 			@appNavLink("/tasks", "Tasks", nd.ActiveSection == "tasks") {
 				@icons.ClipboardList(templ.Attributes{"class": "size-3.5"})
+			}
+			@appNavLink("/staff", "Staff", nd.ActiveSection == "staff") {
+				@icons.UserRound(templ.Attributes{"class": "size-3.5"})
 			}
 		</nav>
 		<div class="flex-1 flex items-center justify-end">

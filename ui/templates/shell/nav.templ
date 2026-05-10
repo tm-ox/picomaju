@@ -20,8 +20,8 @@ type NavData struct {
 templ AppBottomTabBar(nd NavData) {
 	<div class="sm:hidden shrink-0 px-4 pb-4 pt-2">
 		<nav class="bg-card rounded-xl border border-border shadow-sm flex items-stretch" aria-label="Primary mobile">
-			@bottomTab("/", "Staff", nd.ActiveSection == "staff") {
-				@icons.UserRound(templ.Attributes{"class": "size-5"})
+			@bottomTab("/", "Home", nd.ActiveSection == "home") {
+				@icons.House(templ.Attributes{"class": "size-5"})
 			}
 			@bottomTab("/values", "Values", nd.ActiveSection == "values") {
 				@icons.Star(templ.Attributes{"class": "size-5"})
@@ -31,6 +31,9 @@ templ AppBottomTabBar(nd NavData) {
 			}
 			@bottomTab("/tasks", "Tasks", nd.ActiveSection == "tasks") {
 				@icons.ClipboardList(templ.Attributes{"class": "size-5"})
+			}
+			@bottomTab("/staff", "Staff", nd.ActiveSection == "staff") {
+				@icons.UserRound(templ.Attributes{"class": "size-5"})
 			}
 		</nav>
 	</div>

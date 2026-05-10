@@ -25,6 +25,7 @@ import (
 	"picomaju/internal/user"
 	"picomaju/internal/value"
 	"picomaju/ui/templates/shell"
+	hometpl "picomaju/ui/templates/home"
 	licensetpl "picomaju/ui/templates/license"
 	settingstpl "picomaju/ui/templates/settings"
 	setuptpl "picomaju/ui/templates/setup"
@@ -441,6 +442,13 @@ func (h *uiHandler) deleteTask(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 }
 
+// --- Home ---
+
+func (h *uiHandler) homePage(w http.ResponseWriter, r *http.Request) {
+	tab := r.URL.Query().Get("t")
+	hometpl.HomePage(h.navData(r, "home"), tab).Render(r.Context(), w)
+}
+
 // --- Staff UI ---
 
 func (h *uiHandler) staffList(w http.ResponseWriter, r *http.Request) {
@@ -652,7 +660,7 @@ func (h *uiHandler) removeStaffValue(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) deleteStaff(w http.ResponseWriter, r *http.Request) {
 	h.staff.Delete(chi.URLParam(r, "id"))
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/staff", http.StatusSeeOther)
 }
 
 // --- Picoclaw lifecycle ---

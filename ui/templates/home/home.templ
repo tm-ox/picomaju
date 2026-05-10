@@ -1,0 +1,91 @@
+package hometpl
+
+import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"picomaju/ui/templates/shell"
+)
+
+templ HomePage(nd shell.NavData, tab string) {
+	@shell.AppLayout("Home", nd, shell.EmptySidebarNav()) {
+		<div class="flex flex-col gap-1">
+			<h3 class="font-brand font-bold text-foreground">{ greeting(nd.CurrentUserName) }</h3>
+			if nd.CurrentUserDescription != "" {
+				<p class="text-sm text-muted-foreground">{ nd.CurrentUserDescription }</p>
+			}
+		</div>
+		<nav class="flex items-center gap-1">
+			@homeTab("?t=overview", "Overview", tab == "overview" || tab == "")
+			@homeTab("?t=activity", "Activity", tab == "activity")
+			@homeTab("?t=agents", "Agents", tab == "agents")
+		</nav>
+		switch tab {
+		case "activity":
+			@activityTab()
+		case "agents":
+			@agentsTab()
+		default:
+			@overviewTab(nd)
+		}
+	}
+}
+
+templ homeTab(href, label string, active bool) {
+	<a
+		href={ templ.SafeURL(href) }
+		class={
+			"px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+			templ.KV("bg-muted text-foreground", active),
+			templ.KV("text-muted-foreground hover:text-foreground hover:bg-muted", !active),
+		}
+	>{ label }</a>
+}
+
+templ overviewTab(nd shell.NavData) {
+	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+		@homeStat("Agents", "—") {
+			@icons.Bot(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@homeStat("Active now", "—") {
+			@icons.Activity(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@homeStat("Messages today", "—") {
+			@icons.MessageSquare(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+		@homeStat("Credits", "—") {
+			@icons.Zap(templ.Attributes{"class": "size-4 text-muted-foreground"})
+		}
+	</div>
+	@homePlaceholderCard("Recent activity", "Agent conversations and events will appear here.")
+}
+
+templ activityTab() {
+	@homePlaceholderCard("Activity log", "Conversation history and user actions will appear here.")
+}
+
+templ agentsTab() {
+	@homePlaceholderCard("Agent status", "Live agent status, uptime, and recent outputs will appear here.")
+}
+
+templ homeStat(label, value string) {
+	<div class="bg-card rounded-lg border border-border p-4 flex flex-col gap-2">
+		<div class="flex items-center justify-between">
+			<span class="text-xs font-mono text-muted-foreground uppercase tracking-wide">{ label }</span>
+			{ children... }
+		</div>
+		<span class="text-sm font-brand font-semibold text-foreground">{ value }</span>
+	</div>
+}
+
+templ homePlaceholderCard(title, desc string) {
+	<div class="bg-card rounded-lg border border-border p-5 flex flex-col gap-2">
+		<h5 class="text-sm font-brand font-semibold text-foreground">{ title }</h5>
+		<p class="text-sm text-muted-foreground">{ desc }</p>
+	</div>
+}
+
+func greeting(name string) string {
+	if name == "" {
+		return "Welcome back"
+	}
+	return "Welcome back, " + name
+}

@@ -606,7 +606,7 @@ templ staffTasksSection(m *staff.Staff, tasks []task.Task) {
 templ StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, formErr string) {
 	@shell.AppLayout("New Staff", nd, staffAccordionNav(members, "", "", nil)) {
 		@shell.PageHeader("New Staff") {
-			@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeSm}) {
+			@button.Button(button.Props{Href: "/staff", Variant: button.VariantGhost, Size: button.SizeSm}) {
 				Cancel
 			}
 		}

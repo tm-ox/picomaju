@@ -12,15 +12,17 @@ Templates are organised into sub-packages under `ui/templates/`. Each directory 
 
 | Package | Go alias | Key exports |
 |---|---|---|
-| `shell/` | `shell` | `AppLayout`, `ChatAppLayout`, `Layout`, `ThemeToggle`, `NavData`, `AppBottomTabBar`, `SidebarItem`, `PageHeader`, `EmptyState`, `ListSection`, `RowList`, `RowItem`, `Badge`, `RowActions`, `FormCard`, `Field`, `ValueCatIcon`, `EmptySidebarNav`; helpers: `IncludesStr`, `FormTitle`, `FormAction`, `CountWord`, `CategoryLabel`, `CatLabel` |
-| `staff/` | `stafftpl` | `StaffListPage`, `StaffFormPage`, `StaffDetailPage`, `StaffChatPage`; private: sidebar navs, icon picker, helpers |
+| `shell/` | `shell` | `AppLayout`, `ChatAppLayout`, `Layout`, `ThemeToggle`, `NavData`, `AppBottomTabBar`, `SidebarItem`, `PageHeader`, `EmptyState`, `ListSection`, `RowList`, `RowItem`, `Badge`, `RowActions`, `FormCard`, `Field`, `ValueCatIcon`, `EmptySidebarNav`, `SettingsTabNav`; helpers: `IncludesStr`, `FormTitle`, `FormAction`, `CountWord`, `CategoryLabel`, `CatLabel` |
+| `home/` | `hometpl` | `HomePage(nd, tab)` — placeholder dashboard; greeting, stat cards, tabs Overview/Activity/Agents via `?t=` |
+| `staff/` | `stafftpl` | `StaffListPage`, `StaffFormPage`, `StaffDetailPage`, `StaffChatPage`; private: sidebar navs, icon picker, `currentUserCard`, helpers |
 | `values/` | `valuestpl` | `ValueListPage`, `ValueFormPage`, `ValidationFragment`; private: sidebar nav, `groupValuesByCat` |
 | `tools/` | `toolstpl` | `ToolListPage`, `NewToolPage`, `ToolFormPage`; private: sidebar nav, `groupToolsByCat`, `configValue` |
 | `tasks/` | `taskstpl` | `TaskListPage`, `TaskFormPage`; private: sidebar nav |
-| `license/` | `licensetpl` | `LicensePage(l, nd, activated, formErr, dev)` — plan status, credits bar, credit pack + plan cards, dev activation panel |
-| `settings/` | `settingstpl` | `SettingsPage` |
-| `setup/` | `setuptpl` | `WelcomePage`, `DashboardPage`, `SetupStep1Page`, `SetupStep2Page`, `SetupStep3Page` |
-| `workshop/` | `workshoptpl` | `WorkshopPage` |
+| `license/` | `licensetpl` | `LicensePage(l, nd, activated, formErr, dev)` — uses `SettingsTabNav("plan")` |
+| `settings/` | `settingstpl` | `SettingsPage` — uses `SettingsTabNav("general")` |
+| `users/` | `userstpl` | `UserListPage(users, nd)`, `UserFormPage(u, staffOptions, nd, isNew, formErr)`, `ProfilePage(u, nd, formErr)` — `UserListPage` uses `SettingsTabNav("users")` |
+| `login/` | `logintpl` | `LoginPage(users []UserEntry, selectedID, formErr)` |
+| `setup/` | `setuptpl` | `WelcomePage`, `SetupStep1Page`, `SetupOwnerPage`, `SetupStep2Page`, `SetupStep3Page` |
 
 ## Layout shells
 
@@ -43,11 +45,13 @@ Content area: `max-w-2xl mx-auto flex-1 flex flex-col min-h-0 overflow-hidden` i
 **Sidebar** (`bg-sidebar`, `h-dvh`, dark):
 - Header: `size-7` business avatar + name (`data-sidebar-label`) + desktop toggle (`hidden sm:flex`)
 - Middle: `@nav` (page-specific)
-- Footer: Plan & Credits (Zap icon, `/license`) + Settings + theme toggle (all as `SidebarItem`)
+- No footer — all user/settings access moved to top-bar avatar menu
 
-**In-content header** (`h-12 border-b`): mobile hamburger (`flex sm:hidden`) left; `hidden sm:flex` nav links (Staff / Values / Tools / Tasks) center.
+**In-content header** (`h-12 border-b`): mobile hamburger left; nav links center (Home / Values / Tools / Tasks / Staff); avatar menu button right.
 
-**Bottom tab bar** (`AppBottomTabBar`, `sm:hidden`): `shrink-0` flex child inside `#sidebar-main` (not fixed) — slides with content when sidebar opens on mobile. Outer: `px-4 pb-4 pt-2`. Card: `bg-card rounded-xl border border-border shadow-sm`. 4 tabs: Staff / Values / Tools / Tasks — icon + label, active `text-foreground font-medium`.
+**Top-bar avatar menu**: `size-7 rounded-md bg-primary text-primary-foreground font-brand font-bold text-[0.625rem] tracking-wide` inside `size-8` container — matches business avatar exactly. Click → `w-72 rounded-xl mt-4` dropdown panel. Items: user name+role header, Profile, Settings, theme toggle, Sign out. All items `whitespace-nowrap`. JS: `toggleUserMenu(btn)` + outside-click listener, IIFE in `userMenuButton` component.
+
+**Bottom tab bar** (`AppBottomTabBar`, `sm:hidden`): 5 tabs — Home / Values / Tools / Tasks / Staff. `shrink-0` flex child, not fixed. Card: `bg-card rounded-xl border border-border shadow-sm`.
 
 No FAB — page header buttons handle create actions on all screen sizes.
 
@@ -64,17 +68,21 @@ No FAB — page header buttons handle create actions on all screen sizes.
 
 `SidebarItem(href, lbl, key, active string)` — `mx-2 px-1 py-0.5`, icon in `size-8` container. Active: `bg-sidebar-accent text-sidebar-foreground`. Inactive: `text-sidebar-foreground/60`.
 
-`--sidebar-accent` kept close to `--sidebar` to prevent expanded state appearing lighter (active items cover more surface): light `oklch(0.21)`, dark `oklch(0.13)`.
+`--sidebar-accent` kept close to `--sidebar` to prevent expanded state appearing lighter (active items cover more surface).
 
 ## Sidebar nav components
 
 | Page | Component | Filter/content |
 |---|---|---|
-| Staff home | `staffListSidebarNav(members)` | staff member links, icon at `size-4` (UserRound fallback) |
-| Staff detail | `staffSidebarNav(m, section, chats []chat.Chat)` | Overview / Profile / Values / Tools / Tasks + divider + New Chat button + chat list + back |
+| Home | `EmptySidebarNav()` | — |
+| Staff list | `staffAccordionNav(members, "", "", nil)` | all collapsed |
+| Staff detail | `staffAccordionNav(members, m.ID, section, chats)` | active staff expanded |
+| Staff chat | `staffAccordionNav(members, m.ID, c.ID, chats)` | active staff + chat highlighted |
+| Staff form | `staffAccordionNav(members, "", "", nil)` | all collapsed |
 | Values | `valueSidebarNav(cats, activeCat)` | All + 5 categories via `?cat=<id>` |
 | Tools | `toolSidebarNav(activeCat)` | All + messaging/commerce/payments/utilities via `?cat=` |
 | Tasks | `taskSidebarNav(activeCat)` | All + same 4 catalog categories via `?tool_cat=` |
+| Settings/Users/License | `EmptySidebarNav()` | tab nav rendered in-content via `SettingsTabNav` |
 
 **New Chat button** in `staffSidebarNav`: `<form class="px-2">` + `<button class="w-full ... bg-primary text-primary-foreground">` — matches `SidebarItem` lateral padding (`px-2` on form ≡ `mx-2` on link).
 
@@ -90,11 +98,15 @@ When `activeCat == ""`, Values and Tools list pages render items in `listSection
 - `groupToolsByCat(tools)` → `[]toolCatGroup{Label, Tools}` — ordered messaging/commerce/payments/utilities, empty cats omitted
 - `listSection(label string)` in `shared.templ` — renders `<h5>` category heading + `rowList` wrapper
 
+## Settings area
+
+`SettingsTabNav(active string, nd NavData)` in `shell/shared.templ`. Tabs: General (`/settings`) | Users (`/users`, owner only — checks `nd.CurrentUserRole == "owner"`) | Plan (`/license`). Accepts children for right-slot action. Used in place of `PageHeader` on all three pages. `UserListPage` passes `+` button as child.
+
 ## Staff pages
 
-**Home `/`**: `StaffListPage` renders `staffDashboard` — 2-col card grid, each card links to `/staff/:id`.
+**List `/staff`**: `StaffListPage` renders `currentUserCard(nd)` (links to `/profile`) above the staff grid when logged in, then `staffDashboard` — 2-col card grid, each card links to `/staff/:id`.
 
-**Detail `/staff/:id`**: `StaffDetailPage(m, tasks, tools, values, cats, nd, section, formErr, chats, compiled bool)`. Sections: overview / profile / values / tools / tasks. Overview stat cards ordered Status → Values → Tools → Tasks; each is `staffStatCardLink` linking to `?s=profile/values/tools/tasks`. Directives card has "Compile & Deploy" button (`POST /staff/:id/compile`); shows "Deployed" + "Recompile" after `?compiled=1`.
+**Detail `/staff/:id`**: `StaffDetailPage(members, m, tasks, tools, values, cats, nd, section, formErr, chats, compiled, licensed, running)`. Sections: overview / profile / values / tools / tasks. Overview stat cards Status → Values → Tools → Tasks. Directives card + Runtime card.
 
 **Chat `/staff/:id/chats/:chatId`**: `StaffChatPage(m, c, chats, nd, licensed bool)` using `ChatAppLayout`. When `licensed=false`: empty state copy changes to "Activate to chat"; input panel replaced with a `/license` upgrade prompt card. `POST .../messages` redirects to `/license` if not active. Three `shrink-0`/`flex-1`/`shrink-0` children: header with inline rename form + delete button, messages scroll area, input panel. Send button uses `ArrowUp` icon. Rename: text input styled as plain text, checkmark button on `group-focus-within:opacity-100`, auto-submits on blur if changed.
 
