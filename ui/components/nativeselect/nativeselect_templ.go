@@ -53,8 +53,7 @@ func Select(props ...Props) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 = []any{utils.TwMerge(
-			"flex h-9 w-full min-w-0 appearance-none rounded-md border border-input bg-transparent px-3 py-1 pr-8 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
-			"dark:bg-input/30",
+			"flex h-9 w-full min-w-0 appearance-none rounded-md border border-input bg-card text-foreground px-3 py-1 pr-8 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
 			"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
 			"disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
 			"aria-invalid:ring-destructive/20 aria-invalid:border-destructive dark:aria-invalid:ring-destructive/40",

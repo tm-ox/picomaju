@@ -191,7 +191,7 @@ func staffAccordionNav(members []staff.Staff, activeID string, activeKey string,
 			var templ_7745c5c3_Var8 templ.SafeURL
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 52, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 54, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func staffAccordionNav(members []staff.Staff, activeID string, activeKey string,
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(m.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 62, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 64, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -256,7 +256,7 @@ func staffAccordionNav(members []staff.Staff, activeID string, activeKey string,
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("Expand " + m.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 72, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 74, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -451,7 +451,7 @@ func staffAccordionSubItems(staffID string, activeKey string, isActive bool, cha
 		var templ_7745c5c3_Var21 templ.SafeURL
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + staffID + "/chats"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 124, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 126, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -535,7 +535,7 @@ func staffSubItem(href, label, key, activeKey string) templ.Component {
 		var templ_7745c5c3_Var25 templ.SafeURL
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 146, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 148, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -569,7 +569,7 @@ func staffSubItem(href, label, key, activeKey string) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 156, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 158, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -616,7 +616,7 @@ func staffDashboard(members []staff.Staff) templ.Component {
 			var templ_7745c5c3_Var29 templ.SafeURL
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 163, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 165, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -637,82 +637,82 @@ func staffDashboard(members []staff.Staff) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(m.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 170, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 172, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</span> <span class=\"ml-auto shrink-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if m.Active {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<span class=\"shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400\">Active</span>")
+				templ_7745c5c3_Err = shell.Badge("Active", shell.BadgeSuccess).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<span class=\"shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-muted text-muted-foreground\">Inactive</span>")
+				templ_7745c5c3_Err = shell.Badge("Inactive").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if m.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<p class=\"text-xs text-muted-foreground truncate mt-0.5\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<p class=\"text-xs text-muted-foreground truncate mt-0.5\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(m.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 178, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 182, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div></div><div class=\"flex gap-4 text-xs font-mono text-muted-foreground\"><span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</div></div><div class=\"flex gap-4 text-xs font-mono text-muted-foreground\"><span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(shell.CountWord(len(m.Tasks), "task", "tasks"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 183, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 187, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</span> <span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</span> <span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(shell.CountWord(len(m.ValueCategories)+len(m.Values), "value ref", "value refs"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 184, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 188, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</span></div></a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</span></div></a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -754,7 +754,7 @@ func StaffDetailPage(members []staff.Staff, m *staff.Staff, tasks []task.Task, t
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"flex items-center gap-3\"><div class=\"size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"flex items-center gap-3\"><div class=\"size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -762,20 +762,20 @@ func StaffDetailPage(members []staff.Staff, m *staff.Staff, tasks []task.Task, t
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "</div><h3 class=\"font-brand font-bold text-foreground\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div><h3 class=\"font-brand font-bold text-foreground\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(m.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 198, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 202, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</h3></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</h3></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -807,7 +807,7 @@ func StaffDetailPage(members []staff.Staff, m *staff.Staff, tasks []task.Task, t
 						var templ_7745c5c3_Var39 string
 						templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(formErr)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 203, Col: 14}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 207, Col: 14}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 						if templ_7745c5c3_Err != nil {
@@ -826,7 +826,7 @@ func StaffDetailPage(members []staff.Staff, m *staff.Staff, tasks []task.Task, t
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -889,7 +889,7 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 			templ_7745c5c3_Var40 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<h2 class=\"text-base font-brand font-semibold text-foreground\">Overview</h2><div class=\"grid grid-cols-2 sm:grid-cols-4 gap-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<h2 class=\"text-base font-brand font-semibold text-foreground\">Overview</h2><div class=\"grid grid-cols-2 sm:grid-cols-4 gap-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -981,45 +981,45 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</div><div class=\"bg-card rounded-lg border border-border p-5 flex flex-col gap-3\"><div class=\"flex items-center justify-between\"><h5 class=\"text-sm font-brand font-semibold text-foreground\">Directives</h5>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</div><div class=\"bg-card rounded-lg border border-border p-5 flex flex-col gap-3\"><div class=\"flex items-center justify-between\"><h5 class=\"text-sm font-brand font-semibold text-foreground\">Directives</h5>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if compiled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<span class=\"text-xs font-mono text-green-600 dark:text-green-400\">Compiled</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<span class=\"text-xs font-mono text-green-600 dark:text-green-400\">Compiled</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if compiled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<p class=\"text-sm text-muted-foreground\">Workspace files (AGENT.md, SOUL.md, USER.md) written successfully.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<p class=\"text-sm text-muted-foreground\">Workspace files (AGENT.md, SOUL.md, USER.md) written successfully.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<p class=\"text-sm text-muted-foreground\">Compile this agent's profile into workspace identity files for PicoClaw.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<p class=\"text-sm text-muted-foreground\">Compile this agent's profile into workspace identity files for PicoClaw.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<form method=\"post\" action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<form method=\"post\" action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var45 templ.SafeURL
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/compile"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 252, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 255, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1039,17 +1039,17 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if compiled {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "Recompile")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "Recompile")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "Compile")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "Compile")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1060,22 +1060,22 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</form></div><div class=\"bg-card rounded-lg border border-border p-5 flex flex-col gap-3\"><div class=\"flex items-center justify-between\"><h5 class=\"text-sm font-brand font-semibold text-foreground\">Runtime</h5>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</form></div><div class=\"bg-card rounded-lg border border-border p-5 flex flex-col gap-3\"><div class=\"flex items-center justify-between\"><h5 class=\"text-sm font-brand font-semibold text-foreground\">Runtime</h5>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if running {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<span class=\"text-xs font-mono text-green-600 dark:text-green-400\">Running</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<span class=\"text-xs font-mono text-green-600 dark:text-green-400\">Running</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if !licensed {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<p class=\"text-sm text-muted-foreground\">Activate to run this agent with live LLM calls via PicoClaw.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<p class=\"text-sm text-muted-foreground\">Activate to run this agent with live LLM calls via PicoClaw.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1095,7 +1095,7 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, " Upgrade to Activate")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, " Upgrade to Activate")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1106,20 +1106,20 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 				return templ_7745c5c3_Err
 			}
 		} else if running {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "<p class=\"text-sm text-muted-foreground\">PicoClaw agent process is active.</p><form method=\"post\" action=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<p class=\"text-sm text-muted-foreground\">PicoClaw agent process is active.</p><form method=\"post\" action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var48 templ.SafeURL
 			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/deactivate"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 278, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 281, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1139,7 +1139,7 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, " Stop")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, " Stop")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1149,25 +1149,25 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "</form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<p class=\"text-sm text-muted-foreground\">Start the PicoClaw agent process to enable live LLM calls.</p><form method=\"post\" action=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<p class=\"text-sm text-muted-foreground\">Start the PicoClaw agent process to enable live LLM calls.</p><form method=\"post\" action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var50 templ.SafeURL
 			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/activate"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 286, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 289, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1187,7 +1187,7 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, " Activate")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, " Activate")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1197,12 +1197,12 @@ func staffOverviewSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "</form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "</div><div class=\"bg-card rounded-lg border border-border p-5 flex flex-col gap-3\"><div class=\"flex items-center justify-between\"><h5 class=\"text-sm font-brand font-semibold text-foreground\">Activity & Reports</h5><span class=\"text-xs font-mono text-muted-foreground\">Coming soon</span></div><p class=\"text-sm text-muted-foreground\">Agent activity logs, conversation summaries, and performance analytics will appear here.</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "</div><div class=\"bg-card rounded-lg border border-border p-5 flex flex-col gap-3\"><div class=\"flex items-center justify-between\"><h5 class=\"text-sm font-brand font-semibold text-foreground\">Activity & Reports</h5><span class=\"text-xs font-mono text-muted-foreground\">Coming soon</span></div><p class=\"text-sm text-muted-foreground\">Agent activity logs, conversation summaries, and performance analytics will appear here.</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1231,20 +1231,20 @@ func staffStatCard(label, value string) templ.Component {
 			templ_7745c5c3_Var52 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "<div class=\"bg-card rounded-lg border border-border p-4 flex flex-col gap-2\"><div class=\"flex items-center justify-between\"><span class=\"text-xs font-mono text-muted-foreground uppercase tracking-wide\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "<div class=\"bg-card rounded-lg border border-border p-4 flex flex-col gap-2\"><div class=\"flex items-center justify-between\"><span class=\"text-xs font-mono text-muted-foreground uppercase tracking-wide\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var53 string
 		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 306, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 309, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "</span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "</span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1252,20 +1252,20 @@ func staffStatCard(label, value string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "</div><span class=\"text-sm font-brand font-semibold text-foreground\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "</div><span class=\"text-sm font-brand font-semibold text-foreground\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 309, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 312, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "</span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "</span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1294,33 +1294,33 @@ func staffStatCardLink(label, value, href string) templ.Component {
 			templ_7745c5c3_Var55 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var56 templ.SafeURL
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 314, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 317, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "\" class=\"bg-card rounded-lg border border-border p-4 flex flex-col gap-2 hover:border-primary/50 transition-colors\"><div class=\"flex items-center justify-between\"><span class=\"text-xs font-mono text-muted-foreground uppercase tracking-wide\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "\" class=\"bg-card rounded-lg border border-border p-4 flex flex-col gap-2 hover:border-primary/50 transition-colors\"><div class=\"flex items-center justify-between\"><span class=\"text-xs font-mono text-muted-foreground uppercase tracking-wide\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 316, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 319, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "</span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "</span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1328,20 +1328,20 @@ func staffStatCardLink(label, value, href string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "</div><span class=\"text-sm font-brand font-semibold text-foreground\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "</div><span class=\"text-sm font-brand font-semibold text-foreground\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var58 string
 		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 319, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 322, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "</span></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "</span></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1371,20 +1371,20 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 			templ_7745c5c3_Var59 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "<h2 class=\"text-base font-brand font-semibold text-foreground\">Profile</h2><form method=\"post\" action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "<h2 class=\"text-base font-brand font-semibold text-foreground\">Profile</h2><form method=\"post\" action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var60 templ.SafeURL
 		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/profile"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 326, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 329, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "\" class=\"flex flex-col gap-5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "\" class=\"flex flex-col gap-5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1400,20 +1400,20 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "<div class=\"flex flex-col gap-1.5\"><span class=\"text-xs font-mono text-muted-foreground\">ID</span> <span class=\"text-sm font-mono text-foreground\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "<div class=\"flex flex-col gap-1.5\"><span class=\"text-xs font-mono text-muted-foreground\">ID</span> <span class=\"text-sm font-mono text-foreground\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var62 string
 			templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(m.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 330, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 333, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1441,7 +1441,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "Label")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "Label")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1451,7 +1451,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1465,7 +1465,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1493,7 +1493,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "Description")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "Description")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -1503,7 +1503,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1517,17 +1517,17 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, " <div class=\"flex flex-col gap-1.5\"><span class=\"text-sm font-medium text-foreground\">Active</span> <label class=\"flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5 w-fit\"><input type=\"checkbox\" name=\"active\" value=\"on\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, " <div class=\"flex flex-col gap-1.5\"><span class=\"text-sm font-medium text-foreground\">Active</span> <label class=\"flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5 w-fit\"><input type=\"checkbox\" name=\"active\" value=\"on\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if m.Active {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, " checked")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, " checked")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, " class=\"sr-only\"> <span class=\"text-sm text-foreground\">Enable this staff member</span></label></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, " class=\"sr-only\"> <span class=\"text-sm text-foreground\">Enable this staff member</span></label></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1537,7 +1537,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "<div class=\"bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4\"><div class=\"flex flex-col gap-0.5\"><span class=\"text-sm font-medium text-foreground\">Icon</span><p class=\"text-xs text-muted-foreground\">Represents this staff member across the app.</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "<div class=\"bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4\"><div class=\"flex flex-col gap-0.5\"><span class=\"text-sm font-medium text-foreground\">Icon</span><p class=\"text-xs text-muted-foreground\">Represents this staff member across the app.</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1545,7 +1545,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1561,7 +1561,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "Save")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "Save")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1571,7 +1571,7 @@ func staffProfileSection(m *staff.Staff) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "</form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "</form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1643,12 +1643,12 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 		}
 		if len(m.ValueCategories) == 0 && len(m.Values) == 0 {
 			if len(cats) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<p class=\"text-sm text-muted-foreground\">No values created yet. <a href=\"/values/new\" class=\"text-primary underline underline-offset-2\">Add a value</a> first.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "<p class=\"text-sm text-muted-foreground\">No values created yet. <a href=\"/values/new\" class=\"text-primary underline underline-offset-2\">Add a value</a> first.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "<p class=\"text-sm text-muted-foreground\">No values assigned. Tap + to add.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "<p class=\"text-sm text-muted-foreground\">No values assigned. Tap + to add.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1680,7 +1680,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "<span class=\"size-8 shrink-0 flex items-center justify-center text-muted-foreground\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<span class=\"size-8 shrink-0 flex items-center justify-center text-muted-foreground\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1688,20 +1688,20 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</span> <span class=\"flex-1 min-w-0 text-sm font-brand font-semibold text-foreground truncate\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "</span> <span class=\"flex-1 min-w-0 text-sm font-brand font-semibold text-foreground truncate\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var73 string
 							templ_7745c5c3_Var73, templ_7745c5c3_Err = templ.JoinStringErrs(cat.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 392, Col: 104}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 395, Col: 104}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var73))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1709,33 +1709,33 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, " <form method=\"post\" action=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, " <form method=\"post\" action=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var74 templ.SafeURL
 							templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/value-cats/" + cat.ID + "/remove"))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 394, Col: 104}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 397, Col: 104}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "\"><button type=\"submit\" class=\"inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer\" aria-label=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "\"><button type=\"submit\" class=\"inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer\" aria-label=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var75 string
 							templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs("Remove " + cat.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 395, Col: 237}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 398, Col: 237}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1743,7 +1743,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</button></form>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</button></form>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1769,7 +1769,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "<span class=\"size-8 shrink-0 flex items-center justify-center text-muted-foreground\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<span class=\"size-8 shrink-0 flex items-center justify-center text-muted-foreground\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1777,20 +1777,20 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</span> <span class=\"flex-1 min-w-0 text-sm font-brand font-semibold text-foreground truncate\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</span> <span class=\"flex-1 min-w-0 text-sm font-brand font-semibold text-foreground truncate\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var77 string
 							templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(v.Title)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 408, Col: 102}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 411, Col: 102}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1798,33 +1798,33 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, " <form method=\"post\" action=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, " <form method=\"post\" action=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var78 templ.SafeURL
 							templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/values/" + v.ID + "/remove"))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 410, Col: 98}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 413, Col: 98}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "\"><button type=\"submit\" class=\"inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer\" aria-label=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "\"><button type=\"submit\" class=\"inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer\" aria-label=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var79 string
 							templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.JoinStringErrs("Remove " + v.Title)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 411, Col: 235}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 414, Col: 235}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var79))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1832,7 +1832,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "</button></form>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</button></form>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1851,7 +1851,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "<dialog id=\"staff-values-dialog\" class=\"w-full w-[calc(100%-3rem)] max-w-2xl rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Values</span> <button type=\"button\" onclick=\"document.getElementById('staff-values-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "<dialog id=\"staff-values-dialog\" class=\"w-full w-[calc(100%-3rem)] max-w-2xl rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Values</span> <button type=\"button\" onclick=\"document.getElementById('staff-values-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1859,61 +1859,61 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "</button></div><form method=\"post\" action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "</button></div><form method=\"post\" action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var80 templ.SafeURL
 		templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/values"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 428, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 431, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "\" class=\"flex flex-col min-h-0\"><div class=\"overflow-y-auto flex-1 flex flex-col gap-4 px-4 py-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "\" class=\"flex flex-col min-h-0\"><div class=\"overflow-y-auto flex-1 flex flex-col gap-4 px-4 py-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, cat := range cats {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "<div class=\"flex flex-col gap-2\"><label class=\"flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/30 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5\"><input type=\"checkbox\" name=\"value_categories\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<div class=\"flex flex-col gap-2\"><label class=\"flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer bg-secondary/30 transition-colors hover:bg-secondary has-[:checked]:border-primary has-[:checked]:bg-primary/5\"><input type=\"checkbox\" name=\"value_categories\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var81 string
 			templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.JoinStringErrs(cat.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 433, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 436, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var81))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if shell.IncludesStr(m.ValueCategories, cat.ID) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, " checked")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, " checked")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, " class=\"sr-only\"> <span class=\"text-sm font-brand font-semibold text-foreground\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, " class=\"sr-only\"> <span class=\"text-sm font-brand font-semibold text-foreground\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var82 string
 			templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinStringErrs(cat.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 434, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 437, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1921,7 +1921,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "</label>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "</label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1929,12 +1929,12 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "</div><div class=\"shrink-0 px-4 py-3 border-t border-border\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "</div><div class=\"shrink-0 px-4 py-3 border-t border-border\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1950,7 +1950,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "Save")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "Save")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1960,7 +1960,7 @@ func staffValuesSection(m *staff.Staff, values []*value.Value, cats []value.Cate
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 122, "</div></form></div></dialog>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "</div></form></div></dialog>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1990,30 +1990,30 @@ func staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) tem
 			templ_7745c5c3_Var84 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 123, "<h2 class=\"text-base font-brand font-semibold text-foreground\">Tools</h2>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "<h2 class=\"text-base font-brand font-semibold text-foreground\">Tools</h2>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if staffToolCount(m, tasks) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 124, "<p class=\"text-sm text-muted-foreground\">No tools linked yet. Assign tasks with tools in the <a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 122, "<p class=\"text-sm text-muted-foreground\">No tools linked yet. Assign tasks with tools in the <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var85 templ.SafeURL
 			templ_7745c5c3_Var85, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "?s=tasks"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 457, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 460, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var85))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 125, "\" class=\"text-primary underline underline-offset-2\">Tasks</a> section.</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 123, "\" class=\"text-primary underline underline-offset-2\">Tasks</a> section.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 126, "<div class=\"flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 124, "<div class=\"flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2021,7 +2021,7 @@ func staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) tem
 				if shell.IncludesStr(m.Tasks, t.ID) {
 					for _, tl := range tools {
 						if shell.IncludesStr(t.Tools, tl.ID) {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "<div class=\"flex items-center gap-3 px-4 py-3\"><div class=\"size-8 shrink-0 rounded-md bg-muted flex items-center justify-center\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 125, "<div class=\"flex items-center gap-3 px-4 py-3\"><div class=\"size-8 shrink-0 rounded-md bg-muted flex items-center justify-center\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -2029,33 +2029,33 @@ func staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) tem
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 128, "</div><div class=\"flex-1 min-w-0 flex flex-col gap-0.5\"><span class=\"text-sm font-brand font-semibold text-foreground\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 126, "</div><div class=\"flex-1 min-w-0 flex flex-col gap-0.5\"><span class=\"text-sm font-brand font-semibold text-foreground\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var86 string
 							templ_7745c5c3_Var86, templ_7745c5c3_Err = templ.JoinStringErrs(tl.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 471, Col: 82}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 474, Col: 82}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var86))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 129, "</span> <span class=\"text-xs text-muted-foreground font-mono\">via ")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "</span> <span class=\"text-xs text-muted-foreground font-mono\">via ")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var87 string
 							templ_7745c5c3_Var87, templ_7745c5c3_Err = templ.JoinStringErrs(t.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 472, Col: 76}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 475, Col: 76}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var87))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 130, "</span></div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 128, "</span></div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -2063,7 +2063,7 @@ func staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) tem
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, "</div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 129, "</div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -2071,7 +2071,7 @@ func staffToolsSection(m *staff.Staff, tasks []task.Task, tools []tool.Tool) tem
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 132, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 130, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2144,12 +2144,12 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 		}
 		if len(m.Tasks) == 0 {
 			if len(tasks) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 133, "<p class=\"text-sm text-muted-foreground\">No tasks created yet. <a href=\"/tasks/new\" class=\"text-primary underline underline-offset-2\">Add a task</a> first.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, "<p class=\"text-sm text-muted-foreground\">No tasks created yet. <a href=\"/tasks/new\" class=\"text-primary underline underline-offset-2\">Add a task</a> first.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<p class=\"text-sm text-muted-foreground\">No tasks assigned. Tap + to add.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 132, "<p class=\"text-sm text-muted-foreground\">No tasks assigned. Tap + to add.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2181,7 +2181,7 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 								}()
 							}
 							ctx = templ.InitializeContext(ctx)
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 135, "<span class=\"size-8 shrink-0 flex items-center justify-center text-muted-foreground\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 133, "<span class=\"size-8 shrink-0 flex items-center justify-center text-muted-foreground\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -2189,82 +2189,82 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, "</span><div class=\"flex-1 min-w-0 flex flex-col gap-0.5\"><span class=\"text-sm font-brand font-semibold text-foreground truncate\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "</span><div class=\"flex-1 min-w-0 flex flex-col gap-0.5\"><span class=\"text-sm font-brand font-semibold text-foreground truncate\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var93 string
 							templ_7745c5c3_Var93, templ_7745c5c3_Err = templ.JoinStringErrs(t.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 506, Col: 88}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 509, Col: 88}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var93))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "</span> ")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 135, "</span> ")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							if t.Description != "" {
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "<span class=\"text-xs text-muted-foreground truncate\">")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, "<span class=\"text-xs text-muted-foreground truncate\">")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var94 string
 								templ_7745c5c3_Var94, templ_7745c5c3_Err = templ.JoinStringErrs(t.Description)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 508, Col: 76}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 511, Col: 76}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var94))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "</span>")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "</span>")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "</div><span class=\"hidden sm:block text-xs text-muted-foreground font-mono shrink-0\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "</div><span class=\"hidden sm:block text-xs text-muted-foreground font-mono shrink-0\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var95 string
 							templ_7745c5c3_Var95, templ_7745c5c3_Err = templ.JoinStringErrs(shell.CountWord(len(t.Tools), "tool", "tools"))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 511, Col: 133}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 514, Col: 133}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var95))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 141, "</span><form method=\"post\" action=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "</span><form method=\"post\" action=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var96 templ.SafeURL
 							templ_7745c5c3_Var96, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/tasks/" + t.ID + "/remove"))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 512, Col: 97}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 515, Col: 97}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var96))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 142, "\"><button type=\"submit\" class=\"inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer\" aria-label=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "\"><button type=\"submit\" class=\"inline-flex size-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer\" aria-label=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var97 string
 							templ_7745c5c3_Var97, templ_7745c5c3_Err = templ.JoinStringErrs("Remove " + t.Label)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 513, Col: 235}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 516, Col: 235}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var97))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 143, "\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 141, "\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -2272,7 +2272,7 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 144, "</button></form>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 142, "</button></form>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -2291,7 +2291,7 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 145, "<dialog id=\"staff-tasks-dialog\" class=\"w-full w-[calc(100%-3rem)] max-w-2xl rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Tasks</span> <button type=\"button\" onclick=\"document.getElementById('staff-tasks-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 143, "<dialog id=\"staff-tasks-dialog\" class=\"w-full w-[calc(100%-3rem)] max-w-2xl rounded-xl m-auto\"><div class=\"bg-card rounded-xl border border-border flex flex-col\" style=\"max-height: 80dvh\"><div class=\"flex items-center justify-between px-4 py-3 border-b border-border shrink-0\"><span class=\"text-sm font-brand font-semibold text-foreground\">Tasks</span> <button type=\"button\" onclick=\"document.getElementById('staff-tasks-dialog').close()\" class=\"inline-flex size-8 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer\" aria-label=\"Close\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2299,102 +2299,102 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 146, "</button></div><form method=\"post\" action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 144, "</button></div><form method=\"post\" action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var98 templ.SafeURL
 		templ_7745c5c3_Var98, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/staff/" + m.ID + "/tasks"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 530, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 533, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var98))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 147, "\" class=\"flex flex-col min-h-0\"><div class=\"overflow-y-auto flex-1 flex flex-col gap-2 px-4 py-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 145, "\" class=\"flex flex-col min-h-0\"><div class=\"overflow-y-auto flex-1 flex flex-col gap-2 px-4 py-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, t := range tasks {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 148, "<label class=\"flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5\"><input type=\"checkbox\" name=\"tasks\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 146, "<label class=\"flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5\"><input type=\"checkbox\" name=\"tasks\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var99 string
 			templ_7745c5c3_Var99, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 534, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 537, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var99))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 149, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 147, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if shell.IncludesStr(m.Tasks, t.ID) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 150, " checked")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 148, " checked")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 151, " class=\"sr-only\"><div class=\"flex flex-col gap-0.5 min-w-0 flex-1\"><span class=\"text-sm font-brand font-semibold text-foreground\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 149, " class=\"sr-only\"><div class=\"flex flex-col gap-0.5 min-w-0 flex-1\"><span class=\"text-sm font-brand font-semibold text-foreground\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var100 string
 			templ_7745c5c3_Var100, templ_7745c5c3_Err = templ.JoinStringErrs(t.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 536, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 539, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var100))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 152, "</span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 150, "</span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if t.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 153, "<span class=\"text-xs text-muted-foreground\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 151, "<span class=\"text-xs text-muted-foreground\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var101 string
 				templ_7745c5c3_Var101, templ_7745c5c3_Err = templ.JoinStringErrs(t.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 538, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 541, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var101))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 154, "</span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 152, "</span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 155, "</div><span class=\"text-xs text-muted-foreground font-mono shrink-0 mt-0.5\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 153, "</div><span class=\"text-xs text-muted-foreground font-mono shrink-0 mt-0.5\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var102 string
 			templ_7745c5c3_Var102, templ_7745c5c3_Err = templ.JoinStringErrs(shell.CountWord(len(t.Tools), "tool", "tools"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 541, Col: 125}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 544, Col: 125}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var102))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 156, "</span></label>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 154, "</span></label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 157, "</div><div class=\"shrink-0 px-4 py-3 border-t border-border\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 155, "</div><div class=\"shrink-0 px-4 py-3 border-t border-border\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2410,7 +2410,7 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 158, "Save")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 156, "Save")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2420,7 +2420,7 @@ func staffTasksSection(m *staff.Staff, tasks []task.Task) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 159, "</div></form></div></dialog>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 157, "</div></form></div></dialog>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2486,7 +2486,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 						}()
 					}
 					ctx = templ.InitializeContext(ctx)
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 160, "Cancel")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 158, "Cancel")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -2502,7 +2502,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 161, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 159, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2534,7 +2534,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 						var templ_7745c5c3_Var110 string
 						templ_7745c5c3_Var110, templ_7745c5c3_Err = templ.JoinStringErrs(formErr)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 566, Col: 14}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 569, Col: 14}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var110))
 						if templ_7745c5c3_Err != nil {
@@ -2553,7 +2553,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 162, " <form method=\"post\" action=\"/staff\" class=\"flex flex-col gap-5\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 160, " <form method=\"post\" action=\"/staff\" class=\"flex flex-col gap-5\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2593,7 +2593,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 163, "ID")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 161, "ID")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -2603,7 +2603,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 164, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 162, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -2617,7 +2617,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 165, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 163, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2645,7 +2645,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 166, "Label")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 164, "Label")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -2655,7 +2655,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 167, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 165, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -2669,7 +2669,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 168, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 166, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2697,7 +2697,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 169, "Description")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 167, "Description")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -2707,7 +2707,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 170, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 168, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -2727,7 +2727,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 171, "<div class=\"bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4\"><div class=\"flex flex-col gap-0.5\"><span class=\"text-sm font-medium text-foreground\">Icon</span><p class=\"text-xs text-muted-foreground\">Represents this staff member across the app.</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 169, "<div class=\"bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-4\"><div class=\"flex flex-col gap-0.5\"><span class=\"text-sm font-medium text-foreground\">Icon</span><p class=\"text-xs text-muted-foreground\">Represents this staff member across the app.</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2735,7 +2735,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 172, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 170, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2751,7 +2751,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 173, "Create")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 171, "Create")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -2761,7 +2761,7 @@ func StaffFormPage(members []staff.Staff, m *staff.Staff, nd shell.NavData, form
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 174, "</form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 172, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2797,7 +2797,7 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			templ_7745c5c3_Var119 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 175, "<div data-icon-picker class=\"relative w-fit\"><button type=\"button\" class=\"flex items-center gap-2 px-2 py-2 rounded-lg border border-border hover:border-muted-foreground bg-background transition-colors\" onclick=\"this.closest('[data-icon-picker]').querySelector('[data-icon-panel]').classList.toggle('hidden')\"><div class=\"size-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm shrink-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 173, "<div data-icon-picker class=\"relative w-fit\"><button type=\"button\" class=\"flex items-center gap-2 px-2 py-2 rounded-lg border border-border hover:border-muted-foreground bg-background transition-colors\" onclick=\"this.closest('[data-icon-picker]').querySelector('[data-icon-panel]').classList.toggle('hidden')\"><div class=\"size-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-semibold text-sm shrink-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2806,7 +2806,7 @@ func staffIconPicker(selected, lbl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 176, "<span data-icon-preview=\"\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 174, "<span data-icon-preview=\"\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2819,20 +2819,20 @@ func staffIconPicker(selected, lbl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 177, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 175, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var122 string
 		templ_7745c5c3_Var122, templ_7745c5c3_Err = templ.JoinStringErrs(staffInitials(lbl))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 614, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 617, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var122))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 178, "</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 176, "</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2842,20 +2842,20 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 179, "<span data-icon-preview=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 177, "<span data-icon-preview=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var124 string
 			templ_7745c5c3_Var124, templ_7745c5c3_Err = templ.JoinStringErrs(opt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 616, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 619, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var124))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 180, "\" class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 178, "\" class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2868,7 +2868,7 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 181, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 179, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2876,12 +2876,12 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 182, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 180, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 183, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 181, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2889,7 +2889,7 @@ func staffIconPicker(selected, lbl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 184, "</button><div data-icon-panel class=\"hidden absolute z-50 top-full left-0 mt-1.5 bg-popover border border-border rounded-xl shadow-lg p-3\"><div class=\"flex flex-wrap gap-1.5 w-72 max-h-52 overflow-y-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 182, "</button><div data-icon-panel class=\"hidden absolute z-50 top-full left-0 mt-1.5 bg-popover border border-border rounded-xl shadow-lg p-3\"><div class=\"flex flex-wrap gap-1.5 w-72 max-h-52 overflow-y-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2901,7 +2901,7 @@ func staffIconPicker(selected, lbl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 185, "<label title=\"Initials\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 183, "<label title=\"Initials\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2914,30 +2914,30 @@ func staffIconPicker(selected, lbl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 186, "\"><input type=\"radio\" name=\"icon\" value=\"\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 184, "\"><input type=\"radio\" name=\"icon\" value=\"\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if selected == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 187, " checked")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 185, " checked")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 188, " class=\"sr-only\"> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 186, " class=\"sr-only\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var128 string
 		templ_7745c5c3_Var128, templ_7745c5c3_Err = templ.JoinStringErrs(staffInitials(lbl))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 637, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 640, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var128))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 189, "</label> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 187, "</label> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2950,20 +2950,20 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 190, "<label title=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 188, "<label title=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var130 string
 			templ_7745c5c3_Var130, templ_7745c5c3_Err = templ.JoinStringErrs(opt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 641, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 644, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var130))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 191, "\" class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 189, "\" class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2976,30 +2976,30 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 192, "\"><input type=\"radio\" name=\"icon\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 190, "\"><input type=\"radio\" name=\"icon\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var132 string
 			templ_7745c5c3_Var132, templ_7745c5c3_Err = templ.JoinStringErrs(opt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 648, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 651, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var132))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 193, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 191, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if selected == opt {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 194, " checked")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 192, " checked")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 195, " class=\"sr-only\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 193, " class=\"sr-only\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -3007,12 +3007,12 @@ func staffIconPicker(selected, lbl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 196, "</label>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 194, "</label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 197, "</div></div></div><script>\n\t\t(function () {\n\t\t\tvar pickers = document.querySelectorAll(\"[data-icon-picker]\");\n\t\t\tdocument.addEventListener(\"click\", function (e) {\n\t\t\t\tpickers.forEach(function (picker) {\n\t\t\t\t\tif (!picker.contains(e.target)) {\n\t\t\t\t\t\tvar panel = picker.querySelector(\"[data-icon-panel]\");\n\t\t\t\t\t\tif (panel) panel.classList.add(\"hidden\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}, true);\n\t\t\tpickers.forEach(function (picker) {\n\t\t\t\tpicker.querySelectorAll('input[name=\"icon\"]').forEach(function (radio) {\n\t\t\t\t\tradio.addEventListener(\"change\", function () {\n\t\t\t\t\t\tvar val = this.value;\n\t\t\t\t\t\tpicker.querySelectorAll(\"[data-icon-preview]\").forEach(function (el) {\n\t\t\t\t\t\t\tel.classList.toggle(\"hidden\", el.dataset.iconPreview !== val);\n\t\t\t\t\t\t});\n\t\t\t\t\t\tvar panel = picker.querySelector(\"[data-icon-panel]\");\n\t\t\t\t\t\tif (panel) panel.classList.add(\"hidden\");\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 195, "</div></div></div><script>\n\t\t(function () {\n\t\t\tvar pickers = document.querySelectorAll(\"[data-icon-picker]\");\n\t\t\tdocument.addEventListener(\"click\", function (e) {\n\t\t\t\tpickers.forEach(function (picker) {\n\t\t\t\t\tif (!picker.contains(e.target)) {\n\t\t\t\t\t\tvar panel = picker.querySelector(\"[data-icon-panel]\");\n\t\t\t\t\t\tif (panel) panel.classList.add(\"hidden\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}, true);\n\t\t\tpickers.forEach(function (picker) {\n\t\t\t\tpicker.querySelectorAll('input[name=\"icon\"]').forEach(function (radio) {\n\t\t\t\t\tradio.addEventListener(\"change\", function () {\n\t\t\t\t\t\tvar val = this.value;\n\t\t\t\t\t\tpicker.querySelectorAll(\"[data-icon-preview]\").forEach(function (el) {\n\t\t\t\t\t\t\tel.classList.toggle(\"hidden\", el.dataset.iconPreview !== val);\n\t\t\t\t\t\t});\n\t\t\t\t\t\tvar panel = picker.querySelector(\"[data-icon-panel]\");\n\t\t\t\t\t\tif (panel) panel.classList.add(\"hidden\");\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -3186,7 +3186,7 @@ func staffIcon(iconName, lbl string) templ.Component {
 			var templ_7745c5c3_Var134 string
 			templ_7745c5c3_Var134, templ_7745c5c3_Err = templ.JoinStringErrs(staffInitials(lbl))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 741, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 744, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var134))
 			if templ_7745c5c3_Err != nil {
@@ -3218,55 +3218,55 @@ func staffValuePicker(catID string, values []*value.Value, selected []string) te
 			templ_7745c5c3_Var135 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 198, "<div class=\"pl-4 flex flex-col gap-1.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 196, "<div class=\"pl-4 flex flex-col gap-1.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, v := range values {
 			if v.Category == catID {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 199, "<label class=\"flex items-center gap-2.5 px-3 py-2 rounded-md cursor-pointer text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors has-[:checked]:text-foreground\"><input type=\"checkbox\" name=\"values\" value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 197, "<label class=\"flex items-center gap-2.5 px-3 py-2 rounded-md cursor-pointer text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors has-[:checked]:text-foreground\"><input type=\"checkbox\" name=\"values\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var136 string
 				templ_7745c5c3_Var136, templ_7745c5c3_Err = templ.JoinStringErrs(v.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 753, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 756, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var136))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 200, "\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 198, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if shell.IncludesStr(selected, v.ID) {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 201, " checked")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 199, " checked")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 202, " class=\"sr-only\"> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 200, " class=\"sr-only\"> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var137 string
 				templ_7745c5c3_Var137, templ_7745c5c3_Err = templ.JoinStringErrs(v.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 757, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/staff/staff.templ`, Line: 760, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var137))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 203, "</label>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 201, "</label>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 204, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 202, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
