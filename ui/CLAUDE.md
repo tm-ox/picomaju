@@ -107,12 +107,14 @@ When `activeCat == ""`, Values and Tools list pages render items in `listSection
 
 ## Key brand tokens (full set in `ui/assets/css/input.css`)
 
+All tokens are HSL — editable directly.
+
 | Token | Light | Dark |
 |---|---|---|
-| `--primary` | `oklch(0.41 0.22 18.5)` | same |
-| `--background` | `oklch(0.972 0.006 240)` | `oklch(0.115 0.042 258)` |
-| `--card` | `oklch(1 0 0)` | `oklch(0.183 0.057 258)` |
-| `--sidebar` | `oklch(0.167 0.058 258)` | `oklch(0.082 0.04 258)` |
-| `--sidebar-accent` | `oklch(0.21 0.058 258)` | `oklch(0.13 0.05 258)` |
+| `--primary` | `hsl(348, 91%, 39%)` | same |
+| `--background` | `hsl(210, 33%, 97%)` | `hsl(212, 52%, 10%)` |
+| `--card` | `hsl(0, 0%, 100%)` | `hsl(216, 52%, 16%)` |
+| `--sidebar` | `hsl(217, 54%, 16%)` | same |
+| `--sidebar-accent` | `hsl(217, 45%, 21%)` | `hsl(217, 35%, 13%)` |
 
 Theme: `.dark` class on `<html>` (`@custom-variant dark`). `localStorage` key `theme`.

@@ -45,79 +45,62 @@
 
 :root {
     --radius: 0.65rem;
-    /* #f4f7fa — blue-tinted off-white page bg */
-    --background: oklch(0.972 0.006 240);
-    /* #0f1f38 — dark navy text */
-    --foreground: oklch(0.18 0.063 255);
-    /* #ffffff — white card surface */
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.18 0.063 255);
-    --popover: oklch(0.972 0.006 240);
-    --popover-foreground: oklch(0.18 0.063 255);
-    /* #bf092f — brand crimson */
-    --primary: oklch(0.41 0.22 18.5);
-    --primary-foreground: oklch(0.985 0 0);
-    /* #edf2f6 — surface-subtle */
-    --secondary: oklch(0.959 0.009 240);
-    --secondary-foreground: oklch(0.18 0.063 255);
-    --muted: oklch(0.959 0.009 240);
-    /* #7b92a8 — blue-grey muted text */
-    --muted-foreground: oklch(0.612 0.042 232);
-    --accent: oklch(0.959 0.009 240);
-    --accent-foreground: oklch(0.18 0.063 255);
-    --destructive: oklch(0.577 0.245 27.325);
-    /* #dbe4ec — light blue border */
-    --border: oklch(0.906 0.018 232);
-    --input: oklch(0.906 0.018 232);
-    /* #7b92a8 — blue-grey focus ring */
-    --ring: oklch(0.612 0.042 232);
-    /* #132440 — navy-dark sidebar */
-    --sidebar: oklch(0.167 0.058 258);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.41 0.22 18.5);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    /* slightly lighter than sidebar for hover states */
-    --sidebar-accent: oklch(0.21 0.058 258);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.24 0.058 258);
-    --sidebar-ring: oklch(0.612 0.042 232);
+    --background: hsl(210, 33%, 97%);          /* blue-tinted off-white page bg */
+    --foreground: hsl(217, 58%, 14%);          /* dark navy text */
+    --card: hsl(0, 0%, 100%);                  /* white card surface */
+    --card-foreground: hsl(217, 58%, 14%);
+    --popover: hsl(210, 33%, 97%);
+    --popover-foreground: hsl(217, 58%, 14%);
+    --primary: hsl(348, 91%, 39%);             /* brand crimson */
+    --primary-foreground: hsl(0, 0%, 99%);
+    --secondary: hsl(207, 33%, 95%);           /* surface-subtle */
+    --secondary-foreground: hsl(217, 58%, 14%);
+    --muted: hsl(207, 33%, 95%);
+    --muted-foreground: hsl(209, 21%, 57%);    /* blue-grey muted text */
+    --accent: hsl(207, 33%, 95%);
+    --accent-foreground: hsl(217, 58%, 14%);
+    --destructive: hsl(8, 85%, 50%);
+    --border: hsl(208, 31%, 89%);              /* light blue border */
+    --input: hsl(208, 31%, 89%);
+    --ring: hsl(209, 21%, 57%);                /* blue-grey focus ring */
+    --sidebar: hsl(217, 54%, 16%);             /* navy-dark sidebar */
+    --sidebar-foreground: hsl(0, 0%, 99%);
+    --sidebar-primary: hsl(348, 91%, 39%);
+    --sidebar-primary-foreground: hsl(0, 0%, 99%);
+    --sidebar-accent: hsl(217, 45%, 21%);      /* slightly lighter than sidebar for hover states */
+    --sidebar-accent-foreground: hsl(0, 0%, 99%);
+    --sidebar-border: hsl(217, 40%, 24%);
+    --sidebar-ring: hsl(209, 21%, 57%);
 }
 
 .dark {
-    /* #0c1826 — very dark navy bg */
-    --background: oklch(0.115 0.042 258);
-    /* #d8eaf4 — light blue-white text */
-    --foreground: oklch(0.924 0.028 230);
-    /* #142640 — dark navy surface */
-    --card: oklch(0.183 0.057 258);
-    --card-foreground: oklch(0.924 0.028 230);
-    --popover: oklch(0.115 0.042 258);
-    --popover-foreground: oklch(0.924 0.028 230);
-    --primary: oklch(0.41 0.22 18.5);
-    --primary-foreground: oklch(0.985 0 0);
-    /* #1a3251 — dark surface-subtle */
-    --secondary: oklch(0.238 0.063 258);
-    --secondary-foreground: oklch(0.924 0.028 230);
-    --muted: oklch(0.238 0.063 258);
-    /* #5a8a9f — dark muted text */
-    --muted-foreground: oklch(0.573 0.057 222);
-    --accent: oklch(0.238 0.063 258);
-    --accent-foreground: oklch(0.924 0.028 230);
-    --destructive: oklch(0.704 0.191 22.216);
-    /* #1e3a55 — dark blue border */
-    --border: oklch(0.265 0.062 254);
-    --input: oklch(0.265 0.062 254);
-    --ring: oklch(0.573 0.057 222);
-    /* #080f1a — darker than bg for sidebar */
-    --sidebar: oklch(0.167 0.058 258);
-    /*--sidebar: oklch(0.082 0.04 258);*/
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.41 0.22 18.5);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.13 0.05 258);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.265 0.062 254);
-    --sidebar-ring: oklch(0.573 0.057 222);
+    --background: hsl(212, 52%, 10%);          /* very dark navy bg */
+    --foreground: hsl(201, 56%, 90%);          /* light blue-white text */
+    --card: hsl(216, 52%, 16%);                /* dark navy surface */
+    --card-foreground: hsl(201, 56%, 90%);
+    --popover: hsl(212, 52%, 10%);
+    --popover-foreground: hsl(201, 56%, 90%);
+    --primary: hsl(348, 91%, 39%);             /* brand crimson */
+    --primary-foreground: hsl(0, 0%, 99%);
+    --secondary: hsl(214, 51%, 21%);           /* dark surface-subtle */
+    --secondary-foreground: hsl(201, 56%, 90%);
+    --muted: hsl(214, 51%, 21%);
+    --muted-foreground: hsl(198, 28%, 49%);    /* dark muted text */
+    --accent: hsl(214, 51%, 21%);
+    --accent-foreground: hsl(201, 56%, 90%);
+    --destructive: hsl(6, 70%, 60%);
+    --border: hsl(210, 48%, 23%);              /* dark blue border */
+    --input: hsl(210, 48%, 23%);
+    --ring: hsl(205, 25%, 50%);
+    --sidebar: hsl(217, 54%, 16%);
+    /*--sidebar: hsl(217, 35%, 8%);*/          /* darker sidebar alt */
+    --sidebar-foreground: hsl(0, 0%, 99%);
+    --sidebar-primary: hsl(348, 91%, 39%);
+    --sidebar-primary-foreground: hsl(0, 0%, 99%);
+    --sidebar-accent: hsl(217, 35%, 13%);
+    --sidebar-accent-foreground: hsl(0, 0%, 99%);
+    --sidebar-border: hsl(215, 42%, 27%);
+    --sidebar-ring: hsl(205, 25%, 50%);
 }
 
 @layer base {

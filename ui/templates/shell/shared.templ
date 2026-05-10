@@ -33,13 +33,18 @@ templ PageHeader(title string) {
 }
 
 // EmptyState renders the zero-items illustration with a primary CTA.
-templ EmptyState(title, desc, href, label string) {
+// Pass button.VariantOutline etc. as the optional variant argument.
+templ EmptyState(title, desc, href, label string, variant ...button.Variant) {
+	{{ v := button.VariantDefault }}
+	if len(variant) > 0 {
+		{{ v = variant[0] }}
+	}
 	<div class="flex flex-col items-center justify-center text-center py-16 gap-5">
 		<div class="flex flex-col gap-1.5 max-w-xs">
 			<h4>{ title }</h4>
 			<p class="text-base">{ desc }</p>
 		</div>
-		@button.Button(button.Props{Href: href}) {
+		@button.Button(button.Props{Href: href, Variant: v}) {
 			{ label }
 		}
 	</div>
@@ -55,23 +60,71 @@ templ ListSection(label string) {
 	</div>
 }
 
+// RowListProps allows optional class override on RowList.
+type RowListProps struct {
+	Class string
+}
+
 // RowList wraps a set of list rows in a bordered card container.
-templ RowList() {
-	<div class="flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
+templ RowList(props ...RowListProps) {
+	{{ var p RowListProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div class={ "flex flex-col divide-y divide-border rounded-lg border border-border overflow-hidden bg-card", p.Class }>
 		{ children... }
 	</div>
+}
+
+// RowItemProps allows optional class override on RowItem.
+type RowItemProps struct {
+	Class string
 }
 
 // RowItem is a flex row inside a RowList.
-templ RowItem() {
-	<div class="flex items-center gap-3 px-4 py-3">
+templ RowItem(props ...RowItemProps) {
+	{{ var p RowItemProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div class={ "flex items-center gap-3 px-4 py-3", p.Class }>
 		{ children... }
 	</div>
 }
 
-// Badge renders a muted pill tag for category/type labels.
-templ Badge(label string) {
-	<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide bg-secondary text-secondary-foreground">
+// BadgeVariant controls the color scheme of a Badge.
+type BadgeVariant string
+
+const (
+	BadgeDefault     BadgeVariant = "default"
+	BadgePrimary     BadgeVariant = "primary"
+	BadgeDestructive BadgeVariant = "destructive"
+	BadgeSuccess     BadgeVariant = "success"
+	BadgeOutline     BadgeVariant = "outline"
+)
+
+func badgeClasses(v BadgeVariant) string {
+	switch v {
+	case BadgePrimary:
+		return "bg-primary/10 text-primary"
+	case BadgeDestructive:
+		return "bg-destructive/10 text-destructive"
+	case BadgeSuccess:
+		return "bg-green-500/10 text-green-700 dark:text-green-400"
+	case BadgeOutline:
+		return "border border-border text-muted-foreground bg-transparent"
+	default:
+		return "bg-secondary text-secondary-foreground"
+	}
+}
+
+// Badge renders a pill tag. Pass an optional BadgeVariant as the second argument.
+templ Badge(label string, variant ...BadgeVariant) {
+	{{ v := BadgeDefault }}
+	if len(variant) > 0 {
+		{{ v = variant[0] }}
+	}
+	<span class={ "inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-mono uppercase tracking-wide", badgeClasses(v) }>
 		{ label }
 	</span>
 }
@@ -100,16 +153,34 @@ templ RowActions(editHref, deleteHref, confirmNoun string) {
 	</div>
 }
 
+// FormCardProps allows optional class override on FormCard.
+type FormCardProps struct {
+	Class string
+}
+
 // FormCard wraps form content in a surface card.
-templ FormCard() {
-	<div class="bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5">
+templ FormCard(props ...FormCardProps) {
+	{{ var p FormCardProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div class={ "bg-card rounded-lg border border-border p-5 sm:p-6 flex flex-col gap-5", p.Class }>
 		{ children... }
 	</div>
 }
 
+// FieldProps allows optional class override on Field.
+type FieldProps struct {
+	Class string
+}
+
 // Field wraps a label+input pair with consistent spacing.
-templ Field() {
-	<div class="flex flex-col gap-1.5">
+templ Field(props ...FieldProps) {
+	{{ var p FieldProps }}
+	if len(props) > 0 {
+		{{ p = props[0] }}
+	}
+	<div class={ "flex flex-col gap-1.5", p.Class }>
 		{ children... }
 	</div>
 }
