@@ -6,6 +6,9 @@ import (
 	"picomaju/ui/components/card"
 	"picomaju/ui/components/input"
 	"picomaju/ui/components/label"
+	"picomaju/ui/components/nativeselect"
+	"picomaju/ui/components/selectbox"
+	"picomaju/ui/components/textarea"
 	"picomaju/ui/templates/shell"
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
 )
@@ -219,6 +222,22 @@ templ WorkshopPage() {
 					</div>
 				</div>
 			}
+			@workshopSection("Textarea") {
+				<div class="flex flex-col gap-4 max-w-xs">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "demo-ta"}) {
+							Notes
+						}
+						@textarea.Textarea(textarea.Props{ID: "demo-ta", Placeholder: "Write something…"})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "demo-ta-error"}) {
+							Error state
+						}
+						@textarea.Textarea(textarea.Props{ID: "demo-ta-error", Value: "Bad content", HasError: true})
+					</div>
+				</div>
+			}
 			@workshopSection("Alert") {
 				<div class="flex flex-col gap-3">
 					@alert.Alert() {
@@ -349,15 +368,80 @@ templ WorkshopPage() {
 					<h5>sidebar footer toggle · localStorage key: theme</h5>
 				</div>
 			}
-			@workshopSection("Label + Select") {
-				<div class="flex flex-col gap-1.5 max-w-xs">
-					@label.Label(label.Props{For: "lang-demo"}) {
-						Language / Bahasa
-					}
-					<select id="lang-demo">
-						<option>English</option>
-						<option>Bahasa Indonesia</option>
-					</select>
+			@workshopSection("Native Select") {
+				<div class="flex flex-col gap-4 max-w-xs">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "lang-demo"}) {
+							Language / Bahasa
+						}
+						@nativeselect.Select(nativeselect.Props{ID: "lang-demo"}) {
+							<option>English</option>
+							<option>Bahasa Indonesia</option>
+						}
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "lang-demo-err"}) {
+							Error state
+						}
+						@nativeselect.Select(nativeselect.Props{ID: "lang-demo-err", HasError: true}) {
+							<option>English</option>
+							<option>Bahasa Indonesia</option>
+						}
+					</div>
+				</div>
+			}
+			@workshopSection("SelectBox") {
+				@selectbox.Script()
+				<div class="flex flex-col gap-4 max-w-xs">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "sb-demo"}) {
+							Status
+						}
+						@selectbox.SelectBox(selectbox.Props{ID: "sb-demo"}) {
+							@selectbox.Trigger(selectbox.TriggerProps{Name: "status"}) {
+								@selectbox.Value(selectbox.ValueProps{Placeholder: "Select status…"})
+							}
+							@selectbox.Content() {
+								@selectbox.Group() {
+									@selectbox.Item(selectbox.ItemProps{Value: "active"}) {
+										Active
+									}
+									@selectbox.Item(selectbox.ItemProps{Value: "inactive"}) {
+										Inactive
+									}
+									@selectbox.Item(selectbox.ItemProps{Value: "pending"}) {
+										Pending
+									}
+								}
+							}
+						}
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "sb-multi"}) {
+							Tags (multi-select)
+						}
+						@selectbox.SelectBox(selectbox.Props{ID: "sb-multi", Multiple: true}) {
+							@selectbox.Trigger(selectbox.TriggerProps{Name: "tags", Multiple: true, ShowPills: true}) {
+								@selectbox.Value(selectbox.ValueProps{Placeholder: "Pick tags…", Multiple: true})
+							}
+							@selectbox.Content() {
+								@selectbox.Group() {
+									@selectbox.Item(selectbox.ItemProps{Value: "messaging"}) {
+										Messaging
+									}
+									@selectbox.Item(selectbox.ItemProps{Value: "commerce"}) {
+										Commerce
+									}
+									@selectbox.Item(selectbox.ItemProps{Value: "payments"}) {
+										Payments
+									}
+									@selectbox.Item(selectbox.ItemProps{Value: "utilities"}) {
+										Utilities
+									}
+								}
+							}
+						}
+					</div>
 				</div>
 			}
 		</div>
