@@ -10,7 +10,7 @@ import (
 
 templ LicensePage(l *internallicense.License, nd shell.NavData, activated bool, formErr string, dev bool) {
 	@shell.AppLayout("Plan & Credits", nd, shell.EmptySidebarNav()) {
-		@shell.PageHeader("Plan & Credits")
+		@shell.SettingsTabNav("plan", nd)
 		if activated {
 			@alert.Alert() {
 				@alert.Description() {

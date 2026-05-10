@@ -12,7 +12,7 @@ import (
 
 templ SettingsPage(cfg *internalsettings.Settings, activeDataDir string, nd shell.NavData, saved bool, formErr string) {
 	@shell.AppLayout("Settings", nd, shell.EmptySidebarNav()) {
-		@shell.PageHeader("Settings")
+		@shell.SettingsTabNav("general", nd)
 		if saved {
 			@alert.Alert() {
 				@alert.Description() {

@@ -51,7 +51,7 @@ func SettingsPage(cfg *internalsettings.Settings, activeDataDir string, nd shell
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = shell.PageHeader("Settings").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = shell.SettingsTabNav("general", nd).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

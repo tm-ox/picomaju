@@ -49,7 +49,7 @@ func LicensePage(l *internallicense.License, nd shell.NavData, activated bool, f
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = shell.PageHeader("Plan & Credits").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = shell.SettingsTabNav("plan", nd).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

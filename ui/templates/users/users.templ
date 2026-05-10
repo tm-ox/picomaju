@@ -20,7 +20,7 @@ type UserRow struct {
 
 templ UserListPage(users []UserRow, nd shell.NavData) {
 	@shell.AppLayout("Users", nd, shell.EmptySidebarNav()) {
-		@shell.PageHeader("Users") {
+		@shell.SettingsTabNav("users", nd) {
 			@button.Button(button.Props{Href: "/users/new", Size: button.SizeIcon}) {
 				@icons.Plus(templ.Attributes{"class": "size-4"})
 			}

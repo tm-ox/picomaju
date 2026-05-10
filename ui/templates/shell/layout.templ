@@ -61,23 +61,6 @@ templ appSidebarAside(nd NavData, nav templ.Component) {
 			</div>
 		</div>
 		@nav
-		<div class="mt-auto border-t border-sidebar-border shrink-0 py-2">
-			if nd.CurrentUserName != "" {
-				@SidebarItem("/users", "Users", "users", nd.ActiveSection) {
-					@icons.Users(templ.Attributes{"class": "size-4"})
-				}
-			}
-			@SidebarItem("/license", "Plan & Credits", "license", nd.ActiveSection) {
-				@icons.Zap(templ.Attributes{"class": "size-4"})
-			}
-			@SidebarItem("/settings", "Settings", "settings", nd.ActiveSection) {
-				@icons.Settings(templ.Attributes{"class": "size-4"})
-			}
-			@sidebarThemeToggle()
-			if nd.CurrentUserName != "" {
-				@sidebarCurrentUser(nd)
-			}
-		</div>
 	</aside>
 }
 
@@ -120,8 +103,110 @@ templ appTopBar(nd NavData) {
 				@icons.ClipboardList(templ.Attributes{"class": "size-3.5"})
 			}
 		</nav>
-		<div class="flex-1"></div>
+		<div class="flex-1 flex items-center justify-end">
+			@userMenuButton(nd)
+		</div>
 	</header>
+}
+
+templ userMenuButton(nd NavData) {
+	<div class="relative" data-user-menu>
+		<button
+			type="button"
+			onclick="toggleUserMenu(this)"
+			class="size-8 rounded-full flex items-center justify-center text-sm font-brand font-semibold cursor-pointer transition-colors select-none bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+			aria-label="User menu"
+		>
+			if nd.CurrentUserName != "" {
+				{ userMenuInitials(nd.CurrentUserName) }
+			} else {
+				@icons.UserRound(templ.Attributes{"class": "size-4"})
+			}
+		</button>
+		<div
+			data-user-menu-panel
+			class="hidden absolute right-0 top-full mt-4 w-72 bg-popover border border-border rounded-xl shadow-lg z-50 py-1 overflow-hidden"
+		>
+			if nd.CurrentUserName != "" {
+				<div class="px-3 py-2.5 border-b border-border">
+					<p class="text-xs font-semibold text-foreground truncate">{ nd.CurrentUserName }</p>
+					<p class="text-[0.625rem] text-muted-foreground capitalize">{ nd.CurrentUserRole }</p>
+				</div>
+				@userMenuItem("/profile", "Profile") {
+					@icons.UserRound(templ.Attributes{"class": "size-3.5"})
+				}
+			}
+			@userMenuItem("/settings", "Settings") {
+				@icons.Settings(templ.Attributes{"class": "size-3.5"})
+			}
+			<div class="border-t border-border my-1"></div>
+			<button
+				type="button"
+				onclick="var d=document.documentElement,dark=d.classList.toggle('dark');localStorage.setItem('theme',dark?'dark':'light');"
+				class="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer whitespace-nowrap"
+			>
+				<span class="size-4 flex items-center justify-center shrink-0">
+					<svg class="block dark:hidden size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+					<svg class="hidden dark:block size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+				</span>
+				Toggle theme
+			</button>
+			if nd.CurrentUserName != "" {
+				<div class="border-t border-border my-1"></div>
+				<form method="post" action="/logout">
+					<button
+						type="submit"
+						class="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors cursor-pointer whitespace-nowrap"
+					>
+						<span class="size-4 flex items-center justify-center shrink-0">
+							@icons.LogOut(templ.Attributes{"class": "size-3.5"})
+						</span>
+						Sign out
+					</button>
+				</form>
+			}
+		</div>
+	</div>
+	<script>
+		(function () {
+			function toggleUserMenu(btn) {
+				var menu = btn.closest('[data-user-menu]');
+				var panel = menu.querySelector('[data-user-menu-panel]');
+				panel.classList.toggle('hidden');
+			}
+			window.toggleUserMenu = toggleUserMenu;
+			document.addEventListener('click', function (e) {
+				document.querySelectorAll('[data-user-menu]').forEach(function (menu) {
+					if (!menu.contains(e.target)) {
+						menu.querySelector('[data-user-menu-panel]').classList.add('hidden');
+					}
+				});
+			}, true);
+		})();
+	</script>
+}
+
+templ userMenuItem(href, label string) {
+	<a
+		href={ templ.SafeURL(href) }
+		class="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors whitespace-nowrap"
+	>
+		<span class="size-4 flex items-center justify-center shrink-0">
+			{ children... }
+		</span>
+		{ label }
+	</a>
+}
+
+func userMenuInitials(name string) string {
+	runes := []rune(name)
+	if len(runes) == 0 {
+		return "?"
+	}
+	if len(runes) >= 2 {
+		return string([]rune{runes[0], runes[1]})
+	}
+	return string(runes[0:1])
 }
 
 templ appSidebarScript() {
@@ -195,43 +280,6 @@ templ appContentFooter() {
 	</footer>
 }
 
-templ sidebarThemeToggle() {
-	<button
-		class="flex items-center gap-2 w-full mx-2 px-1 py-0.5 rounded-md text-sm transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
-		aria-label="Toggle theme"
-		onclick="var d=document.documentElement,dark=d.classList.toggle('dark');localStorage.setItem('theme',dark?'dark':'light');"
-	>
-		<span class="size-8 shrink-0 flex items-center justify-center">
-			<svg class="block dark:hidden size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-			</svg>
-			<svg class="hidden dark:block size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<circle cx="12" cy="12" r="4"></circle>
-				<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-			</svg>
-		</span>
-		<span data-sidebar-label>Theme</span>
-	</button>
-}
-
-templ sidebarCurrentUser(nd NavData) {
-	<div class="mx-2 mt-1 border-t border-sidebar-border/40 pt-2">
-		<form method="post" action="/logout">
-			<button
-				type="submit"
-				class="flex items-center gap-2 w-full px-1 py-0.5 rounded-md text-sm transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
-			>
-				<span class="size-8 shrink-0 flex items-center justify-center">
-					@icons.LogOut(templ.Attributes{"class": "size-4"})
-				</span>
-				<span data-sidebar-label class="flex flex-col items-start min-w-0">
-					<span class="text-xs font-medium text-sidebar-foreground/90 truncate">{ nd.CurrentUserName }</span>
-					<span class="text-[0.625rem] text-sidebar-foreground/50 capitalize">{ nd.CurrentUserRole }</span>
-				</span>
-			</button>
-		</form>
-	</div>
-}
 
 // ── AppLayout — standard scrollable content shell ─────────────────────────────
 

@@ -7,6 +7,32 @@ import "picomaju/ui/components/button"
 templ EmptySidebarNav() {
 }
 
+// SettingsTabNav renders the General / Users / Plan tab strip for settings-area pages.
+// Pass the active tab key ("general", "users", "plan") and optional right-slot children.
+templ SettingsTabNav(active string, nd NavData) {
+	<div class="flex items-center justify-between gap-4">
+		<nav class="flex items-center gap-1">
+			@settingsTab("/settings", "General", active == "general")
+			if nd.CurrentUserRole == "owner" {
+				@settingsTab("/users", "Users", active == "users")
+			}
+			@settingsTab("/license", "Plan", active == "plan")
+		</nav>
+		{ children... }
+	</div>
+}
+
+templ settingsTab(href, label string, active bool) {
+	<a
+		href={ templ.SafeURL(href) }
+		class={
+			"px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+			templ.KV("bg-muted text-foreground", active),
+			templ.KV("text-muted-foreground hover:text-foreground hover:bg-muted", !active),
+		}
+	>{ label }</a>
+}
+
 // SidebarItem renders a single sidebar nav link. Pass the icon as children.
 templ SidebarItem(href, lbl, key, active string) {
 	<a
