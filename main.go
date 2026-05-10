@@ -12,10 +12,12 @@ import (
 	"picomaju/internal/chat"
 	"picomaju/internal/license"
 	"picomaju/internal/picoclaw"
+	"picomaju/internal/session"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
+	"picomaju/internal/user"
 	"picomaju/internal/value"
 	setuptpl "picomaju/ui/templates/setup"
 	"picomaju/ui/templates/shell"
@@ -47,6 +49,7 @@ func main() {
 	var staffStore *staff.Store
 	var chatStore *chat.Store
 	var licenseStore *license.Store
+	var userStore *user.Store
 	if dataDir != "" {
 		valStore = value.NewStore(filepath.Join(dataDir, "values"))
 		taskStore = task.NewStore(filepath.Join(dataDir, "tasks.json"))
@@ -54,7 +57,10 @@ func main() {
 		staffStore = staff.NewStore(filepath.Join(dataDir, "staff.json"))
 		chatStore = chat.NewStore(filepath.Join(dataDir, "chats.json"))
 		licenseStore = license.NewStore(filepath.Join(dataDir, "license.json"))
+		userStore = user.NewStore(filepath.Join(dataDir, "users.json"))
 	}
+
+	sessions := session.NewStore()
 
 	var static http.FileSystem
 	if os.Getenv("DEV") != "" {
@@ -72,7 +78,7 @@ func main() {
 	defer pm.StopAll()
 
 	addr := env("ADDR", ":18800")
-	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, chatStore, licenseStore, settingsStore, dataDir, static, pm)
+	r := api.NewRouter(valStore, taskStore, toolStore, staffStore, chatStore, licenseStore, settingsStore, userStore, sessions, dataDir, static, pm)
 
 	// ui/assets served from disk during active development
 	r.Handle("GET /ui/assets/*", http.StripPrefix("/ui/assets/", http.FileServer(http.Dir("ui/assets"))))

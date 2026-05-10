@@ -7,6 +7,11 @@ import (
 	"path/filepath"
 )
 
+// WriteUserMD rewrites only USER.md in an existing workspace directory.
+func WriteUserMD(userMD, workspaceDir string) error {
+	return os.WriteFile(filepath.Join(workspaceDir, "USER.md"), []byte(userMD), 0644)
+}
+
 // Write writes compiled workspace files into workspaceDir, creating it if needed.
 func Write(out Output, workspaceDir string) error {
 	if err := os.MkdirAll(workspaceDir, 0755); err != nil {

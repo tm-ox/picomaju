@@ -1,0 +1,106 @@
+package logintpl
+
+import "picomaju/ui/templates/shell"
+
+type UserEntry struct {
+	ID   string
+	Name string
+	Role string
+}
+
+// LoginPage shows the user picker. If selectedID is set, shows the PIN form for that user.
+templ LoginPage(users []UserEntry, selectedID string, formErr string) {
+	@shell.Layout("Sign In") {
+		<div class="min-h-dvh flex flex-col items-center justify-center px-4 py-12 gap-8">
+			<div class="flex flex-col items-center gap-2">
+				<img src="/static/logo-symbol.svg" class="h-10 w-auto opacity-80" alt=""/>
+				<h3 class="font-brand font-bold text-foreground">Sign in</h3>
+			</div>
+			if len(users) == 0 {
+				<div class="w-full max-w-sm bg-card rounded-xl border border-border p-6 text-center flex flex-col gap-3">
+					<p class="text-base text-muted-foreground">No user accounts configured yet.</p>
+					<p class="text-sm text-muted-foreground">Set up the app first, then add user accounts via Settings.</p>
+				</div>
+			} else if selectedID == "" {
+				<div class="w-full max-w-sm flex flex-col gap-2">
+					for _, u := range users {
+						<a
+							href={ templ.SafeURL("/login?u=" + u.ID) }
+							class="bg-card rounded-xl border border-border px-5 py-4 flex items-center gap-4 hover:border-primary/50 transition-colors"
+						>
+							<div class="size-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-bold text-sm shrink-0">
+								{ userInitials(u.Name) }
+							</div>
+							<div class="flex flex-col min-w-0">
+								<span class="text-sm font-brand font-semibold text-foreground">{ u.Name }</span>
+								<span class="text-xs text-muted-foreground capitalize">{ u.Role }</span>
+							</div>
+						</a>
+					}
+				</div>
+			} else {
+				{{ selected := findUser(users, selectedID) }}
+				<div class="w-full max-w-sm flex flex-col gap-4">
+					<div class="bg-card rounded-xl border border-border px-5 py-4 flex items-center gap-4">
+						<div class="size-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-bold text-sm shrink-0">
+							{ userInitials(selected.Name) }
+						</div>
+						<div class="flex flex-col min-w-0">
+							<span class="text-sm font-brand font-semibold text-foreground">{ selected.Name }</span>
+							<span class="text-xs text-muted-foreground capitalize">{ selected.Role }</span>
+						</div>
+					</div>
+					<form method="post" action="/login" class="flex flex-col gap-3">
+						<input type="hidden" name="user_id" value={ selectedID }/>
+						<div class="flex flex-col gap-1.5">
+							<label class="text-xs font-mono uppercase tracking-wide text-muted-foreground" for="pin">PIN</label>
+							<input
+								id="pin"
+								type="password"
+								name="pin"
+								inputmode="numeric"
+								maxlength="8"
+								autocomplete="current-password"
+								autofocus
+								placeholder="••••"
+								class="flex h-12 w-full rounded-lg border border-input bg-card text-foreground text-center text-2xl tracking-widest px-3 shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+							/>
+						</div>
+						if formErr != "" {
+							<p class="text-sm text-destructive">{ formErr }</p>
+						}
+						<button
+							type="submit"
+							class="h-10 w-full rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer"
+						>
+							Sign in
+						</button>
+					</form>
+					<a href="/login" class="text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+						← Back to users
+					</a>
+				</div>
+			}
+		</div>
+	}
+}
+
+func userInitials(name string) string {
+	if name == "" {
+		return "?"
+	}
+	runes := []rune(name)
+	if len(runes) >= 2 {
+		return string([]rune{runes[0], runes[1]})
+	}
+	return string(runes[0:1])
+}
+
+func findUser(users []UserEntry, id string) UserEntry {
+	for _, u := range users {
+		if u.ID == id {
+			return u
+		}
+	}
+	return UserEntry{}
+}

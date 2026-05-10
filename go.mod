@@ -15,4 +15,7 @@ require (
 	github.com/templui/templui v1.10.0
 )
 
-require github.com/kr/text v0.2.0 // indirect
+require (
+	github.com/kr/text v0.2.0 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
+)

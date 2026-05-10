@@ -11,14 +11,16 @@ import (
 	"picomaju/internal/license"
 	"picomaju/internal/llmproxy"
 	"picomaju/internal/picoclaw"
+	"picomaju/internal/session"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
+	"picomaju/internal/user"
 	"picomaju/internal/value"
 )
 
-func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, dataDir string, static http.FileSystem, pm *picoclaw.Manager) *chi.Mux {
+func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, userStore *user.Store, sessions *session.Store, dataDir string, static http.FileSystem, pm *picoclaw.Manager) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -31,27 +33,35 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		chats:    chatStore,
 		license:  licenseStore,
 		settings: settingsStore,
+		users:    userStore,
+		sessions: sessions,
 		dataDir:  dataDir,
 		picoclaw: pm,
 	}
 
-	// Paths that must work before the data dir is configured.
+	// Paths exempt from the setup gate.
 	setupPaths := map[string]bool{
-		"/welcome":               true,
-		"/setup":                 true,
-		"/setup/first-staff":     true,
-		"/setup/integrations":    true,
+		"/welcome":            true,
+		"/setup":              true,
+		"/setup/owner":        true,
+		"/setup/first-staff":  true,
+		"/setup/integrations": true,
 	}
 
-	// Gate: redirect to /welcome until data dir is configured.
+	// exempt returns true for paths that bypass both the setup gate and the auth gate.
+	exempt := func(path string) bool {
+		return setupPaths[path] ||
+			strings.HasPrefix(path, "/static/") ||
+			strings.HasPrefix(path, "/ui/") ||
+			strings.HasPrefix(path, "/webhooks/") ||
+			strings.HasPrefix(path, "/proxy/") ||
+			path == "/login"
+	}
+
+	// Gate 1: redirect to /welcome until data dir is configured.
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			if !ui.configured() &&
-				!setupPaths[req.URL.Path] &&
-				!strings.HasPrefix(req.URL.Path, "/static/") &&
-				!strings.HasPrefix(req.URL.Path, "/ui/") &&
-				!strings.HasPrefix(req.URL.Path, "/webhooks/") &&
-				!strings.HasPrefix(req.URL.Path, "/proxy/") {
+			if !ui.configured() && !exempt(req.URL.Path) {
 				http.Redirect(w, req, "/welcome", http.StatusSeeOther)
 				return
 			}
@@ -59,18 +69,59 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		})
 	})
 
+	// Gate 2: auth — redirect to /login when users exist and no valid session.
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if exempt(req.URL.Path) || !ui.configured() {
+				next.ServeHTTP(w, req)
+				return
+			}
+			// If no users are configured yet, bypass auth entirely.
+			n, _ := userStore.Count()
+			if n == 0 {
+				next.ServeHTTP(w, req)
+				return
+			}
+			uid, ok := sessions.FromRequest(req)
+			if !ok {
+				http.Redirect(w, req, "/login", http.StatusSeeOther)
+				return
+			}
+			next.ServeHTTP(w, session.WithUser(req, uid))
+		})
+	})
+
 	// LLM proxy — picoclaw routes LLM calls here; proxy adds Anthropic auth + metering.
 	proxy := llmproxy.NewHandler(licenseStore, os.Getenv("ANTHROPIC_API_KEY"))
 	r.Handle("/proxy/v1/*", proxy)
 
-	// Setup (onboarding) — welcome + 3 steps
-	r.Post("/welcome", ui.completeWelcome) //   -> /setup
-	r.Get("/setup", ui.setupPage)                                     // step 1 — business + data dir + tz + hours
-	r.Post("/setup", ui.completeSetup)                                //   -> /setup/first-staff
-	r.Get("/setup/first-staff", ui.firstStaffPage)                    // step 2 — first staff profile
-	r.Post("/setup/first-staff", ui.completeFirstStaff)               //   -> /setup/integrations
-	r.Get("/setup/integrations", ui.integrationsPage)                 // step 3 — tool picker
-	r.Post("/setup/integrations", ui.completeIntegrations)            // -> /values
+	// Auth
+	r.Get("/login", ui.loginPage)
+	r.Post("/login", ui.loginSubmit)
+	r.Post("/logout", ui.logout)
+
+	// Profile (any logged-in user)
+	r.Get("/profile", ui.profilePage)
+	r.Post("/profile", ui.updateProfile)
+
+	// Users (owner only)
+	r.Get("/users", ui.userList)
+	r.Get("/users/new", ui.newUserForm)
+	r.Post("/users", ui.createUser)
+	r.Get("/users/{id}/edit", ui.editUserForm)
+	r.Post("/users/{id}", ui.updateUser)
+	r.Post("/users/{id}/delete", ui.deleteUser)
+
+	// Setup (onboarding) — welcome + 4 steps
+	r.Post("/welcome", ui.completeWelcome)          // -> /setup
+	r.Get("/setup", ui.setupPage)                   // step 1 — business info
+	r.Post("/setup", ui.completeSetup)              //   -> /setup/owner
+	r.Get("/setup/owner", ui.ownerPage)             // step 2 — owner account
+	r.Post("/setup/owner", ui.completeOwner)        //   -> /setup/first-staff
+	r.Get("/setup/first-staff", ui.firstStaffPage)  // step 3 — first staff profile
+	r.Post("/setup/first-staff", ui.completeFirstStaff) //   -> /setup/integrations
+	r.Get("/setup/integrations", ui.integrationsPage)   // step 4 — tool picker
+	r.Post("/setup/integrations", ui.completeIntegrations) // -> /values
 
 	// Home — staff list
 	r.Get("/", ui.staffList)

@@ -8,8 +8,12 @@ import (
 
 // NavData holds data for the authenticated app shell.
 type NavData struct {
-	BusinessName  string
-	ActiveSection string // "staff" | "values" | "tools" | "tasks" | "settings" | ""
+	BusinessName            string
+	ActiveSection           string // "staff" | "values" | "tools" | "tasks" | "settings" | ""
+	CurrentUserName         string
+	CurrentUserRole         string
+	CurrentUserID           string
+	CurrentUserDescription  string
 }
 
 // AppBottomTabBar renders the mobile primary navigation as a floating card at the bottom of the content column.

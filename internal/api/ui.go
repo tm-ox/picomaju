@@ -17,10 +17,12 @@ import (
 	"picomaju/internal/license"
 	"picomaju/internal/payment"
 	"picomaju/internal/picoclaw"
+	"picomaju/internal/session"
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
 	"picomaju/internal/task"
 	"picomaju/internal/tool"
+	"picomaju/internal/user"
 	"picomaju/internal/value"
 	"picomaju/ui/templates/shell"
 	licensetpl "picomaju/ui/templates/license"
@@ -41,6 +43,8 @@ type uiHandler struct {
 	chats    *chat.Store
 	settings *settings.Store
 	license  *license.Store
+	users    *user.Store
+	sessions *session.Store
 	picoclaw *picoclaw.Manager
 	dataDir  string
 }
@@ -63,6 +67,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 	h.staff = staff.NewStore(filepath.Join(dataDir, "staff.json"))
 	h.chats = chat.NewStore(filepath.Join(dataDir, "chats.json"))
 	h.license = license.NewStore(filepath.Join(dataDir, "license.json"))
+	h.users = user.NewStore(filepath.Join(dataDir, "users.json"))
 	h.dataDir = dataDir
 	h.mu.Unlock()
 	return nil
@@ -121,7 +126,12 @@ func (h *uiHandler) completeSetup(w http.ResponseWriter, r *http.Request) {
 		setuptpl.SetupStep1Page(businessName, dataDir, tz, hours, "Could not initialise data directory: "+err.Error()).Render(r.Context(), w)
 		return
 	}
-	http.Redirect(w, r, "/setup/first-staff", http.StatusSeeOther)
+	// Skip owner setup if an owner account already exists (re-running setup).
+	if n, _ := h.users.Count(); n > 0 {
+		http.Redirect(w, r, "/setup/first-staff", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/setup/owner", http.StatusSeeOther)
+	}
 }
 
 func (h *uiHandler) integrationsPage(w http.ResponseWriter, r *http.Request) {
@@ -1096,10 +1106,37 @@ func (h *uiHandler) navData(r *http.Request, section string) shell.NavData {
 	if cfg != nil {
 		name = cfg.BusinessName
 	}
-	return shell.NavData{
+	nd := shell.NavData{
 		BusinessName:  name,
 		ActiveSection: section,
 	}
+	if h.users != nil {
+		if uid, ok := session.CurrentUser(r); ok {
+			if u, err := h.users.Get(uid); err == nil {
+				nd.CurrentUserName = u.Name
+				nd.CurrentUserRole = string(u.Role)
+				nd.CurrentUserID = u.ID
+				nd.CurrentUserDescription = u.Description
+			}
+		}
+	}
+	return nd
+}
+
+// currentUser returns the logged-in user for the request, or nil if unauthenticated.
+func (h *uiHandler) currentUser(r *http.Request) *user.User {
+	if h.users == nil {
+		return nil
+	}
+	uid, ok := session.CurrentUser(r)
+	if !ok {
+		return nil
+	}
+	u, err := h.users.Get(uid)
+	if err != nil {
+		return nil
+	}
+	return u
 }
 
 func lookupIntegration(typeName string) *tool.Integration {

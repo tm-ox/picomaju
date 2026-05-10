@@ -62,6 +62,11 @@ templ appSidebarAside(nd NavData, nav templ.Component) {
 		</div>
 		@nav
 		<div class="mt-auto border-t border-sidebar-border shrink-0 py-2">
+			if nd.CurrentUserName != "" {
+				@SidebarItem("/users", "Users", "users", nd.ActiveSection) {
+					@icons.Users(templ.Attributes{"class": "size-4"})
+				}
+			}
 			@SidebarItem("/license", "Plan & Credits", "license", nd.ActiveSection) {
 				@icons.Zap(templ.Attributes{"class": "size-4"})
 			}
@@ -69,6 +74,9 @@ templ appSidebarAside(nd NavData, nav templ.Component) {
 				@icons.Settings(templ.Attributes{"class": "size-4"})
 			}
 			@sidebarThemeToggle()
+			if nd.CurrentUserName != "" {
+				@sidebarCurrentUser(nd)
+			}
 		</div>
 	</aside>
 }
@@ -204,6 +212,25 @@ templ sidebarThemeToggle() {
 		</span>
 		<span data-sidebar-label>Theme</span>
 	</button>
+}
+
+templ sidebarCurrentUser(nd NavData) {
+	<div class="mx-2 mt-1 border-t border-sidebar-border/40 pt-2">
+		<form method="post" action="/logout">
+			<button
+				type="submit"
+				class="flex items-center gap-2 w-full px-1 py-0.5 rounded-md text-sm transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
+			>
+				<span class="size-8 shrink-0 flex items-center justify-center">
+					@icons.LogOut(templ.Attributes{"class": "size-4"})
+				</span>
+				<span data-sidebar-label class="flex flex-col items-start min-w-0">
+					<span class="text-xs font-medium text-sidebar-foreground/90 truncate">{ nd.CurrentUserName }</span>
+					<span class="text-[0.625rem] text-sidebar-foreground/50 capitalize">{ nd.CurrentUserRole }</span>
+				</span>
+			</button>
+		</form>
+	</div>
 }
 
 // ── AppLayout — standard scrollable content shell ─────────────────────────────

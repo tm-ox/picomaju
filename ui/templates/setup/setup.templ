@@ -210,11 +210,69 @@ templ tzOption(tz, selected string) {
 	}
 }
 
+templ SetupOwnerPage(ownerName, formErr string) {
+	@shell.Layout("Setup — Picomaju") {
+		<div class="min-h-dvh flex flex-col items-center">
+			<div class="w-full max-w-2xl flex flex-col px-6 py-12 gap-8">
+				@setupProgress(2, 4)
+				<div>
+					<h3 class="font-semibold">Create your owner account</h3>
+					<p>This is your personal login. You'll use this PIN every time you open Picomaju.</p>
+				</div>
+				if formErr != "" {
+					@alert.Alert(alert.Props{Variant: alert.VariantDestructive}) {
+						@alert.Description() {
+							{ formErr }
+						}
+					}
+				}
+				<form method="post" action="/setup/owner" class="flex flex-col gap-5">
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "name"}) {
+							Your name
+						}
+						@input.Input(input.Props{ID: "name", Name: "name", Value: ownerName, Placeholder: "Jane Smith", Required: true})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "pin"}) {
+							PIN
+						}
+						@input.Input(input.Props{
+							ID:          "pin",
+							Name:        "pin",
+							Type:        input.TypePassword,
+							Placeholder: "4–8 digits",
+							Attributes:  templ.Attributes{"inputmode": "numeric", "maxlength": "8"},
+							Required:    true,
+						})
+					</div>
+					<div class="flex flex-col gap-1.5">
+						@label.Label(label.Props{For: "pin_confirm"}) {
+							Confirm PIN
+						}
+						@input.Input(input.Props{
+							ID:          "pin_confirm",
+							Name:        "pin_confirm",
+							Type:        input.TypePassword,
+							Placeholder: "••••",
+							Attributes:  templ.Attributes{"inputmode": "numeric", "maxlength": "8"},
+							Required:    true,
+						})
+					</div>
+					@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+						Continue
+					}
+				</form>
+			</div>
+		</div>
+	}
+}
+
 templ SetupStep2Page(staffName, staffRole, formErr string) {
 	@shell.Layout("Setup — Picomaju") {
 		<div class="min-h-dvh flex flex-col items-center">
 			<div class="w-full max-w-2xl flex flex-col px-6 py-12 gap-8">
-				@setupProgress(2, 3)
+				@setupProgress(3, 4)
 				<div>
 					<h3 class="font-semibold">Your first staff profile</h3>
 					<p>A staff profile is an agent that represents a role — like a receptionist or billing clerk. You can edit or add more later.</p>
@@ -258,7 +316,7 @@ templ SetupStep3Page(groups []tool.IntegrationGroup, formErr string) {
 	@shell.Layout("Setup — Picomaju") {
 		<div class="min-h-dvh flex flex-col items-center">
 			<div class="w-full max-w-2xl flex flex-col px-6 py-12 gap-8">
-				@setupProgress(3, 3)
+				@setupProgress(4, 4)
 				<div>
 					<h3 class="font-semibold">Connect your tools</h3>
 					<p>Select the integrations your business uses. You can configure credentials later under Tools.</p>

@@ -3,11 +3,14 @@ package api
 // Onboarding handlers for the welcome screen + 3-step setup wizard.
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"picomaju/internal/settings"
 	"picomaju/internal/staff"
+	"picomaju/internal/user"
 	setuptpl "picomaju/ui/templates/setup"
 )
 
@@ -32,6 +35,57 @@ func (h *uiHandler) completeWelcome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/setup", http.StatusSeeOther)
+}
+
+// ─── Step 1b — Owner account ────────────────────────────────────────────────
+
+func (h *uiHandler) ownerPage(w http.ResponseWriter, r *http.Request) {
+	setuptpl.SetupOwnerPage("", "").Render(r.Context(), w)
+}
+
+func (h *uiHandler) completeOwner(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		setuptpl.SetupOwnerPage("", err.Error()).Render(r.Context(), w)
+		return
+	}
+	name := strings.TrimSpace(r.FormValue("name"))
+	pin := r.FormValue("pin")
+	pinConfirm := r.FormValue("pin_confirm")
+
+	if name == "" {
+		setuptpl.SetupOwnerPage(name, "Name is required.").Render(r.Context(), w)
+		return
+	}
+	if len(pin) < 4 {
+		setuptpl.SetupOwnerPage(name, "PIN must be at least 4 digits.").Render(r.Context(), w)
+		return
+	}
+	if pin != pinConfirm {
+		setuptpl.SetupOwnerPage(name, "PINs do not match.").Render(r.Context(), w)
+		return
+	}
+
+	u := &user.User{
+		ID:   fmt.Sprintf("%x", time.Now().UnixNano()),
+		Name: name,
+		Role: user.RoleOwner,
+	}
+	if err := u.SetPIN(pin); err != nil {
+		setuptpl.SetupOwnerPage(name, "Could not hash PIN: "+err.Error()).Render(r.Context(), w)
+		return
+	}
+	if err := h.users.Create(u); err != nil {
+		setuptpl.SetupOwnerPage(name, "Could not save account: "+err.Error()).Render(r.Context(), w)
+		return
+	}
+
+	// Log the new owner in immediately.
+	sid, err := h.sessions.Create(u.ID)
+	if err == nil {
+		h.sessions.SetCookie(w, sid)
+	}
+
+	http.Redirect(w, r, "/setup/first-staff", http.StatusSeeOther)
 }
 
 // ─── Step 2 — First staff profile ──────────────────────────────────────────

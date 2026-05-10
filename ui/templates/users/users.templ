@@ -1,0 +1,214 @@
+package userstpl
+
+import (
+	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"picomaju/ui/components/button"
+	"picomaju/ui/components/input"
+	"picomaju/ui/components/label"
+	"picomaju/ui/components/nativeselect"
+	"picomaju/ui/templates/shell"
+)
+
+type UserRow struct {
+	ID          string
+	Name        string
+	Role        string
+	StaffID     string
+	Description string
+	HasPIN      bool
+}
+
+templ UserListPage(users []UserRow, nd shell.NavData) {
+	@shell.AppLayout("Users", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader("Users") {
+			@button.Button(button.Props{Href: "/users/new", Size: button.SizeIcon}) {
+				@icons.Plus(templ.Attributes{"class": "size-4"})
+			}
+		}
+		if len(users) == 0 {
+			@shell.EmptyState(
+				"No users",
+				"Add user accounts to control who can access Picomaju and how agents address them.",
+				"/users/new",
+				"Add user",
+			)
+		} else {
+			@shell.RowList() {
+				for _, u := range users {
+					@shell.RowItem() {
+						<div class="size-9 shrink-0 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-brand font-bold text-sm">
+							{ initials(u.Name) }
+						</div>
+						<div class="flex-1 min-w-0">
+							<div class="flex items-center gap-2">
+								<span class="text-sm font-brand font-semibold text-foreground truncate">{ u.Name }</span>
+								<span class="ml-auto shrink-0">
+									@rolePill(u.Role)
+								</span>
+							</div>
+							if u.Description != "" {
+								<p class="text-xs text-muted-foreground truncate mt-0.5">{ u.Description }</p>
+							}
+						</div>
+						@shell.RowActions("/users/"+u.ID+"/edit", "/users/"+u.ID+"/delete", u.Name)
+					}
+				}
+			}
+		}
+	}
+}
+
+templ UserFormPage(u UserRow, staffOptions []StaffOption, nd shell.NavData, isNew bool, formErr string) {
+	@shell.AppLayout(formTitle(isNew), nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader(formTitle(isNew)) {
+			if !isNew {
+				@button.Button(button.Props{Href: "/users", Variant: button.VariantGhost, Size: button.SizeIcon}) {
+					@icons.X(templ.Attributes{"class": "size-4"})
+				}
+			}
+		}
+		<form method="post" action={ formAction(u.ID, isNew) } class="flex flex-col gap-5">
+			@shell.FormCard() {
+				@shell.Field() {
+					@label.Label(label.Props{For: "name"}) { Name }
+					@input.Input(input.Props{ID: "name", Name: "name", Value: u.Name, Required: true, Placeholder: "Jane Smith"})
+				}
+				@shell.Field() {
+					@label.Label(label.Props{For: "role"}) { Role }
+					@nativeselect.Select(nativeselect.Props{ID: "role", Name: "role", Required: true}) {
+						<option value="owner" selected?={ u.Role == "owner" }>Owner</option>
+						<option value="manager" selected?={ u.Role == "manager" }>Manager</option>
+						<option value="staff" selected?={ u.Role == "staff" }>Staff</option>
+					}
+				}
+				@shell.Field() {
+					@label.Label(label.Props{For: "description"}) { About (written into USER.md) }
+					<textarea id="description" name="description" placeholder="How this user works, their preferences, communication style...">{ u.Description }</textarea>
+				}
+				@shell.Field() {
+					@label.Label(label.Props{For: "pin"}) {
+						if isNew {
+							PIN
+						} else {
+							New PIN (leave blank to keep current)
+						}
+					}
+					@input.Input(input.Props{
+						ID:          "pin",
+						Name:        "pin",
+						Type:        input.TypePassword,
+						Placeholder: "4–8 digits",
+						Attributes:  templ.Attributes{"inputmode": "numeric", "maxlength": "8"},
+					})
+				}
+				if len(staffOptions) > 0 {
+					@shell.Field() {
+						@label.Label(label.Props{For: "staff_id"}) { Linked agent profile (optional) }
+						@nativeselect.Select(nativeselect.Props{ID: "staff_id", Name: "staff_id"}) {
+							<option value="">None</option>
+							for _, s := range staffOptions {
+								<option value={ s.ID } selected?={ u.StaffID == s.ID }>{ s.Label }</option>
+							}
+						}
+					}
+				}
+				if formErr != "" {
+					<p class="text-sm text-destructive">{ formErr }</p>
+				}
+			}
+			<div class="flex gap-3">
+				@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+					if isNew {
+						Add user
+					} else {
+						Save changes
+					}
+				}
+				if !isNew {
+					@button.Button(button.Props{Href: "/users", Variant: button.VariantGhost, FullWidth: true}) {
+						Cancel
+					}
+				}
+			</div>
+		</form>
+	}
+}
+
+templ ProfilePage(u UserRow, nd shell.NavData, formErr string) {
+	@shell.AppLayout("My Profile", nd, shell.EmptySidebarNav()) {
+		@shell.PageHeader("My Profile") {
+			@button.Button(button.Props{Href: "/", Variant: button.VariantGhost, Size: button.SizeIcon}) {
+				@icons.X(templ.Attributes{"class": "size-4"})
+			}
+		}
+		<form method="post" action="/profile" class="flex flex-col gap-5">
+			@shell.FormCard() {
+				@shell.Field() {
+					@label.Label(label.Props{For: "name"}) { Name }
+					@input.Input(input.Props{ID: "name", Name: "name", Value: u.Name, Required: true, Placeholder: "Jane Smith"})
+				}
+				@shell.Field() {
+					@label.Label(label.Props{For: "description"}) { About (written into USER.md) }
+					<textarea id="description" name="description" class="flex min-h-[5rem] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none" placeholder="How you work, your preferences, communication style...">{ u.Description }</textarea>
+				}
+				@shell.Field() {
+					@label.Label(label.Props{For: "pin"}) { New PIN (leave blank to keep current) }
+					@input.Input(input.Props{
+						ID:          "pin",
+						Name:        "pin",
+						Type:        input.TypePassword,
+						Placeholder: "4–8 digits",
+						Attributes:  templ.Attributes{"inputmode": "numeric", "maxlength": "8"},
+					})
+				}
+				if formErr != "" {
+					<p class="text-sm text-destructive">{ formErr }</p>
+				}
+			}
+			@button.Button(button.Props{Type: button.TypeSubmit, FullWidth: true}) {
+				Save changes
+			}
+		</form>
+	}
+}
+
+type StaffOption struct {
+	ID    string
+	Label string
+}
+
+func formTitle(isNew bool) string {
+	if isNew {
+		return "Add User"
+	}
+	return "Edit User"
+}
+
+func formAction(id string, isNew bool) templ.SafeURL {
+	if isNew {
+		return "/users"
+	}
+	return templ.SafeURL("/users/" + id)
+}
+
+func initials(name string) string {
+	if name == "" {
+		return "?"
+	}
+	runes := []rune(name)
+	if len(runes) >= 2 {
+		return string([]rune{runes[0], runes[1]})
+	}
+	return string(runes[0:1])
+}
+
+templ rolePill(role string) {
+	switch role {
+	case "owner":
+		@shell.Badge("Owner", shell.BadgePrimary)
+	case "manager":
+		@shell.Badge("Manager", shell.BadgeOutline)
+	default:
+		@shell.Badge("Staff")
+	}
+}

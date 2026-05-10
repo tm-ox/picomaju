@@ -12,6 +12,13 @@ import (
 	"picomaju/internal/value"
 )
 
+// UserContext is the currently-logged-in human user, written into USER.md.
+type UserContext struct {
+	Name        string
+	Role        string
+	Description string
+}
+
 // Input is all resolved data needed to compile one agent workspace.
 type Input struct {
 	Staff    *staff.Staff
@@ -19,6 +26,7 @@ type Input struct {
 	Tools    []tool.Tool
 	Values   []*value.Value
 	Settings *settings.Settings
+	User     *UserContext // optional: currently logged-in user
 }
 
 // Output holds the three generated workspace files as strings.
@@ -148,6 +156,17 @@ func buildSoul(in Input) string {
 func buildUser(in Input) string {
 	var b strings.Builder
 	s := in.Settings
+
+	if in.User != nil {
+		b.WriteString("# Current User\n\n")
+		fmt.Fprintf(&b, "**Name:** %s\n\n", in.User.Name)
+		if in.User.Role != "" {
+			fmt.Fprintf(&b, "**Role:** %s\n\n", in.User.Role)
+		}
+		if in.User.Description != "" {
+			b.WriteString(strings.TrimSpace(in.User.Description) + "\n\n")
+		}
+	}
 
 	b.WriteString("# Business Context\n\n")
 	if s == nil {

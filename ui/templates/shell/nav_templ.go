@@ -16,8 +16,12 @@ import (
 
 // NavData holds data for the authenticated app shell.
 type NavData struct {
-	BusinessName  string
-	ActiveSection string // "staff" | "values" | "tools" | "tasks" | "settings" | ""
+	BusinessName           string
+	ActiveSection          string // "staff" | "values" | "tools" | "tasks" | "settings" | ""
+	CurrentUserName        string
+	CurrentUserRole        string
+	CurrentUserID          string
+	CurrentUserDescription string
 }
 
 // AppBottomTabBar renders the mobile primary navigation as a floating card at the bottom of the content column.
@@ -178,7 +182,7 @@ func bottomTab(href, label string, active bool) templ.Component {
 		var templ_7745c5c3_Var8 templ.SafeURL
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/shell/nav.templ`, Line: 37, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/shell/nav.templ`, Line: 41, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -208,7 +212,7 @@ func bottomTab(href, label string, active bool) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/shell/nav.templ`, Line: 45, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/templates/shell/nav.templ`, Line: 49, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
