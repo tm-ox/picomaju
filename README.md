@@ -2,12 +2,6 @@
     <img src="ui/static/logo-symbol.svg" alt="PicoMaju" width="170"/>
 </div>
 
-<br>
-
-<div align="center">
-    <img src="ui/static/logo-type.svg" alt="PicoMaju" width="170"/>
-</div>
-
 ---
 
 **Give your small business its own AI staff — without writing a single prompt.**
@@ -105,19 +99,19 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 
 **Environment variables** (advanced / managed deployments):
 
-| Var                      | Description                                                  |
-| ------------------------ | ------------------------------------------------------------ |
-| `PICOMAJU_CONFIG`        | Override config file path                                    |
-| `DATA_DIR`               | Skip onboarding; use this data directory directly            |
-| `ADDR`                   | Listen address (default `:18800`)                            |
-| `DEV`                    | Serve static files from disk; enables `/license/activate-dev` |
-| `STRIPE_SECRET_KEY`      | Stripe secret key (`sk_live_…` or `sk_test_…`)               |
-| `STRIPE_WEBHOOK_SECRET`  | Stripe webhook signing secret (`whsec_…`)                    |
-| `XENDIT_API_KEY`         | Xendit API key (`xnd_production_…`)                          |
-| `XENDIT_WEBHOOK_TOKEN`   | Xendit callback token                                        |
-| `PICOMAJU_BASE_URL`      | Public base URL for payment redirect URLs                    |
-| `PICOCLAW_VERSION`       | picoclaw release to download on first activation (default `0.1.0`) |
-| `ANTHROPIC_API_KEY`      | Anthropic API key for LLM proxy (`sk-ant-…`)                 |
+| Var                     | Description                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `PICOMAJU_CONFIG`       | Override config file path                                          |
+| `DATA_DIR`              | Skip onboarding; use this data directory directly                  |
+| `ADDR`                  | Listen address (default `:18800`)                                  |
+| `DEV`                   | Serve static files from disk; enables `/license/activate-dev`      |
+| `STRIPE_SECRET_KEY`     | Stripe secret key (`sk_live_…` or `sk_test_…`)                     |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (`whsec_…`)                          |
+| `XENDIT_API_KEY`        | Xendit API key (`xnd_production_…`)                                |
+| `XENDIT_WEBHOOK_TOKEN`  | Xendit callback token                                              |
+| `PICOMAJU_BASE_URL`     | Public base URL for payment redirect URLs                          |
+| `PICOCLAW_VERSION`      | picoclaw release to download on first activation (default `0.1.0`) |
+| `ANTHROPIC_API_KEY`     | Anthropic API key for LLM proxy (`sk-ant-…`)                       |
 
 ---
 
