@@ -22,9 +22,9 @@ tool/store.go        — Tool{id, label, type, config map[string]any}; CRUD on t
 tool/catalog.go      — Integration catalog: 8 entries; CatalogByCategory/ID/Type helpers
 task/store.go        — Task{id, label, description, tools[]}; CRUD on tasks.json
 staff/store.go       — Staff{id, label, description, active, icon, tasks[], value_categories[], values[]}; CRUD on staff.json
-chat/store.go        — Chat{id, staff_id, title, created_at, messages[]}, Message{role, content, ts}; CRUD on chats.json; ListByStaff(staffID)
+chat/store.go        — Chat{id, staff_id, title, created_at, messages[]}, Message{role, content, ts}; CRUD on chats.json; List(); ListByStaff(staffID)
 api/router.go        — all routes; setup gate + auth gate middleware
-api/ui.go            — HTML + SSE handlers; uiHandler; navData() helper; homePage handler
+api/ui.go            — HTML + SSE handlers; uiHandler; navData() helper; homePage handler; homeData() → HomeData (agent count, active count, messages today, credits, recent chats, agent statuses)
 api/ui_users.go      — login/logout, user CRUD (owner-only), /profile self-edit
 api/ui_onboarding.go — completeWelcome; ownerPage/completeOwner; firstStaffPage/completeFirstStaff; slugify
 api/webhooks.go      — stripeWebhook; xenditWebhook; activateFromStripe/Xendit → license.json
@@ -163,11 +163,12 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 | `license` | 91% | |
 | `user` | 86% | |
 | `task` | 85% | |
-| `chat` | 83% | |
+| `chat` | ~88% | `List()` added and tested |
 | `staff` | 83% | |
 | `settings` | 79% | |
 | `tool` | 66% | |
 | `llmproxy` | 52% | Streaming proxy path needs injectable `*http.Client` to test against mock upstream |
+| `api` | ~10% | `homeData()` tested; remaining UI handlers need full httptest harness with templ rendering |
 | `picoclaw` | 18% | `EnsureBinary`/`Start`/`Stop` need real binary or mock exec |
 | `payment` | 10% | `stripe.go`/`xendit.go` need test-mode credentials |
-| `api` | 4% | UI handlers need full httptest harness with templ rendering wired |
+| `ui/templates/home` | ~80% | `greeting`, `relativeTime`, `HomeData` types tested; templ render paths untested |

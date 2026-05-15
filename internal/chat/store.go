@@ -30,6 +30,10 @@ func NewStore(path string) *Store {
 	return &Store{path: path}
 }
 
+func (s *Store) List() ([]Chat, error) {
+	return s.load()
+}
+
 func (s *Store) ListByStaff(staffID string) ([]Chat, error) {
 	all, err := s.load()
 	if err != nil {

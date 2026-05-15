@@ -446,7 +446,89 @@ func (h *uiHandler) deleteTask(w http.ResponseWriter, r *http.Request) {
 
 func (h *uiHandler) homePage(w http.ResponseWriter, r *http.Request) {
 	tab := r.URL.Query().Get("t")
-	hometpl.HomePage(h.navData(r, "home"), tab).Render(r.Context(), w)
+	hometpl.HomePage(h.navData(r, "home"), tab, h.homeData()).Render(r.Context(), w)
+}
+
+func (h *uiHandler) homeData() hometpl.HomeData {
+	var d hometpl.HomeData
+
+	members, _ := h.staff.List()
+	d.AgentCount = len(members)
+
+	for _, m := range members {
+		if h.picoclaw.IsRunning(m.ID) {
+			d.ActiveCount++
+		}
+		d.Agents = append(d.Agents, hometpl.AgentStatus{
+			ID:      m.ID,
+			Label:   m.Label,
+			Active:  m.Active,
+			Running: h.picoclaw.IsRunning(m.ID),
+		})
+	}
+
+	allChats, _ := h.chats.List()
+	today := time.Now().Truncate(24 * time.Hour).Unix()
+	for _, c := range allChats {
+		for _, msg := range c.Messages {
+			if msg.Timestamp >= today {
+				d.MessagesToday++
+			}
+		}
+	}
+
+	// Recent chats: last 10 across all staff, newest first.
+	type chatWithLabel struct {
+		chat      chat.Chat
+		staffLabel string
+	}
+	staffByID := make(map[string]string, len(members))
+	for _, m := range members {
+		staffByID[m.ID] = m.Label
+	}
+	var all []chatWithLabel
+	for _, c := range allChats {
+		all = append(all, chatWithLabel{c, staffByID[c.StaffID]})
+	}
+	// Sort newest first by created_at.
+	for i := 0; i < len(all)-1; i++ {
+		for j := i + 1; j < len(all); j++ {
+			if all[j].chat.CreatedAt > all[i].chat.CreatedAt {
+				all[i], all[j] = all[j], all[i]
+			}
+		}
+	}
+	if len(all) > 10 {
+		all = all[:10]
+	}
+	for _, item := range all {
+		last := ""
+		if n := len(item.chat.Messages); n > 0 {
+			last = item.chat.Messages[n-1].Content
+			if len(last) > 80 {
+				last = last[:80] + "…"
+			}
+		}
+		d.RecentChats = append(d.RecentChats, hometpl.RecentChat{
+			ID:         item.chat.ID,
+			StaffID:    item.chat.StaffID,
+			StaffLabel: item.staffLabel,
+			Title:      item.chat.Title,
+			LastMsg:    last,
+			CreatedAt:  item.chat.CreatedAt,
+		})
+	}
+
+	lic, _ := h.license.Load()
+	if lic != nil && lic.Plan == license.PlanCredits {
+		d.Credits = strconv.Itoa(lic.CreditsRemaining)
+	} else if lic != nil && lic.IsActive() {
+		d.Credits = lic.PlanLabel()
+	} else {
+		d.Credits = "Free"
+	}
+
+	return d
 }
 
 // --- Staff UI ---

@@ -13,7 +13,7 @@ Templates are organised into sub-packages under `ui/templates/`. Each directory 
 | Package | Go alias | Key exports |
 |---|---|---|
 | `shell/` | `shell` | `AppLayout`, `ChatAppLayout`, `Layout`, `ThemeToggle`, `NavData`, `AppBottomTabBar`, `SidebarItem`, `PageHeader`, `EmptyState`, `ListSection`, `RowList`, `RowItem`, `Badge`, `RowActions`, `FormCard`, `Field`, `ValueCatIcon`, `EmptySidebarNav`, `SettingsTabNav`; helpers: `IncludesStr`, `FormTitle`, `FormAction`, `CountWord`, `CategoryLabel`, `CatLabel` |
-| `home/` | `hometpl` | `HomePage(nd, tab)` — placeholder dashboard; greeting, stat cards, tabs Overview/Activity/Agents via `?t=` |
+| `home/` | `hometpl` | `HomePage(nd, tab, HomeData)` — live dashboard; `HomeData{AgentCount, ActiveCount, MessagesToday, Credits, RecentChats[]RecentChat, Agents[]AgentStatus}`; tabs Overview/Activity/Agents via `?t=`; `relativeTime()` helper |
 | `staff/` | `stafftpl` | `StaffListPage`, `StaffFormPage`, `StaffDetailPage`, `StaffChatPage`; private: sidebar navs, icon picker, `currentUserCard`, helpers |
 | `values/` | `valuestpl` | `ValueListPage`, `ValueFormPage`, `ValidationFragment`; private: sidebar nav, `groupValuesByCat` |
 | `tools/` | `toolstpl` | `ToolListPage`, `NewToolPage`, `ToolFormPage`; private: sidebar nav, `groupToolsByCat`, `configValue` |

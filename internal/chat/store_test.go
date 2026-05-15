@@ -103,3 +103,21 @@ func TestChatStore_Delete_NotFound(t *testing.T) {
 		t.Error("expected error deleting non-existent chat")
 	}
 }
+
+func TestChatStore_List(t *testing.T) {
+	s := newChatStore(t)
+	s.Create(&Chat{ID: "c1", StaffID: "s1", Title: "A"})
+	s.Create(&Chat{ID: "c2", StaffID: "s2", Title: "B"})
+	all, err := s.List()
+	if err != nil || len(all) != 2 {
+		t.Errorf("expected 2 chats, got %d err=%v", len(all), err)
+	}
+}
+
+func TestChatStore_List_Empty(t *testing.T) {
+	s := newChatStore(t)
+	all, err := s.List()
+	if err != nil || len(all) != 0 {
+		t.Errorf("expected empty list, got %d err=%v", len(all), err)
+	}
+}

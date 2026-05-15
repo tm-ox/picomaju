@@ -1,11 +1,40 @@
 package hometpl
 
 import (
+	"fmt"
+	"time"
+
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
 	"picomaju/ui/templates/shell"
 )
 
-templ HomePage(nd shell.NavData, tab string) {
+// HomeData is all pre-computed data the home page needs.
+type HomeData struct {
+	AgentCount    int
+	ActiveCount   int
+	MessagesToday int
+	Credits       string
+	RecentChats   []RecentChat
+	Agents        []AgentStatus
+}
+
+type RecentChat struct {
+	ID         string
+	StaffID    string
+	StaffLabel string
+	Title      string
+	LastMsg    string
+	CreatedAt  int64
+}
+
+type AgentStatus struct {
+	ID      string
+	Label   string
+	Active  bool
+	Running bool
+}
+
+templ HomePage(nd shell.NavData, tab string, d HomeData) {
 	@shell.AppLayout("Home", nd, shell.EmptySidebarNav()) {
 		<div class="flex flex-col gap-1">
 			<h3 class="font-brand font-bold text-foreground">{ greeting(nd.CurrentUserName) }</h3>
@@ -20,11 +49,11 @@ templ HomePage(nd shell.NavData, tab string) {
 		</nav>
 		switch tab {
 		case "activity":
-			@activityTab()
+			@activityTab(d)
 		case "agents":
-			@agentsTab()
+			@agentsTab(d)
 		default:
-			@overviewTab(nd)
+			@overviewTab(d)
 		}
 	}
 }
@@ -40,30 +69,105 @@ templ homeTab(href, label string, active bool) {
 	>{ label }</a>
 }
 
-templ overviewTab(nd shell.NavData) {
+templ overviewTab(d HomeData) {
 	<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-		@homeStat("Agents", "—") {
+		@homeStat("Agents", fmt.Sprintf("%d", d.AgentCount)) {
 			@icons.Bot(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@homeStat("Active now", "—") {
+		@homeStat("Active now", fmt.Sprintf("%d", d.ActiveCount)) {
 			@icons.Activity(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@homeStat("Messages today", "—") {
+		@homeStat("Messages today", fmt.Sprintf("%d", d.MessagesToday)) {
 			@icons.MessageSquare(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
-		@homeStat("Credits", "—") {
+		@homeStat("Credits", d.Credits) {
 			@icons.Zap(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
 	</div>
-	@homePlaceholderCard("Recent activity", "Agent conversations and events will appear here.")
+	if len(d.RecentChats) == 0 {
+		@homePlaceholderCard("Recent activity", "Agent conversations will appear here once chats are started.")
+	} else {
+		<div class="bg-card rounded-lg border border-border divide-y divide-border">
+			<div class="px-5 py-3">
+				<h5 class="text-sm font-brand font-semibold text-foreground">Recent activity</h5>
+			</div>
+			for _, c := range d.RecentChats {
+				<a href={ templ.SafeURL("/staff/" + c.StaffID + "/chats/" + c.ID) } class="flex flex-col gap-0.5 px-5 py-3 hover:bg-muted/50 transition-colors">
+					<div class="flex items-center justify-between gap-2">
+						<span class="text-sm font-medium text-foreground truncate">{ c.Title }</span>
+						<span class="text-xs text-muted-foreground shrink-0">{ relativeTime(c.CreatedAt) }</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="text-xs text-muted-foreground">{ c.StaffLabel }</span>
+						if c.LastMsg != "" {
+							<span class="text-xs text-muted-foreground">·</span>
+							<span class="text-xs text-muted-foreground truncate">{ c.LastMsg }</span>
+						}
+					</div>
+				</a>
+			}
+		</div>
+	}
 }
 
-templ activityTab() {
-	@homePlaceholderCard("Activity log", "Conversation history and user actions will appear here.")
+templ activityTab(d HomeData) {
+	if len(d.RecentChats) == 0 {
+		@homePlaceholderCard("Activity log", "Conversation history will appear here once chats are started.")
+	} else {
+		<div class="bg-card rounded-lg border border-border divide-y divide-border">
+			<div class="px-5 py-3">
+				<h5 class="text-sm font-brand font-semibold text-foreground">Recent chats</h5>
+			</div>
+			for _, c := range d.RecentChats {
+				<a href={ templ.SafeURL("/staff/" + c.StaffID + "/chats/" + c.ID) } class="flex flex-col gap-0.5 px-5 py-3 hover:bg-muted/50 transition-colors">
+					<div class="flex items-center justify-between gap-2">
+						<span class="text-sm font-medium text-foreground truncate">{ c.Title }</span>
+						<span class="text-xs text-muted-foreground shrink-0">{ relativeTime(c.CreatedAt) }</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="text-xs text-muted-foreground">{ c.StaffLabel }</span>
+						if c.LastMsg != "" {
+							<span class="text-xs text-muted-foreground">·</span>
+							<span class="text-xs text-muted-foreground truncate">{ c.LastMsg }</span>
+						}
+					</div>
+				</a>
+			}
+		</div>
+	}
 }
 
-templ agentsTab() {
-	@homePlaceholderCard("Agent status", "Live agent status, uptime, and recent outputs will appear here.")
+templ agentsTab(d HomeData) {
+	if len(d.Agents) == 0 {
+		@homePlaceholderCard("No agents", "Create a staff profile to get started.")
+	} else {
+		<div class="bg-card rounded-lg border border-border divide-y divide-border">
+			<div class="px-5 py-3">
+				<h5 class="text-sm font-brand font-semibold text-foreground">Agent status</h5>
+			</div>
+			for _, a := range d.Agents {
+				<a href={ templ.SafeURL("/staff/" + a.ID) } class="flex items-center gap-3 px-5 py-3 hover:bg-muted/50 transition-colors">
+					<span
+						class={
+							"size-2 rounded-full shrink-0",
+							templ.KV("bg-green-500", a.Running),
+							templ.KV("bg-muted-foreground/30", !a.Running),
+						}
+					></span>
+					<span class="text-sm font-medium text-foreground flex-1">{ a.Label }</span>
+					<span class="text-xs text-muted-foreground">
+						if a.Running {
+							Running
+						} else if a.Active {
+							Inactive
+						} else {
+							Draft
+						}
+					</span>
+				</a>
+			}
+		</div>
+	}
 }
 
 templ homeStat(label, value string) {
@@ -88,4 +192,18 @@ func greeting(name string) string {
 		return "Welcome back"
 	}
 	return "Welcome back, " + name
+}
+
+func relativeTime(unix int64) string {
+	d := time.Since(time.Unix(unix, 0))
+	switch {
+	case d < time.Minute:
+		return "just now"
+	case d < time.Hour:
+		return fmt.Sprintf("%dm ago", int(d.Minutes()))
+	case d < 24*time.Hour:
+		return fmt.Sprintf("%dh ago", int(d.Hours()))
+	default:
+		return time.Unix(unix, 0).Format("Jan 2")
+	}
 }

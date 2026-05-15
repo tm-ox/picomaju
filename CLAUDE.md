@@ -50,8 +50,9 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 - `internal/CLAUDE.md` — packages, data models, API routes, security notes, test coverage
 - `ui/CLAUDE.md` — shell, templates, sidebar, UI conventions
 
+**Sub-doc rule:** All implementation detail — new packages, data model changes, route additions, UI components, test coverage updates, security notes — goes into the relevant sub-doc, not here. This file stays at orientation level only.
+
 ## Deferred
 
-- **Home dashboard** — wire real data (agent count, active agents, messages today, credits); Activity tab; Agents tab
 - **USER.md on chat** — `compiler.WriteUserMD` with current user context on new chat creation
 - **Manifest versioning**, Sidecar Execution, Managed Lifecycle, Overview section analytics
