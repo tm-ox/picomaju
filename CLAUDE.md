@@ -4,14 +4,6 @@ Mobile-first agent orchestrator for small business owners. Runs via **picoclaw**
 
 Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Lifecycle.
 
-## Status
-
-**Implemented:** Full UI (home dashboard · staff · values · tools · tasks · chat shell · settings · users · login · profile) · Directive Compiler · License store · Plan & Credits page · Payment infrastructure (Stripe + Xendit) · Chat activation gate · Compile/Activate split · Picoclaw lifecycle (download + subprocess management) · LLM proxy (Anthropic passthrough + credit metering + rate limiting) · Subscription renewal verification (Stripe) · User system (PIN auth · roles · session · user management · self-edit profile)
-
-**Security hardened (2026-05-07):** Xendit webhook constant-time compare · credits validation · URL-encoded error redirects · store write error handling · value/task ID path traversal prevention · license mutex (atomic credit deduction) · form field length caps · absolute path enforcement for data dir · compiler warnings for unresolved tool refs · onboarding role field wired
-
-**Next:** Home dashboard — wire real data (agent count, active agents, messages today, credits); Activity tab (chat history); Agents tab (live picoclaw status)
-
 ## Product tiers
 
 **Free — Configure & Preview**: full UI, directive compilation, workspace file preview. No LLM, no picoclaw.
@@ -25,13 +17,7 @@ Four pillars: Control Plane, Directive Compiler, Sidecar Execution, Managed Life
 - **Stripe** — international (cards, Apple/Google Pay)
 - **Xendit** — SE Asia (GoPay, OVO, DANA, QRIS; ID/PH/MY/TH/VN)
 
-Webhooks delivered directly to the app (`/webhooks/stripe`, `/webhooks/xendit`). On payment confirmed, `license.json` is written locally. No separate backend required for v1. LLM proxy (future) will require a backend for metering.
-
-Payment infrastructure is fully implemented and gated behind env vars. No code changes needed when accounts are created — just set the env vars.
-
-## Picoclaw integration
-
-Not bundled, not downloaded during onboarding. Fetched from GitHub releases on first activation (`picoclaw-android-universal.zip` or platform equivalent), extracted to `{dataDir}/bin/picoclaw`, managed as a subprocess thereafter. User has zero visibility. Picomaju owns full `config.json` generation.
+Webhooks delivered directly to the app (`/webhooks/stripe`, `/webhooks/xendit`). License written locally on payment confirmed. Gated behind env vars — no code changes needed when accounts are created.
 
 ## Dev workflow
 
@@ -61,11 +47,11 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 
 ## Sub-docs
 
-- `internal/CLAUDE.md` — packages, data models, API routes
+- `internal/CLAUDE.md` — packages, data models, API routes, security notes, test coverage
 - `ui/CLAUDE.md` — shell, templates, sidebar, UI conventions
 
 ## Deferred
 
-- **Subscription renewal** — on expiry, re-verify against payment provider; currently 35-day local expiry safety net only
+- **Home dashboard** — wire real data (agent count, active agents, messages today, credits); Activity tab; Agents tab
 - **USER.md on chat** — `compiler.WriteUserMD` with current user context on new chat creation
 - **Manifest versioning**, Sidecar Execution, Managed Lifecycle, Overview section analytics

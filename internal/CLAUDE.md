@@ -146,3 +146,28 @@ Auth gate: redirect to `/login` when users exist and no valid session.
 | POST | `/webhooks/xendit` | Xendit webhook (token verify → license update) |
 | GET/POST | `/settings` | settings page |
 | GET | `/static/*` | embedded static assets |
+
+## Security hardening (2026-05-07)
+
+Xendit webhook constant-time compare · credits validation · URL-encoded error redirects · store write error handling · value/task ID path traversal prevention · license mutex (atomic credit deduction) · form field length caps · absolute path enforcement for data dir · compiler warnings for unresolved tool refs · onboarding role field wired.
+
+## Test coverage (2026-05-15)
+
+`go test ./internal/...` passes clean. All 14 internal packages have tests.
+
+| Package | Coverage | Notes |
+|---|---|---|
+| `session` | 96% | |
+| `compiler` | 94% | |
+| `value` | 92% | |
+| `license` | 91% | |
+| `user` | 86% | |
+| `task` | 85% | |
+| `chat` | 83% | |
+| `staff` | 83% | |
+| `settings` | 79% | |
+| `tool` | 66% | |
+| `llmproxy` | 52% | Streaming proxy path needs injectable `*http.Client` to test against mock upstream |
+| `picoclaw` | 18% | `EnsureBinary`/`Start`/`Stop` need real binary or mock exec |
+| `payment` | 10% | `stripe.go`/`xendit.go` need test-mode credentials |
+| `api` | 4% | UI handlers need full httptest harness with templ rendering wired |
