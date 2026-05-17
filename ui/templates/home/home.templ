@@ -5,6 +5,7 @@ import (
 	"time"
 
 	icons "github.com/bryanvaz/go-templ-lucide-icons"
+	"picomaju/internal/event"
 	"picomaju/ui/templates/shell"
 )
 
@@ -15,6 +16,7 @@ type HomeData struct {
 	MessagesToday int
 	Credits       string
 	RecentChats   []RecentChat
+	RecentEvents  []event.Event
 	Agents        []AgentStatus
 }
 
@@ -84,56 +86,62 @@ templ overviewTab(d HomeData) {
 			@icons.Zap(templ.Attributes{"class": "size-4 text-muted-foreground"})
 		}
 	</div>
-	if len(d.RecentChats) == 0 {
-		@homePlaceholderCard("Recent activity", "Agent conversations will appear here once chats are started.")
+	if len(d.RecentEvents) == 0 {
+		@homePlaceholderCard("Recent activity", "Agent actions and reports will appear here once agents are running.")
 	} else {
 		<div class="bg-card rounded-lg border border-border divide-y divide-border">
 			<div class="px-5 py-3">
 				<h5 class="text-sm font-brand font-semibold text-foreground">Recent activity</h5>
 			</div>
-			for _, c := range d.RecentChats {
-				<a href={ templ.SafeURL("/staff/" + c.StaffID + "/chats/" + c.ID) } class="flex flex-col gap-0.5 px-5 py-3 hover:bg-muted/50 transition-colors">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm font-medium text-foreground truncate">{ c.Title }</span>
-						<span class="text-xs text-muted-foreground shrink-0">{ relativeTime(c.CreatedAt) }</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="text-xs text-muted-foreground">{ c.StaffLabel }</span>
-						if c.LastMsg != "" {
-							<span class="text-xs text-muted-foreground">·</span>
-							<span class="text-xs text-muted-foreground truncate">{ c.LastMsg }</span>
-						}
-					</div>
-				</a>
+			for _, e := range d.RecentEvents {
+				if e.Type != event.EventTypeApprovalResult {
+					@eventRow(e)
+				}
 			}
 		</div>
 	}
 }
 
 templ activityTab(d HomeData) {
-	if len(d.RecentChats) == 0 {
-		@homePlaceholderCard("Activity log", "Conversation history will appear here once chats are started.")
+	if len(d.RecentEvents) == 0 {
+		@homePlaceholderCard("Activity log", "Agent actions, messages, and approval requests will appear here once agents are running.")
 	} else {
 		<div class="bg-card rounded-lg border border-border divide-y divide-border">
 			<div class="px-5 py-3">
-				<h5 class="text-sm font-brand font-semibold text-foreground">Recent chats</h5>
+				<h5 class="text-sm font-brand font-semibold text-foreground">All activity</h5>
 			</div>
-			for _, c := range d.RecentChats {
-				<a href={ templ.SafeURL("/staff/" + c.StaffID + "/chats/" + c.ID) } class="flex flex-col gap-0.5 px-5 py-3 hover:bg-muted/50 transition-colors">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm font-medium text-foreground truncate">{ c.Title }</span>
-						<span class="text-xs text-muted-foreground shrink-0">{ relativeTime(c.CreatedAt) }</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="text-xs text-muted-foreground">{ c.StaffLabel }</span>
-						if c.LastMsg != "" {
-							<span class="text-xs text-muted-foreground">·</span>
-							<span class="text-xs text-muted-foreground truncate">{ c.LastMsg }</span>
-						}
-					</div>
-				</a>
+			for _, e := range d.RecentEvents {
+				@eventRow(e)
 			}
 		</div>
+	}
+}
+
+templ eventRow(e event.Event) {
+	<a href={ templ.SafeURL("/staff/" + e.AgentID) } class="flex items-start gap-3 px-5 py-3 hover:bg-muted/50 transition-colors">
+		<span class={ "mt-0.5 size-2 rounded-full shrink-0", eventDotClass(e.Type) }></span>
+		<div class="flex-1 min-w-0">
+			<div class="flex items-center justify-between gap-2">
+				<span class="text-sm text-foreground truncate">{ e.Summary }</span>
+				<span class="text-xs text-muted-foreground shrink-0">{ relativeTime(e.Timestamp) }</span>
+			</div>
+			if e.Channel != "" {
+				<span class="text-xs text-muted-foreground">{ e.Channel }</span>
+			}
+		</div>
+	</a>
+}
+
+func eventDotClass(t event.EventType) string {
+	switch t {
+	case event.EventTypeApprovalRequest:
+		return "bg-yellow-500"
+	case event.EventTypeError:
+		return "bg-red-500"
+	case event.EventTypeMessage:
+		return "bg-blue-500"
+	default:
+		return "bg-green-500"
 	}
 }
 

@@ -3,6 +3,9 @@
 ## Packages
 
 ```
+event/model.go  — see Changes section
+event/store.go  — see Changes section
+api/agents.go   — see Changes section
 settings/store.go    — Settings{business_name, business_details, data_dir, languages[], timezone, hours}; file-backed JSON at PICOMAJU_CONFIG
 license/store.go     — License{active, plan, credits_remaining, token, expires_at}; IsActive(); DeductCredit(); file-backed JSON at {dataDir}/license.json
 payment/config.go    — Config from env vars; StripeConfigured()/XenditConfigured()
@@ -141,6 +144,10 @@ Auth gate: redirect to `/login` when users exist and no valid session.
 | GET | `/license/checkout` | → Stripe/Xendit checkout (`?pkg=`, `?plan=`, `?provider=stripe\|xendit`) |
 | GET | `/license/checkout/success` | post-payment landing → `/license?activated=1` |
 | POST | `/license/activate-dev` | DEV env only — instant test license |
+| POST | `/agents/{id}/events` | picoclaw ingest — Bearer token auth; stores event + SSE broadcast |
+| GET | `/agents/{id}/events/stream` | browser SSE subscription for real-time agent events |
+| GET | `/agents/{id}/approvals/{eventId}` | picoclaw long-poll — 25s timeout, 408 on expire |
+| POST | `/agents/{id}/approvals/{eventId}` | human approve/deny — stores result, unblocks waiter |
 | POST | `/proxy/v1/*` | LLM proxy → Anthropic API; auth via license.Token; metering for credits plan |
 | POST | `/webhooks/stripe` | Stripe webhook (sig verify → license update) |
 | POST | `/webhooks/xendit` | Xendit webhook (token verify → license update) |
@@ -158,10 +165,25 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 - `picoclaw.Manager` now has `httpClient *http.Client` field; `EnsureBinary` uses it (injectable for tests)
 - `payment.xenditHTTPClient` package var replaces `http.DefaultClient` in `XenditCheckoutURL` (injectable for tests)
 - `activateStaff` now compiles AGENT.md/SOUL.md/USER.md into workspace before writing config.json and starting picoclaw
+- `internal/event/` package added — JSONL append-only event store; `Append`, `ListByAgent`, `PendingApprovals`, `RecentAll`
+- `internal/api/agents.go` — agent API: `POST /agents/{id}/events` (picoclaw ingest, Bearer auth), `GET /agents/{id}/events/stream` (browser SSE), `GET /agents/{id}/approvals/{eventId}` (picoclaw long-poll, 25s timeout), `POST /agents/{id}/approvals/{eventId}` (human resolve)
+- `picoclaw.Config` gains `report_url` field; `activateStaff` sets it to `{base}/agents/{id}/events`
+- `uiHandler` gains `events *event.Store`; wired through `initStores`, `NewRouter`, and `main.go`
+- Activity tab on home now renders real agent events (colour-coded by type); overview tab shows recent events
+- Staff detail overview: pending approvals card replaces "coming soon" placeholder — shows unresolved approval requests with Approve/Deny buttons
+- `/agents/` prefix added to auth gate exempt list; picoclaw endpoints verify Bearer token internally
+
+## Packages
+
+```
+event/model.go  — Event{ID,AgentID,Type,Timestamp,Summary,Detail,Channel,RefID,Decision,ExpiresAt,Metadata}; EventType consts
+event/store.go  — Store; Append/ListByAgent/PendingApprovals/RecentAll; JSONL per agent at {dataDir}/events/{agentID}.jsonl
+api/agents.go   — agentHandler; broadcaster (SSE per agent); approvalBroker (long-poll waiters); four agent API handlers
+```
 
 ## Test coverage (2026-05-17)
 
-`go test ./internal/...` passes clean. All 14 internal packages have tests.
+`go test ./internal/...` passes clean. 15 internal packages have tests (event added).
 
 | Package | Coverage | Notes |
 |---|---|---|
@@ -171,6 +193,7 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 | `license` | 91% | |
 | `llmproxy` | 91% | proxy path, credit deduction, upstream forwarding all covered |
 | `user` | 86% | |
+| `event` | 85% | store fully covered; SSE/long-poll paths not testable without real HTTP streaming |
 | `task` | 85% | |
 | `chat` | 83% | |
 | `staff` | 83% | |
@@ -178,5 +201,5 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 | `settings` | 79% | |
 | `payment` | 72% | config, Xendit mock, Stripe validation paths; Stripe SDK calls untestable without credentials |
 | `tool` | 66% | |
-| `api` | ~9% | `homeData()` + `createChat` tested; remaining UI handlers need full httptest harness with templ rendering |
+| `api` | ~14% | homeData + createChat + agent handler (ingest/resolve/broker/broadcaster) tested |
 | `ui/templates/home` | ~80% | `greeting`, `relativeTime`, `HomeData` types tested; templ render paths untested |

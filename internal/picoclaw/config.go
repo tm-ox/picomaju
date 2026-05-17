@@ -10,6 +10,7 @@ import (
 type Config struct {
 	AgentID      string          `json:"agent_id"`
 	WorkspaceDir string          `json:"workspace_dir"`
+	ReportURL    string          `json:"report_url,omitempty"` // POST events here
 	Tools        []ToolConfig    `json:"tools,omitempty"`
 	LLMProxy     *LLMProxyConfig `json:"llm_proxy,omitempty"`
 }

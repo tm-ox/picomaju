@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"picomaju/internal/chat"
 	"picomaju/internal/compiler"
+	"picomaju/internal/event"
 	"picomaju/internal/license"
 	"picomaju/internal/payment"
 	"picomaju/internal/picoclaw"
@@ -47,6 +48,7 @@ type uiHandler struct {
 	users    *user.Store
 	sessions *session.Store
 	picoclaw *picoclaw.Manager
+	events   *event.Store
 	dataDir  string
 }
 
@@ -69,6 +71,7 @@ func (h *uiHandler) initStores(dataDir string) error {
 	h.chats = chat.NewStore(filepath.Join(dataDir, "chats.json"))
 	h.license = license.NewStore(filepath.Join(dataDir, "license.json"))
 	h.users = user.NewStore(filepath.Join(dataDir, "users.json"))
+	h.events = event.NewStore(filepath.Join(dataDir, "events"))
 	h.dataDir = dataDir
 	h.mu.Unlock()
 	return nil
@@ -528,6 +531,10 @@ func (h *uiHandler) homeData() hometpl.HomeData {
 		d.Credits = "Free"
 	}
 
+	if h.events != nil {
+		d.RecentEvents, _ = h.events.RecentAll(50)
+	}
+
 	return d
 }
 
@@ -568,7 +575,11 @@ func (h *uiHandler) staffDetail(w http.ResponseWriter, r *http.Request) {
 	if members == nil {
 		members = []staff.Staff{}
 	}
-	stafftpl.StaffDetailPage(members, m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled, licensed, running).Render(r.Context(), w)
+	var pending []event.Event
+	if h.events != nil {
+		pending, _ = h.events.PendingApprovals(id)
+	}
+	stafftpl.StaffDetailPage(members, m, tasks, tools, vals, value.DefaultCategories, h.navData(r, "staff"), section, formErr, chats, compiled, licensed, running, pending).Render(r.Context(), w)
 }
 
 func (h *uiHandler) newStaffForm(w http.ResponseWriter, r *http.Request) {
@@ -775,16 +786,17 @@ func (h *uiHandler) activateStaff(w http.ResponseWriter, r *http.Request) {
 	for _, t := range in.Tools {
 		toolCfgs = append(toolCfgs, picoclaw.ToolConfig{Type: t.Type, Config: t.Config})
 	}
+	base := os.Getenv("PICOMAJU_BASE_URL")
+	if base == "" {
+		base = "http://localhost:18800"
+	}
 	cfg := picoclaw.Config{
 		AgentID:      id,
 		WorkspaceDir: workspaceDir,
+		ReportURL:    base + "/agents/" + id + "/events",
 		Tools:        toolCfgs,
 	}
 	if lic.Token != "" {
-		base := os.Getenv("PICOMAJU_BASE_URL")
-		if base == "" {
-			base = "http://localhost:18800"
-		}
 		cfg.LLMProxy = &picoclaw.LLMProxyConfig{
 			URL:   base + "/proxy/v1",
 			Token: lic.Token,

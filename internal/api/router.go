@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"picomaju/internal/chat"
+	"picomaju/internal/event"
 	"picomaju/internal/license"
 	"picomaju/internal/llmproxy"
 	"picomaju/internal/picoclaw"
@@ -20,7 +21,7 @@ import (
 	"picomaju/internal/value"
 )
 
-func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, userStore *user.Store, sessions *session.Store, dataDir string, static http.FileSystem, pm *picoclaw.Manager) *chi.Mux {
+func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Store, staffStore *staff.Store, chatStore *chat.Store, licenseStore *license.Store, settingsStore *settings.Store, userStore *user.Store, sessions *session.Store, dataDir string, static http.FileSystem, pm *picoclaw.Manager, eventStore *event.Store) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -37,7 +38,9 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 		sessions: sessions,
 		dataDir:  dataDir,
 		picoclaw: pm,
+		events:   eventStore,
 	}
+	ah := newAgentHandler(eventStore, licenseStore)
 
 	// Paths exempt from the setup gate.
 	setupPaths := map[string]bool{
@@ -55,6 +58,7 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 			strings.HasPrefix(path, "/ui/") ||
 			strings.HasPrefix(path, "/webhooks/") ||
 			strings.HasPrefix(path, "/proxy/") ||
+			strings.HasPrefix(path, "/agents/") ||
 			path == "/login"
 	}
 
@@ -190,6 +194,12 @@ func NewRouter(valStore *value.Store, taskStore *task.Store, toolStore *tool.Sto
 	// Settings
 	r.Get("/settings", ui.settingsPage)
 	r.Post("/settings", ui.saveSettings)
+
+	// Agent API — picoclaw reports events; browser subscribes to SSE; humans resolve approvals.
+	r.Post("/agents/{id}/events", ah.ingestEvent)
+	r.Get("/agents/{id}/events/stream", ah.streamEvents)
+	r.Get("/agents/{id}/approvals/{eventId}", ah.waitApproval)
+	r.Post("/agents/{id}/approvals/{eventId}", ah.resolveApproval)
 
 	// Static assets
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(static)))
