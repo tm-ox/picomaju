@@ -176,3 +176,134 @@ func TestRateLimiter_IndependentTokens(t *testing.T) {
 		t.Error("rate limit should be per-token")
 	}
 }
+
+// ── proxy path ────────────────────────────────────────────────────────────────
+
+func upstreamHandler(status int, body string) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(status)
+		w.Write([]byte(body))
+	}))
+}
+
+func newHandlerWithUpstream(t *testing.T, lic *license.License, srv *httptest.Server) *Handler {
+	t.Helper()
+	h := newHandler(t, lic, "test-api-key")
+	h.httpClient = srv.Client()
+	// Redirect all upstream calls to the test server.
+	h.httpClient.Transport = &proxyRedirect{base: srv.URL, inner: srv.Client().Transport}
+	return h
+}
+
+type proxyRedirect struct {
+	base  string
+	inner http.RoundTripper
+}
+
+func (p *proxyRedirect) RoundTrip(r *http.Request) (*http.Response, error) {
+	r2 := r.Clone(r.Context())
+	r2.URL.Scheme = "http"
+	r2.URL.Host = strings.TrimPrefix(p.base, "http://")
+	if p.inner != nil {
+		return p.inner.RoundTrip(r2)
+	}
+	return http.DefaultTransport.RoundTrip(r2)
+}
+
+func TestProxy_Success_200Forwarded(t *testing.T) {
+	lic := &license.License{Active: true, Plan: license.PlanStarter, Token: "tok"}
+	upstream := upstreamHandler(http.StatusOK, `{"id":"msg_1"}`)
+	defer upstream.Close()
+
+	h := newHandlerWithUpstream(t, lic, upstream)
+	w := post(h, "/proxy/v1/messages", "tok")
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected 200, got %d", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), "msg_1") {
+		t.Errorf("expected upstream body, got: %s", w.Body.String())
+	}
+}
+
+func TestProxy_Upstream_Non200_Forwarded(t *testing.T) {
+	lic := &license.License{Active: true, Plan: license.PlanStarter, Token: "tok"}
+	upstream := upstreamHandler(http.StatusBadRequest, `{"error":"bad"}`)
+	defer upstream.Close()
+
+	h := newHandlerWithUpstream(t, lic, upstream)
+	w := post(h, "/proxy/v1/messages", "tok")
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected 400 forwarded from upstream, got %d", w.Code)
+	}
+}
+
+func TestProxy_CreditDeducted_OnSuccess(t *testing.T) {
+	ls := newLicenseStore(t, &license.License{
+		Active: true, Plan: license.PlanCredits, Token: "tok", CreditsRemaining: 10,
+	})
+	upstream := upstreamHandler(http.StatusOK, `{}`)
+	defer upstream.Close()
+
+	h := NewHandler(ls, "test-api-key")
+	h.httpClient = &http.Client{
+		Transport: &proxyRedirect{base: upstream.URL},
+	}
+
+	r := httptest.NewRequest(http.MethodPost, "/proxy/v1/messages", strings.NewReader("{}"))
+	r.Header.Set("Authorization", "Bearer tok")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+
+	lic, _ := ls.Load()
+	if lic.CreditsRemaining != 9 {
+		t.Errorf("expected 9 credits remaining, got %d", lic.CreditsRemaining)
+	}
+}
+
+func TestProxy_CreditNotDeducted_OnNon200(t *testing.T) {
+	ls := newLicenseStore(t, &license.License{
+		Active: true, Plan: license.PlanCredits, Token: "tok", CreditsRemaining: 10,
+	})
+	upstream := upstreamHandler(http.StatusInternalServerError, `{}`)
+	defer upstream.Close()
+
+	h := NewHandler(ls, "test-api-key")
+	h.httpClient = &http.Client{
+		Transport: &proxyRedirect{base: upstream.URL},
+	}
+
+	r := httptest.NewRequest(http.MethodPost, "/proxy/v1/messages", strings.NewReader("{}"))
+	r.Header.Set("Authorization", "Bearer tok")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+
+	lic, _ := ls.Load()
+	if lic.CreditsRemaining != 10 {
+		t.Errorf("expected credits unchanged at 10, got %d", lic.CreditsRemaining)
+	}
+}
+
+func TestProxy_SubscriptionPlan_NoCreditDeduction(t *testing.T) {
+	ls := newLicenseStore(t, &license.License{
+		Active: true, Plan: license.PlanStarter, Token: "tok", CreditsRemaining: 5,
+	})
+	upstream := upstreamHandler(http.StatusOK, `{}`)
+	defer upstream.Close()
+
+	h := NewHandler(ls, "test-api-key")
+	h.httpClient = &http.Client{
+		Transport: &proxyRedirect{base: upstream.URL},
+	}
+
+	r := httptest.NewRequest(http.MethodPost, "/proxy/v1/messages", strings.NewReader("{}"))
+	r.Header.Set("Authorization", "Bearer tok")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+
+	lic, _ := ls.Load()
+	if lic.CreditsRemaining != 5 {
+		t.Errorf("expected credits unchanged on subscription plan, got %d", lic.CreditsRemaining)
+	}
+}

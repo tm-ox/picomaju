@@ -19,12 +19,16 @@ const DefaultVersion = "0.1.0"
 
 // Manager tracks running picoclaw subprocesses keyed by staff ID.
 type Manager struct {
-	mu        sync.RWMutex
-	processes map[string]*os.Process
+	mu         sync.RWMutex
+	processes  map[string]*os.Process
+	httpClient *http.Client
 }
 
 func NewManager() *Manager {
-	return &Manager{processes: make(map[string]*os.Process)}
+	return &Manager{
+		processes:  make(map[string]*os.Process),
+		httpClient: &http.Client{},
+	}
 }
 
 // BinaryPath returns the path to the picoclaw binary within dataDir.
@@ -49,7 +53,7 @@ func (m *Manager) EnsureBinary(dataDir, version string) error {
 		return err
 	}
 	url := fmt.Sprintf("https://github.com/%s/releases/download/v%s/%s", githubRepo, version, platformZip())
-	resp, err := http.Get(url) //nolint:gosec
+	resp, err := m.httpClient.Get(url) //nolint:gosec
 	if err != nil {
 		return fmt.Errorf("download picoclaw: %w", err)
 	}

@@ -10,6 +10,8 @@ import (
 
 const xenditBaseURL = "https://api.xendit.co"
 
+var xenditHTTPClient = http.DefaultClient
+
 type xenditInvoiceRequest struct {
 	ExternalID  string            `json:"external_id"`
 	Amount      int               `json:"amount"`
@@ -81,7 +83,7 @@ func XenditCheckoutURL(cfg Config, packID, planID string) (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(cfg.XenditAPIKey, "")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := xenditHTTPClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("xendit request: %w", err)
 	}
