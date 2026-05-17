@@ -5,7 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"picomaju/internal/settings"
 )
+
+// BuildUserMD generates the USER.md content from optional user and settings context.
+func BuildUserMD(u *UserContext, s *settings.Settings) string {
+	return buildUser(Input{User: u, Settings: s})
+}
 
 // WriteUserMD rewrites only USER.md in an existing workspace directory.
 func WriteUserMD(userMD, workspaceDir string) error {

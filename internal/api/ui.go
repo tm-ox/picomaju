@@ -925,6 +925,21 @@ func (h *uiHandler) createChat(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	wsDir := h.workspaceDir(staffID)
+	if _, err := os.Stat(wsDir); err == nil {
+		var uc *compiler.UserContext
+		if u := h.currentUser(r); u != nil {
+			uc = &compiler.UserContext{
+				Name:        u.Name,
+				Role:        string(u.Role),
+				Description: u.Description,
+			}
+		}
+		cfg, _ := h.settings.Load()
+		_ = compiler.WriteUserMD(compiler.BuildUserMD(uc, cfg), wsDir)
+	}
+
 	http.Redirect(w, r, "/staff/"+staffID+"/chats/"+c.ID, http.StatusSeeOther)
 }
 

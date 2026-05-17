@@ -54,5 +54,4 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 
 ## Deferred
 
-- **USER.md on chat** — `compiler.WriteUserMD` with current user context on new chat creation
 - **Manifest versioning**, Sidecar Execution, Managed Lifecycle, Overview section analytics
