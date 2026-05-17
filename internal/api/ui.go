@@ -765,6 +765,12 @@ func (h *uiHandler) activateStaff(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}
+	out := compiler.Compile(in)
+	if err := compiler.Write(out, workspaceDir); err != nil {
+		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+		return
+	}
+
 	toolCfgs := make([]picoclaw.ToolConfig, 0, len(in.Tools))
 	for _, t := range in.Tools {
 		toolCfgs = append(toolCfgs, picoclaw.ToolConfig{Type: t.Type, Config: t.Config})

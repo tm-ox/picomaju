@@ -151,7 +151,15 @@ Auth gate: redirect to `/login` when users exist and no valid session.
 
 Xendit webhook constant-time compare · credits validation · URL-encoded error redirects · store write error handling · value/task ID path traversal prevention · license mutex (atomic credit deduction) · form field length caps · absolute path enforcement for data dir · compiler warnings for unresolved tool refs · onboarding role field wired.
 
-## Test coverage (2026-05-15)
+## Changes (2026-05-17)
+
+- `compiler.BuildUserMD(u, settings)` exported — generates USER.md content without a full `Compile` call (avoids nil Staff panic)
+- `createChat` handler writes USER.md into workspace on new chat creation if workspace dir exists; silently skips if not
+- `picoclaw.Manager` now has `httpClient *http.Client` field; `EnsureBinary` uses it (injectable for tests)
+- `payment.xenditHTTPClient` package var replaces `http.DefaultClient` in `XenditCheckoutURL` (injectable for tests)
+- `activateStaff` now compiles AGENT.md/SOUL.md/USER.md into workspace before writing config.json and starting picoclaw
+
+## Test coverage (2026-05-17)
 
 `go test ./internal/...` passes clean. All 14 internal packages have tests.
 
@@ -161,14 +169,14 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 | `compiler` | 94% | |
 | `value` | 92% | |
 | `license` | 91% | |
+| `llmproxy` | 91% | proxy path, credit deduction, upstream forwarding all covered |
 | `user` | 86% | |
 | `task` | 85% | |
-| `chat` | ~88% | `List()` added and tested |
+| `chat` | 83% | |
 | `staff` | 83% | |
+| `picoclaw` | 82% | EnsureBinary (exists/non-200/extract), Start/Stop/StopAll covered |
 | `settings` | 79% | |
+| `payment` | 72% | config, Xendit mock, Stripe validation paths; Stripe SDK calls untestable without credentials |
 | `tool` | 66% | |
-| `llmproxy` | 52% | Streaming proxy path needs injectable `*http.Client` to test against mock upstream |
-| `api` | ~10% | `homeData()` tested; remaining UI handlers need full httptest harness with templ rendering |
-| `picoclaw` | 18% | `EnsureBinary`/`Start`/`Stop` need real binary or mock exec |
-| `payment` | 10% | `stripe.go`/`xendit.go` need test-mode credentials |
+| `api` | ~9% | `homeData()` + `createChat` tested; remaining UI handlers need full httptest harness with templ rendering |
 | `ui/templates/home` | ~80% | `greeting`, `relativeTime`, `HomeData` types tested; templ render paths untested |
