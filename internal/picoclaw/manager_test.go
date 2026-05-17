@@ -1,13 +1,16 @@
 package picoclaw
 
 import (
+	"archive/tar"
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -26,7 +29,29 @@ func makeZip(t *testing.T, content []byte) []byte {
 	return buf.Bytes()
 }
 
-// redirectTransport sends every request to the given base URL, preserving path.
+// makeTarGz returns the bytes of a .tar.gz containing one file named "picoclaw".
+func makeTarGz(t *testing.T, content []byte) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gw)
+	hdr := &tar.Header{
+		Name: "picoclaw",
+		Mode: 0755,
+		Size: int64(len(content)),
+	}
+	if err := tw.WriteHeader(hdr); err != nil {
+		t.Fatalf("tar header: %v", err)
+	}
+	if _, err := tw.Write(content); err != nil {
+		t.Fatalf("tar write: %v", err)
+	}
+	tw.Close()
+	gw.Close()
+	return buf.Bytes()
+}
+
+// redirectTransport sends every request to the given base URL, preserving nothing.
 type redirectTransport struct {
 	base   *url.URL
 	client *http.Client
@@ -60,7 +85,7 @@ func TestEnsureBinary_AlreadyExists(t *testing.T) {
 	fakeBinary(t, dir)
 
 	m := NewManager()
-	if err := m.EnsureBinary(dir, "0.1.0"); err != nil {
+	if err := m.EnsureBinary(dir, DefaultVersion); err != nil {
 		t.Errorf("expected no error when binary exists: %v", err)
 	}
 }
@@ -74,17 +99,24 @@ func TestEnsureBinary_DownloadNonOK(t *testing.T) {
 	m := NewManager()
 	m.httpClient = newRedirectClient(srv)
 
-	if err := m.EnsureBinary(t.TempDir(), "0.1.0"); err == nil {
+	if err := m.EnsureBinary(t.TempDir(), DefaultVersion); err == nil {
 		t.Error("expected error on non-200 response")
 	}
 }
 
 func TestEnsureBinary_DownloadAndExtract(t *testing.T) {
-	zipData := makeZip(t, []byte("#!/bin/sh\nsleep 60\n"))
+	content := []byte("#!/bin/sh\nsleep 60\n")
+	asset := platformAsset()
+	var archiveData []byte
+	if strings.HasSuffix(asset, ".tar.gz") {
+		archiveData = makeTarGz(t, content)
+	} else {
+		archiveData = makeZip(t, content)
+	}
+
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/zip")
 		w.WriteHeader(http.StatusOK)
-		w.Write(zipData)
+		w.Write(archiveData)
 	}))
 	defer srv.Close()
 
@@ -92,7 +124,7 @@ func TestEnsureBinary_DownloadAndExtract(t *testing.T) {
 	m.httpClient = newRedirectClient(srv)
 
 	dir := t.TempDir()
-	if err := m.EnsureBinary(dir, "0.1.0"); err != nil {
+	if err := m.EnsureBinary(dir, DefaultVersion); err != nil {
 		t.Fatalf("EnsureBinary: %v", err)
 	}
 	if _, err := os.Stat(BinaryPath(dir)); err != nil {

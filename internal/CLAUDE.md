@@ -14,8 +14,8 @@ payment/stripe.go    — StripeCheckoutURL(cfg, packID, planID) → Stripe Check
 payment/xendit.go    — XenditCheckoutURL(cfg, packID, planID) → Xendit invoice URL (IDR)
 compiler/compiler.go — Compile(Input) Output; builds AGENT.md, SOUL.md, USER.md
 compiler/write.go    — Write(Output, workspaceDir); InjectConfig(configPath, AgentEntry)
-picoclaw/manager.go  — Manager{processes map[staffID]*os.Process}; EnsureBinary(dataDir, version); Start/Stop/IsRunning/StopAll; BinaryPath → {dataDir}/bin/picoclaw; DefaultVersion="0.1.0"; repo=picomaju/picoclaw
-picoclaw/config.go   — Config{agent_id, workspace_dir, tools[], llm_proxy{url,token}}; WriteConfig → {workspaceDir}/config.json
+picoclaw/manager.go  — Manager{processes map[staffID]*os.Process}; EnsureBinary(dataDir, version); Start/Stop/IsRunning/StopAll; BinaryPath → {dataDir}/bin/picoclaw; DefaultVersion="0.2.8"; repo=sipeed/picoclaw; platformAsset() returns .tar.gz for Linux/macOS, .zip for Windows/Android
+picoclaw/config.go   — Config{version, agents{defaults{workspace,model_name}}, model_list[], gateway{host,port}}; ConfigPath()→~/.picoclaw/config.json; WriteConfig(cfg, dest)
 llmproxy/handler.go  — Handler; POST /proxy/v1/* → https://api.anthropic.com/v1/*; auth via Bearer token matched to license.Token; deducts 1 credit per 200 on credits plan; SSE streaming via http.Flusher
 value/model.go       — Value, DirectiveEntry, ValidationResult, ValidationError
 value/store.go       — CRUD on <data_dir>/values/<id>.md (YAML frontmatter + body)
@@ -167,11 +167,11 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 - `activateStaff` now compiles AGENT.md/SOUL.md/USER.md into workspace before writing config.json and starting picoclaw
 - `internal/event/` package added — JSONL append-only event store; `Append`, `ListByAgent`, `PendingApprovals`, `RecentAll`
 - `internal/api/agents.go` — agent API: `POST /agents/{id}/events` (picoclaw ingest, Bearer auth), `GET /agents/{id}/events/stream` (browser SSE), `GET /agents/{id}/approvals/{eventId}` (picoclaw long-poll, 25s timeout), `POST /agents/{id}/approvals/{eventId}` (human resolve)
-- `picoclaw.Config` gains `report_url` field; `activateStaff` sets it to `{base}/agents/{id}/events`
 - `uiHandler` gains `events *event.Store`; wired through `initStores`, `NewRouter`, and `main.go`
 - Activity tab on home now renders real agent events (colour-coded by type); overview tab shows recent events
 - Staff detail overview: pending approvals card replaces "coming soon" placeholder — shows unresolved approval requests with Approve/Deny buttons
 - `/agents/` prefix added to auth gate exempt list; picoclaw endpoints verify Bearer token internally
+- **picoclaw integration corrected** (was built against wrong assumptions): repo `sipeed/picoclaw` v0.2.8; config format rewritten to real schema (version/agents/model_list/gateway); `platformAsset()` emits `.tar.gz` for Linux/macOS, `.zip` for Windows/Android; `Start()` runs `picoclaw gateway` (no `--config` flag); `ConfigPath()` → `~/.picoclaw/config.json`; `activateStaff` writes real config pointing model_list at picomaju's `/proxy/v1`
 
 ## Packages
 

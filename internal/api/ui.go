@@ -782,27 +782,33 @@ func (h *uiHandler) activateStaff(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	toolCfgs := make([]picoclaw.ToolConfig, 0, len(in.Tools))
-	for _, t := range in.Tools {
-		toolCfgs = append(toolCfgs, picoclaw.ToolConfig{Type: t.Type, Config: t.Config})
-	}
 	base := os.Getenv("PICOMAJU_BASE_URL")
 	if base == "" {
 		base = "http://localhost:18800"
 	}
 	cfg := picoclaw.Config{
-		AgentID:      id,
-		WorkspaceDir: workspaceDir,
-		ReportURL:    base + "/agents/" + id + "/events",
-		Tools:        toolCfgs,
+		Version: 2,
+		Agents: picoclaw.AgentsConfig{
+			Defaults: picoclaw.AgentDefaults{
+				Workspace: workspaceDir,
+				ModelName: "picomaju-proxy",
+			},
+		},
+		ModelList: []picoclaw.ModelEntry{
+			{
+				ModelName: "picomaju-proxy",
+				Model:     "openai/claude-sonnet-4-5",
+				APIKeys:   []string{lic.Token},
+				APIBase:   base + "/proxy/v1",
+			},
+		},
+		Gateway: picoclaw.GatewayConfig{
+			Host:     "127.0.0.1",
+			Port:     18790,
+			LogLevel: "warn",
+		},
 	}
-	if lic.Token != "" {
-		cfg.LLMProxy = &picoclaw.LLMProxyConfig{
-			URL:   base + "/proxy/v1",
-			Token: lic.Token,
-		}
-	}
-	if err := picoclaw.WriteConfig(cfg, workspaceDir); err != nil {
+	if err := picoclaw.WriteConfig(cfg, picoclaw.ConfigPath()); err != nil {
 		http.Redirect(w, r, "/staff/"+id+"?err="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 		return
 	}

@@ -117,11 +117,19 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 
 ## Project status
 
-**Implemented:** Full UI (home dashboard · staff · values · tools · tasks · chat · settings · users · login · profile) · Directive Compiler · License store · Plan & Credits page · Payment infrastructure (Stripe + Xendit) · Chat activation gate · Picoclaw lifecycle (download + subprocess management) · LLM proxy (Anthropic passthrough + credit metering + rate limiting) · User system (PIN auth · roles · session · user management · profile). Component workshop at `/ui/workshop`.
+**Implemented:**
+- Full UI — home dashboard (overview/activity/agents tabs) · staff · values · tools · tasks · chat · settings · users · login · profile
+- Directive Compiler — generates AGENT.md, SOUL.md, USER.md per agent; recompiles on activate
+- License store, Plan & Credits page, Payment infrastructure (Stripe + Xendit), webhook handlers
+- Picoclaw lifecycle — binary download, subprocess management, config.json generation (with `report_url`)
+- LLM proxy — Anthropic passthrough, Bearer token auth, credit metering, rate limiting (60 req/min)
+- User system — PIN auth, roles (owner/manager/staff), sessions, user management, profile
+- Event/reporting system — agents POST events to `/agents/{id}/events`; browser subscribes via SSE; approval requests surface in UI with approve/deny actions; long-poll for picoclaw to await decisions
+- Home activity tab wired to real agent events; staff detail shows pending approval requests
 
-**Next:** Home dashboard — wire real data (agent count, active agents, messages today, credits); Activity tab (chat history); Agents tab (live picoclaw status).
-
-**Deferred:** Sidecar Execution, Managed Lifecycle, manifest versioning.
+**Pending:**
+- picoclaw binary (upstream repo not yet published — activation downloads from GitHub releases)
+- Managed Lifecycle, manifest versioning
 
 ---
 
@@ -135,6 +143,8 @@ internal/
   settings/              config file store
   value/ tool/ task/ staff/ chat/ user/  domain models + file stores
   license/ payment/      license store + Stripe/Xendit checkout
+  compiler/              directive compiler (AGENT.md, SOUL.md, USER.md)
+  event/                 JSONL event store; approval tracking
   picoclaw/              binary lifecycle manager + config writer
   llmproxy/              Anthropic passthrough proxy with credit metering
   api/                   HTTP handlers (HTML UI + SSE + webhooks)
@@ -142,6 +152,7 @@ internal/
     ui.go                core page handlers
     ui_onboarding.go     onboarding step handlers
     ui_users.go          login/logout, user CRUD, profile
+    agents.go            agent event ingest, SSE broadcast, approval long-poll
     webhooks.go          Stripe + Xendit webhook handlers
 ui/                      frontend (templui + Tailwind CSS v4)
   static/                logo SVGs, datastar.js (not committed — place manually)

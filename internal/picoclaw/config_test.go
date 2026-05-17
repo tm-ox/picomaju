@@ -16,27 +16,36 @@ func TestBinaryPath(t *testing.T) {
 	}
 }
 
-func TestPlatformZip_Format(t *testing.T) {
-	name := platformZip()
-	if !strings.HasPrefix(name, "picoclaw-") || !strings.HasSuffix(name, ".zip") {
-		t.Errorf("unexpected platform zip name: %q", name)
+func TestPlatformAsset_Format(t *testing.T) {
+	name := platformAsset()
+	if !strings.HasPrefix(name, "picoclaw") {
+		t.Errorf("unexpected asset name: %q", name)
+	}
+	if !strings.HasSuffix(name, ".zip") && !strings.HasSuffix(name, ".tar.gz") {
+		t.Errorf("expected .zip or .tar.gz, got %q", name)
 	}
 }
 
 func TestWriteConfig(t *testing.T) {
 	dir := t.TempDir()
+	dest := filepath.Join(dir, "config.json")
 	cfg := Config{
-		AgentID:      "agent-1",
-		WorkspaceDir: "/ws/agent-1",
-		Tools: []ToolConfig{
-			{Type: "whatsapp", Config: map[string]any{"token": "abc"}},
+		Version: 2,
+		Agents: AgentsConfig{
+			Defaults: AgentDefaults{
+				Workspace: "/ws/agent-1",
+				ModelName: "picomaju-proxy",
+			},
 		},
-		LLMProxy: &LLMProxyConfig{URL: "http://localhost:18800/proxy", Token: "tok"},
+		ModelList: []ModelEntry{
+			{ModelName: "picomaju-proxy", Model: "openai/claude-sonnet-4-5", APIKeys: []string{"tok"}, APIBase: "http://localhost:18800/proxy/v1"},
+		},
+		Gateway: GatewayConfig{Host: "127.0.0.1", Port: 18790, LogLevel: "warn"},
 	}
-	if err := WriteConfig(cfg, dir); err != nil {
+	if err := WriteConfig(cfg, dest); err != nil {
 		t.Fatalf("WriteConfig: %v", err)
 	}
-	b, err := os.ReadFile(filepath.Join(dir, "config.json"))
+	b, err := os.ReadFile(dest)
 	if err != nil {
 		t.Fatalf("read config.json: %v", err)
 	}
@@ -44,21 +53,22 @@ func TestWriteConfig(t *testing.T) {
 	if err := json.Unmarshal(b, &out); err != nil {
 		t.Fatalf("invalid JSON: %v", err)
 	}
-	if out.AgentID != "agent-1" {
-		t.Errorf("AgentID: got %q", out.AgentID)
+	if out.Version != 2 {
+		t.Errorf("Version: got %d", out.Version)
 	}
-	if out.LLMProxy == nil || out.LLMProxy.Token != "tok" {
-		t.Errorf("LLMProxy not preserved: %+v", out.LLMProxy)
+	if out.Agents.Defaults.ModelName != "picomaju-proxy" {
+		t.Errorf("ModelName: got %q", out.Agents.Defaults.ModelName)
 	}
-	if len(out.Tools) != 1 || out.Tools[0].Type != "whatsapp" {
-		t.Errorf("Tools not preserved: %+v", out.Tools)
+	if len(out.ModelList) != 1 || out.ModelList[0].APIKeys[0] != "tok" {
+		t.Errorf("ModelList not preserved: %+v", out.ModelList)
 	}
 }
 
 func TestWriteConfig_FileMode(t *testing.T) {
 	dir := t.TempDir()
-	WriteConfig(Config{AgentID: "a1"}, dir)
-	info, err := os.Stat(filepath.Join(dir, "config.json"))
+	dest := filepath.Join(dir, "config.json")
+	WriteConfig(Config{Version: 2}, dest)
+	info, err := os.Stat(dest)
 	if err != nil {
 		t.Fatalf("stat: %v", err)
 	}
