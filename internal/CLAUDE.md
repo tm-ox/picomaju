@@ -3,9 +3,9 @@
 ## Packages
 
 ```
-event/model.go  — see Changes section
-event/store.go  — see Changes section
-api/agents.go   — see Changes section
+event/model.go  — Event{ID,AgentID,Type,Timestamp,Summary,Detail,Channel,RefID,Decision,ExpiresAt,Metadata}; EventType consts (action/approval_request/approval_result/message/error)
+event/store.go  — Store; Append/ListByAgent/PendingApprovals/RecentAll; JSONL per agent at {dataDir}/events/{agentID}.jsonl
+api/agents.go   — agentHandler; broadcaster (SSE fan-out per agent); approvalBroker (long-poll channels per eventID); ingestEvent/streamEvents/waitApproval/resolveApproval handlers
 settings/store.go    — Settings{business_name, business_details, data_dir, languages[], timezone, hours}; file-backed JSON at PICOMAJU_CONFIG
 license/store.go     — License{active, plan, credits_remaining, token, expires_at}; IsActive(); DeductCredit(); file-backed JSON at {dataDir}/license.json
 payment/config.go    — Config from env vars; StripeConfigured()/XenditConfigured()
@@ -15,7 +15,8 @@ payment/xendit.go    — XenditCheckoutURL(cfg, packID, planID) → Xendit invoi
 compiler/compiler.go — Compile(Input) Output; builds AGENT.md, SOUL.md, USER.md
 compiler/write.go    — Write(Output, workspaceDir); InjectConfig(configPath, AgentEntry)
 picoclaw/manager.go  — Manager{processes map[staffID]*os.Process}; EnsureBinary(dataDir, version); Start/Stop/IsRunning/StopAll; BinaryPath → {dataDir}/bin/picoclaw; DefaultVersion="0.2.8"; repo=sipeed/picoclaw; platformAsset() returns .tar.gz for Linux/macOS, .zip for Windows/Android
-picoclaw/config.go   — Config{version, agents{defaults{workspace,model_name}}, model_list[], gateway{host,port}}; ConfigPath()→~/.picoclaw/config.json; WriteConfig(cfg, dest)
+picoclaw/config.go   — Config{version, agents{defaults{workspace,model_name}}, model_list[], gateway{host,port}, hooks{}}; HooksConfig/HookEntry; ConfigPath()→~/.picoclaw/config.json; WriteConfig(cfg, dest)
+hook/handler.go      — `picomaju hook` subcommand; reads JSON-RPC from picoclaw via stdin; posts action/error/approval_request events to picomaju API; long-polls /agents/{id}/approvals/{eventId} for approve_tool decisions; writes JSON-RPC result to stdout
 llmproxy/handler.go  — Handler; POST /proxy/v1/* → https://api.anthropic.com/v1/*; auth via Bearer token matched to license.Token; deducts 1 credit per 200 on credits plan; SSE streaming via http.Flusher
 value/model.go       — Value, DirectiveEntry, ValidationResult, ValidationError
 value/store.go       — CRUD on <data_dir>/values/<id>.md (YAML frontmatter + body)
@@ -172,6 +173,7 @@ Xendit webhook constant-time compare · credits validation · URL-encoded error 
 - Staff detail overview: pending approvals card replaces "coming soon" placeholder — shows unresolved approval requests with Approve/Deny buttons
 - `/agents/` prefix added to auth gate exempt list; picoclaw endpoints verify Bearer token internally
 - **picoclaw integration corrected** (was built against wrong assumptions): repo `sipeed/picoclaw` v0.2.8; config format rewritten to real schema (version/agents/model_list/gateway); `platformAsset()` emits `.tar.gz` for Linux/macOS, `.zip` for Windows/Android; `Start()` runs `picoclaw gateway` (no `--config` flag); `ConfigPath()` → `~/.picoclaw/config.json`; `activateStaff` writes real config pointing model_list at picomaju's `/proxy/v1`
+- **Hook system wired**: `internal/hook/` package — `picomaju hook` subcommand handles picoclaw's JSON-RPC 2.0 checkpoint events (stdio). Observer checkpoints POST action/error/message events; `approve_tool` checkpoint POSTs approval_request + long-polls for decision. `activateStaff` writes hooks config into picoclaw config with `exe path`, `PICOMAJU_API_URL`, `PICOMAJU_TOKEN`. `main.go` dispatches to `hook.Run()` when `os.Args[1] == "hook"`.
 
 ## Packages
 
@@ -183,7 +185,7 @@ api/agents.go   — agentHandler; broadcaster (SSE per agent); approvalBroker (l
 
 ## Test coverage (2026-05-17)
 
-`go test ./internal/...` passes clean. 15 internal packages have tests (event added).
+`go test ./internal/...` passes clean. 16 internal packages (hook added).
 
 | Package | Coverage | Notes |
 |---|---|---|
@@ -193,13 +195,14 @@ api/agents.go   — agentHandler; broadcaster (SSE per agent); approvalBroker (l
 | `license` | 91% | |
 | `llmproxy` | 91% | proxy path, credit deduction, upstream forwarding all covered |
 | `user` | 86% | |
-| `event` | 85% | store fully covered; SSE/long-poll paths not testable without real HTTP streaming |
 | `task` | 85% | |
+| `event` | 85% | store fully covered; SSE/long-poll paths not testable without real HTTP streaming |
+| `hook` | 83% | observer/approval flows, retry-on-408, API-unreachable; Run() stdio wiring untested |
 | `chat` | 83% | |
 | `staff` | 83% | |
-| `picoclaw` | 82% | EnsureBinary (exists/non-200/extract), Start/Stop/StopAll covered |
+| `picoclaw` | 80% | extractZip + extractTarGz + EnsureBinary; platformAsset() Android/Windows branches untested |
 | `settings` | 79% | |
 | `payment` | 72% | config, Xendit mock, Stripe validation paths; Stripe SDK calls untestable without credentials |
 | `tool` | 66% | |
-| `api` | ~14% | homeData + createChat + agent handler (ingest/resolve/broker/broadcaster) tested |
+| `api` | 14% | homeData + createChat + agent handler (ingest/resolve/broker/broadcaster) tested |
 | `ui/templates/home` | ~80% | `greeting`, `relativeTime`, `HomeData` types tested; templ render paths untested |

@@ -42,7 +42,7 @@ tailwindcss -i ui/assets/css/input.css -o ui/assets/css/output.css
 | `XENDIT_API_KEY` | — | Xendit API key (`xnd_production_…`) |
 | `XENDIT_WEBHOOK_TOKEN` | — | Xendit callback token (from Xendit dashboard) |
 | `PICOMAJU_BASE_URL` | — | Public base URL for payment redirect URLs |
-| `PICOCLAW_VERSION` | `0.1.0` | picoclaw release version to download on first activation |
+| `PICOCLAW_VERSION` | `0.2.8` | picoclaw release version to download on first activation |
 | `ANTHROPIC_API_KEY` | — | Anthropic API key for LLM proxy (`sk-ant-…`) |
 
 ## Sub-docs

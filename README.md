@@ -110,7 +110,7 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 | `XENDIT_API_KEY`        | Xendit API key (`xnd_production_…`)                                |
 | `XENDIT_WEBHOOK_TOKEN`  | Xendit callback token                                              |
 | `PICOMAJU_BASE_URL`     | Public base URL for payment redirect URLs                          |
-| `PICOCLAW_VERSION`      | picoclaw release to download on first activation (default `0.1.0`) |
+| `PICOCLAW_VERSION`      | picoclaw release to download on first activation (default `0.2.8`) |
 | `ANTHROPIC_API_KEY`     | Anthropic API key for LLM proxy (`sk-ant-…`)                       |
 
 ---
@@ -121,14 +121,13 @@ Settings are managed in the app at `/settings`. The config file lives at the pla
 - Full UI — home dashboard (overview/activity/agents tabs) · staff · values · tools · tasks · chat · settings · users · login · profile
 - Directive Compiler — generates AGENT.md, SOUL.md, USER.md per agent; recompiles on activate
 - License store, Plan & Credits page, Payment infrastructure (Stripe + Xendit), webhook handlers
-- Picoclaw lifecycle — binary download, subprocess management, config.json generation (with `report_url`)
-- LLM proxy — Anthropic passthrough, Bearer token auth, credit metering, rate limiting (60 req/min)
+- Picoclaw integration — downloads `sipeed/picoclaw` v0.2.8 on first activation; writes `~/.picoclaw/config.json` in picoclaw's native format; starts `picoclaw gateway`
+- Hook system — picomaju binary doubles as picoclaw's hook process (`picomaju hook`); receives JSON-RPC checkpoint events over stdin, stores them, surfaces approval requests in the UI with approve/deny actions
+- LLM proxy — Anthropic passthrough, Bearer token auth, credit metering, rate limiting (60 req/min); wired into picoclaw's `model_list` as an OpenAI-compatible provider
 - User system — PIN auth, roles (owner/manager/staff), sessions, user management, profile
-- Event/reporting system — agents POST events to `/agents/{id}/events`; browser subscribes via SSE; approval requests surface in UI with approve/deny actions; long-poll for picoclaw to await decisions
-- Home activity tab wired to real agent events; staff detail shows pending approval requests
+- Event/reporting system — JSONL store per agent; browser SSE stream; activity tab and staff detail wired to real events
 
 **Pending:**
-- picoclaw binary (upstream repo not yet published — activation downloads from GitHub releases)
 - Managed Lifecycle, manifest versioning
 
 ---
@@ -145,6 +144,7 @@ internal/
   license/ payment/      license store + Stripe/Xendit checkout
   compiler/              directive compiler (AGENT.md, SOUL.md, USER.md)
   event/                 JSONL event store; approval tracking
+  hook/                  `picomaju hook` subcommand — picoclaw hook process (stdio JSON-RPC)
   picoclaw/              binary lifecycle manager + config writer
   llmproxy/              Anthropic passthrough proxy with credit metering
   api/                   HTTP handlers (HTML UI + SSE + webhooks)

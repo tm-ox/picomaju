@@ -77,6 +77,13 @@ func TestWriteConfig_FileMode(t *testing.T) {
 	}
 }
 
+func TestConfigPath(t *testing.T) {
+	p := ConfigPath()
+	if !strings.HasSuffix(p, filepath.Join(".picoclaw", "config.json")) {
+		t.Errorf("unexpected ConfigPath: %q", p)
+	}
+}
+
 func TestManager_IsRunning_InitiallyFalse(t *testing.T) {
 	m := NewManager()
 	if m.IsRunning("any-agent") {

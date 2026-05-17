@@ -11,6 +11,7 @@ import (
 	"picomaju/internal/api"
 	"picomaju/internal/chat"
 	"picomaju/internal/event"
+	"picomaju/internal/hook"
 	"picomaju/internal/license"
 	"picomaju/internal/picoclaw"
 	"picomaju/internal/session"
@@ -29,6 +30,12 @@ import (
 var staticFiles embed.FS
 
 func main() {
+	// Hook mode: invoked by picoclaw for each checkpoint event (stdio JSON-RPC).
+	if len(os.Args) > 1 && os.Args[1] == "hook" {
+		hook.Run()
+		return
+	}
+
 	configFile := configPath()
 	settingsStore := settings.NewStore(configFile)
 	cfg, err := settingsStore.Load()

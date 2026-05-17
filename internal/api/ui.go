@@ -786,6 +786,7 @@ func (h *uiHandler) activateStaff(w http.ResponseWriter, r *http.Request) {
 	if base == "" {
 		base = "http://localhost:18800"
 	}
+	exe, _ := os.Executable()
 	cfg := picoclaw.Config{
 		Version: 2,
 		Agents: picoclaw.AgentsConfig{
@@ -806,6 +807,23 @@ func (h *uiHandler) activateStaff(w http.ResponseWriter, r *http.Request) {
 			Host:     "127.0.0.1",
 			Port:     18790,
 			LogLevel: "warn",
+		},
+		Hooks: &picoclaw.HooksConfig{
+			Enabled: true,
+			Hooks: []picoclaw.HookEntry{
+				{
+					ID:          "picomaju",
+					Enabled:     true,
+					Checkpoints: []string{"before_tool", "after_tool", "approve_tool"},
+					Type:        "process",
+					Command:     exe,
+					Args:        []string{"hook"},
+					Env: map[string]string{
+						"PICOMAJU_API_URL": base,
+						"PICOMAJU_TOKEN":   lic.Token,
+					},
+				},
+			},
 		},
 	}
 	if err := picoclaw.WriteConfig(cfg, picoclaw.ConfigPath()); err != nil {

@@ -132,6 +132,51 @@ func TestEnsureBinary_DownloadAndExtract(t *testing.T) {
 	}
 }
 
+func TestExtractZip_WritesBinary(t *testing.T) {
+	dir := t.TempDir()
+	dest := filepath.Join(dir, "picoclaw")
+	content := []byte("#!/bin/sh\necho hi\n")
+	zipData := makeZip(t, content)
+
+	tmp, err := os.CreateTemp(dir, "*.zip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmp.Write(zipData)
+	tmp.Close()
+
+	if err := extractZip(tmp.Name(), dest); err != nil {
+		t.Fatalf("extractZip: %v", err)
+	}
+	got, err := os.ReadFile(dest)
+	if err != nil {
+		t.Fatalf("read dest: %v", err)
+	}
+	if string(got) != string(content) {
+		t.Errorf("content mismatch: got %q", got)
+	}
+}
+
+func TestExtractZip_EmptyArchive(t *testing.T) {
+	dir := t.TempDir()
+	// Build a zip with no files (only directories).
+	var buf bytes.Buffer
+	w := zip.NewWriter(&buf)
+	w.Create("somedir/") //nolint:errcheck
+	w.Close()
+
+	tmp, err := os.CreateTemp(dir, "*.zip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmp.Write(buf.Bytes())
+	tmp.Close()
+
+	if err := extractZip(tmp.Name(), filepath.Join(dir, "out")); err == nil {
+		t.Error("expected error for zip with no binary")
+	}
+}
+
 // ── Start / Stop / IsRunning ──────────────────────────────────────────────────
 
 func TestManager_Stop_NoOp(t *testing.T) {
